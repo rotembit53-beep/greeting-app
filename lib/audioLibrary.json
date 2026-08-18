@@ -1,0 +1,116 @@
+{
+  "birthday": [
+    {
+      "name": "the_mountain-happy-birthday-576570.mp3",
+      "key": "audio/birthday/the_mountain-happy-birthday-576570.mp3"
+    },
+    {
+      "name": "turning_pages-birthday-cake-lofi-501727.mp3",
+      "key": "audio/birthday/turning_pages-birthday-cake-lofi-501727.mp3"
+    }
+  ],
+  "party": [
+    {
+      "name": "alexguz-funk-amp-breakbeat-541097.mp3",
+      "key": "audio/party/alexguz-funk-amp-breakbeat-541097.mp3"
+    },
+    {
+      "name": "bfcmusic-happy-lovely-xmas-249620.mp3",
+      "key": "audio/party/bfcmusic-happy-lovely-xmas-249620.mp3"
+    },
+    {
+      "name": "bfcmusic-upbeat-amp-optimistic-funky-groove-252342.mp3",
+      "key": "audio/party/bfcmusic-upbeat-amp-optimistic-funky-groove-252342.mp3"
+    },
+    {
+      "name": "joyinsound-no-copyright-music-398375.mp3",
+      "key": "audio/party/joyinsound-no-copyright-music-398375.mp3"
+    },
+    {
+      "name": "kontraa-whip-afro-dancehall-music-110235.mp3",
+      "key": "audio/party/kontraa-whip-afro-dancehall-music-110235.mp3"
+    }
+  ],
+  "rock": [
+    {
+      "name": "desifreemusic-powerful-electric-guitar-rock-beat-for-action-amp-sports-505311.mp3",
+      "key": "audio/rock/desifreemusic-powerful-electric-guitar-rock-beat-for-action-amp-sports-505311.mp3"
+    },
+    {
+      "name": "desifreemusic-rising-tension-dramatic-snare-build-505313.mp3",
+      "key": "audio/rock/desifreemusic-rising-tension-dramatic-snare-build-505313.mp3"
+    }
+  ],
+  "pop": [
+    {
+      "name": "aamirsomewhere-copyright-free-musicroyalty-free-music100-free-music-437088.mp3",
+      "key": "audio/pop/aamirsomewhere-copyright-free-musicroyalty-free-music100-free-music-437088.mp3"
+    },
+    {
+      "name": "aamirsomewhere-copyright-free-musicroyalty-free-music100-free-music-437089.mp3",
+      "key": "audio/pop/aamirsomewhere-copyright-free-musicroyalty-free-music100-free-music-437089.mp3"
+    },
+    {
+      "name": "desifreemusic-royalty-free-background-music-audio-tracks-no-copyright-406801.mp3",
+      "key": "audio/pop/desifreemusic-royalty-free-background-music-audio-tracks-no-copyright-406801.mp3"
+    },
+    {
+      "name": "kontraa-no-sleep-hiphop-music-473847.mp3",
+      "key": "audio/pop/kontraa-no-sleep-hiphop-music-473847.mp3"
+    },
+    {
+      "name": "nastelbom-no-copyright-music-463071.mp3",
+      "key": "audio/pop/nastelbom-no-copyright-music-463071.mp3"
+    },
+    {
+      "name": "pocketbeats-mini-vlog-562664.mp3",
+      "key": "audio/pop/pocketbeats-mini-vlog-562664.mp3"
+    },
+    {
+      "name": "prettyjohn1-no-copyright-music-498106.mp3",
+      "key": "audio/pop/prettyjohn1-no-copyright-music-498106.mp3"
+    },
+    {
+      "name": "studiokolomna-beautiful-moments-136801.mp3",
+      "key": "audio/pop/studiokolomna-beautiful-moments-136801.mp3"
+    }
+  ],
+  "sports": [
+    {
+      "name": "sigmamusicart-football-football-music-551346.mp3",
+      "key": "audio/sports/sigmamusicart-football-football-music-551346.mp3"
+    }
+  ],
+  "epic": [
+    {
+      "name": "soulfuljamtracks-inspiring-epic-cinematic-247677.mp3",
+      "key": "audio/epic/soulfuljamtracks-inspiring-epic-cinematic-247677.mp3"
+    },
+    {
+      "name": "soulfuljamtracks-powerful-epic-rock-248903.mp3",
+      "key": "audio/epic/soulfuljamtracks-powerful-epic-rock-248903.mp3"
+    }
+  ],
+  "gaming": [
+    {
+      "name": "playhousesound-forever-trance-royalty-free-music-play-house-287383.mp3",
+      "key": "audio/gaming/playhousesound-forever-trance-royalty-free-music-play-house-287383.mp3"
+    },
+    {
+      "name": "playhousesound-play-techno-play-house-copyright-free-music-206935.mp3",
+      "key": "audio/gaming/playhousesound-play-techno-play-house-copyright-free-music-206935.mp3"
+    }
+  ],
+  "romance": [
+    {
+      "name": "desifreemusic-gentle-romantic-piano-instrumental-royalty-free-music-397373.mp3",
+      "key": "audio/romance/desifreemusic-gentle-romantic-piano-instrumental-royalty-free-music-397373.mp3"
+    }
+  ],
+  "chill": [
+    {
+      "name": "pufino-vibing-chill-lofi-royalty-free-music-318954.mp3",
+      "key": "audio/chill/pufino-vibing-chill-lofi-royalty-free-music-318954.mp3"
+    }
+  ]
+}

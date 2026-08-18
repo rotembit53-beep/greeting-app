@@ -39,3 +39,18 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Local data and uploads (legacy localhost-only mode; superseded by D1 + R2)
+/data/*.json
+!/data/.gitkeep
+/public/uploads/*
+!/public/uploads/.gitkeep
+# Source copy of the audio library migrated into R2 — not needed in the deploy bundle
+/public/audio/*
+!/public/audio/.gitkeep
+
+# Cloudflare / OpenNext
+.open-next/
+.wrangler/
+.dev.vars
+cloudflare-env.d.ts
