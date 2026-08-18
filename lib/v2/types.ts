@@ -171,6 +171,7 @@ export const SCENE_KINDS = [
   'messages',
   'memories',
   'surprise',
+  'gift',
   'closing',
 ] as const;
 
@@ -232,13 +233,36 @@ export type GreetingContent = z.infer<typeof GreetingContentSchema>;
  * Stored greeting
  * ------------------------------------------------------------------ */
 
-export type MediaKind = 'image' | 'video';
+export type MediaKind = 'image' | 'video' | 'audio';
+
+/** Where a media item is used in the experience. */
+export const MEDIA_ROLES = ['library', 'cover', 'memory', 'final', 'surprise'] as const;
+export type MediaRole = (typeof MEDIA_ROLES)[number];
 
 export interface MediaItem {
+  /** Stable id so scenes can reference an item without depending on order. */
+  id: string;
   url: string;
   type: MediaKind;
   caption?: string;
+  /**
+   * Which scene this belongs to. Everything uploaded lands in the shared
+   * library; assigning a role is what places it in the experience.
+   */
+  role?: MediaRole;
+  width?: number;
+  height?: number;
 }
+
+/** How a template chooses to present a set of photos. */
+export const PHOTO_PRESENTATIONS = [
+  'cinematic',
+  'polaroid',
+  'cards3d',
+  'parallax',
+  'wall',
+] as const;
+export type PhotoPresentation = (typeof PHOTO_PRESENTATIONS)[number];
 
 export type PlanId = 'free' | 'premium';
 
@@ -262,6 +286,13 @@ export interface GreetingV2 {
   musicTrack: string;
   musicEnabled: boolean;
   media: MediaItem[];
+  /** id of the MediaItem used as the opening image. */
+  coverMediaId?: string;
+
+  /** The attached digital gift, revealed at the end. */
+  gift?: import('./gifts').Gift | null;
+  giftInterests?: string[];
+  giftBudget?: string;
 
   plan: PlanId;
   status: 'draft' | 'published';

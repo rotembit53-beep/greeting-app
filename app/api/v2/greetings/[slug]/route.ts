@@ -9,9 +9,11 @@ import { isValidSlug } from '@/lib/v2/slug';
 import { canUseTemplate, maxImagesFor } from '@/lib/v2/plan';
 import {
   GreetingContentSchema,
+  MEDIA_ROLES,
   TEMPLATE_IDS,
   toPublicGreeting,
 } from '@/lib/v2/types';
+import { GiftSchema } from '@/lib/v2/gifts';
 
 interface RouteParams {
   params: Promise<{ slug: string }>;
@@ -38,9 +40,13 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
 }
 
 const MediaSchema = z.object({
+  id: z.string().min(1).max(64),
   url: z.string().max(500),
-  type: z.enum(['image', 'video']),
+  type: z.enum(['image', 'video', 'audio']),
   caption: z.string().max(200).optional().default(''),
+  role: z.enum(MEDIA_ROLES).optional().default('library'),
+  width: z.number().optional(),
+  height: z.number().optional(),
 });
 
 const PatchSchema = z.object({
@@ -50,6 +56,8 @@ const PatchSchema = z.object({
   musicTrack: z.string().max(300).optional(),
   musicEnabled: z.boolean().optional(),
   media: z.array(MediaSchema).max(60).optional(),
+  coverMediaId: z.string().max(64).optional(),
+  gift: GiftSchema.nullable().optional(),
 });
 
 export async function PATCH(req: NextRequest, { params }: RouteParams) {
@@ -90,6 +98,8 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
       musicTrack: patch.musicTrack,
       musicEnabled: patch.musicEnabled,
       media,
+      coverMediaId: patch.coverMediaId,
+      gift: patch.gift,
     });
 
     const updated = await getGreetingBySlug(slug);

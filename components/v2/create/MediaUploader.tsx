@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { MediaItem } from '@/lib/v2/types';
+import { compressImage } from '@/lib/v2/imageCompress';
 
 /**
  * Uploads through the existing /api/upload-media endpoint (shared with V1,
@@ -30,9 +31,11 @@ export default function MediaUploader({
   onChange,
 }: Props) {
   const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState({ done: 0, total: 0 });
   const [error, setError] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
 
   const atLimit = media.length >= maxImages;
 
@@ -46,17 +49,30 @@ export default function MediaUploader({
       return;
     }
 
+    const batch = files.slice(0, room);
     setUploading(true);
+    setProgress({ done: 0, total: batch.length });
     const added: MediaItem[] = [];
 
-    for (const file of files.slice(0, room)) {
+    for (const file of batch) {
       if (!allowVideo && file.type.startsWith('video/')) {
         setError('העלאת וידאו זמינה בפרימיום');
         continue;
       }
 
+      // Shrink big camera shots before they hit the network: a modern phone
+      // photo is 4-8MB, which is slow to upload and pointless at display size.
+      let payload: File = file;
+      if (file.type.startsWith('image/')) {
+        try {
+          payload = await compressImage(file);
+        } catch {
+          // Compression is best-effort — fall back to the original.
+        }
+      }
+
       const form = new FormData();
-      form.append('file', file);
+      form.append('file', payload);
       form.append('greetingId', draftId);
 
       try {
@@ -68,9 +84,15 @@ export default function MediaUploader({
 
         if (res.ok && data.path) {
           added.push({
+            id: crypto.randomUUID(),
             url: data.path,
-            type: file.type.startsWith('video/') ? 'video' : 'image',
+            type: file.type.startsWith('video/')
+              ? 'video'
+              : file.type.startsWith('audio/')
+                ? 'audio'
+                : 'image',
             caption: '',
+            role: 'library',
           });
         } else {
           setError((data.error && ERRORS[data.error]) || 'ההעלאה נכשלה — נסו שוב');
@@ -78,10 +100,13 @@ export default function MediaUploader({
       } catch {
         setError('ההעלאה נכשלה — בדקו את החיבור לאינטרנט');
       }
+
+      setProgress((p) => ({ ...p, done: p.done + 1 }));
     }
 
     if (added.length) onChange([...media, ...added]);
     setUploading(false);
+    setProgress({ done: 0, total: 0 });
   };
 
   const remove = (index: number) => {
@@ -148,7 +173,49 @@ export default function MediaUploader({
             גררו לכאן או לחצו · {media.length}/{maxImages}
           </p>
         </label>
+
+        {uploading && progress.total > 0 && (
+          <div className="mt-4">
+            <div
+              className="h-1.5 rounded-full overflow-hidden"
+              style={{ background: 'var(--v2-accent-soft)' }}
+            >
+              <div
+                className="h-full transition-all duration-300"
+                style={{
+                  width: `${(progress.done / progress.total) * 100}%`,
+                  background: 'var(--v2-accent)',
+                }}
+              />
+            </div>
+            <p className="text-xs mt-2" style={{ color: 'var(--v2-ink-soft)' }}>
+              {progress.done} מתוך {progress.total}
+            </p>
+          </div>
+        )}
       </div>
+
+      {/* Camera capture — phones open the camera directly from this input. */}
+      <input
+        ref={cameraRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        className="hidden"
+        onChange={(e) => {
+          const files = Array.from(e.target.files ?? []);
+          e.target.value = '';
+          void uploadFiles(files);
+        }}
+      />
+      <button
+        type="button"
+        onClick={() => cameraRef.current?.click()}
+        disabled={uploading || atLimit}
+        className="v2-btn v2-btn-ghost w-full mt-3 sm:hidden"
+      >
+        📷 צלמו עכשיו
+      </button>
 
       {error && (
         <p className="mt-3 text-sm text-center font-semibold" style={{ color: '#c62828' }}>

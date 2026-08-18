@@ -1,4 +1,5 @@
 import { getCloudflareContext } from '@opennextjs/cloudflare';
+import { Gift } from './gifts';
 import {
   EventType,
   GreetingContent,
@@ -36,6 +37,10 @@ interface GreetingV2Row {
   musicTrack: string;
   musicEnabled: number;
   media: string;
+  coverMediaId: string;
+  gift: string;
+  giftInterests: string;
+  giftBudget: string;
   plan: string;
   status: string;
   allowContributions: number;
@@ -63,6 +68,10 @@ function rowToGreeting(row: GreetingV2Row): GreetingV2 {
     musicTrack: row.musicTrack,
     musicEnabled: row.musicEnabled === 1,
     media: JSON.parse(row.media) as MediaItem[],
+    coverMediaId: row.coverMediaId || '',
+    gift: row.gift ? (JSON.parse(row.gift) as Gift) : null,
+    giftInterests: row.giftInterests ? (JSON.parse(row.giftInterests) as string[]) : [],
+    giftBudget: row.giftBudget || '',
     plan: row.plan as PlanId,
     status: row.status as GreetingV2['status'],
     allowContributions: row.allowContributions === 1,
@@ -79,9 +88,10 @@ export async function createGreeting(g: GreetingV2): Promise<void> {
       `INSERT INTO greetings_v2
         (id, slug, ownerToken, eventType, recipientName, relationship, recipientAge,
          aboutThem, sharedMemory, senderName, tone, content, templateId, musicTrack,
-         musicEnabled, media, plan, status, allowContributions, viewCount, openCount,
+         musicEnabled, media, coverMediaId, gift, giftInterests, giftBudget,
+         plan, status, allowContributions, viewCount, openCount,
          createdAt, updatedAt)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
     .bind(
       g.id,
@@ -100,6 +110,10 @@ export async function createGreeting(g: GreetingV2): Promise<void> {
       g.musicTrack,
       g.musicEnabled ? 1 : 0,
       JSON.stringify(g.media),
+      g.coverMediaId ?? '',
+      g.gift ? JSON.stringify(g.gift) : '',
+      JSON.stringify(g.giftInterests ?? []),
+      g.giftBudget ?? '',
       g.plan,
       g.status,
       g.allowContributions ? 1 : 0,
@@ -134,6 +148,10 @@ export interface GreetingUpdate {
   musicTrack?: string;
   musicEnabled?: boolean;
   media?: MediaItem[];
+  coverMediaId?: string;
+  gift?: Gift | null;
+  giftInterests?: string[];
+  giftBudget?: string;
   status?: GreetingV2['status'];
   plan?: PlanId;
   allowContributions?: boolean;
@@ -169,6 +187,22 @@ export async function updateGreeting(
   if (patch.media !== undefined) {
     sets.push('media = ?');
     values.push(JSON.stringify(patch.media));
+  }
+  if (patch.coverMediaId !== undefined) {
+    sets.push('coverMediaId = ?');
+    values.push(patch.coverMediaId);
+  }
+  if (patch.gift !== undefined) {
+    sets.push('gift = ?');
+    values.push(patch.gift ? JSON.stringify(patch.gift) : '');
+  }
+  if (patch.giftInterests !== undefined) {
+    sets.push('giftInterests = ?');
+    values.push(JSON.stringify(patch.giftInterests));
+  }
+  if (patch.giftBudget !== undefined) {
+    sets.push('giftBudget = ?');
+    values.push(patch.giftBudget);
   }
   if (patch.status !== undefined) {
     sets.push('status = ?');

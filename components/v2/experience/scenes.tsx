@@ -180,8 +180,49 @@ export function MessagesScene({ template, content }: SceneProps) {
 }
 
 /* ------------------------------------------------------------------ *
- * Memories — photos revealed one at a time, not a grid dump
+ * Memories — staged per the template's photoPresentation, never a plain grid
  * ------------------------------------------------------------------ */
+
+function MediaFrame({
+  item,
+  className = '',
+  style,
+  dataAttr,
+}: {
+  item: MediaItem;
+  className?: string;
+  style?: React.CSSProperties;
+  /** Marker the scene's scroll effects hook onto, e.g. "data-kenburns". */
+  dataAttr?: string;
+}) {
+  const marker = dataAttr ? { [dataAttr]: '' } : {};
+  if (item.type === 'video') {
+    return (
+      <video
+        {...marker}
+        src={item.url}
+        controls
+        playsInline
+        preload="metadata"
+        className={`w-full block ${className}`}
+        style={style}
+      />
+    );
+  }
+  if (item.type === 'audio') {
+    return <audio src={item.url} controls className={`w-full ${className}`} style={style} />;
+  }
+  return (
+    <img
+      {...marker}
+      src={item.url}
+      alt={item.caption || 'זיכרון'}
+      loading="lazy"
+      className={`w-full block ${className}`}
+      style={style}
+    />
+  );
+}
 
 export function MemoriesScene({
   template,
@@ -191,9 +232,49 @@ export function MemoriesScene({
   media: MediaItem[];
 }) {
   const ref = useRef<HTMLElement>(null);
-  useSceneReveal(ref, template, [media.length]);
+  useSceneReveal(ref, template, [media.length, template.photoPresentation]);
+
+  // Ken Burns / parallax drift on the active images.
+  useGSAP(
+    () => {
+      const el = ref.current;
+      if (!el || prefersReduced()) return;
+
+      if (template.photoPresentation === 'cinematic') {
+        gsap.utils.toArray<HTMLElement>('[data-kenburns]', el).forEach((img, i) => {
+          gsap.fromTo(
+            img,
+            { scale: 1.02, xPercent: i % 2 === 0 ? -1.5 : 1.5 },
+            {
+              scale: 1.14,
+              xPercent: 0,
+              ease: 'none',
+              scrollTrigger: { trigger: img, start: 'top bottom', end: 'bottom top', scrub: 0.4 },
+            }
+          );
+        });
+      }
+
+      if (template.photoPresentation === 'parallax') {
+        gsap.utils.toArray<HTMLElement>('[data-parallax]', el).forEach((img, i) => {
+          gsap.fromTo(
+            img,
+            { yPercent: -8 },
+            {
+              yPercent: 8,
+              ease: 'none',
+              scrollTrigger: { trigger: img, start: 'top bottom', end: 'bottom top', scrub: 0.35 },
+            }
+          );
+        });
+      }
+    },
+    { scope: ref, dependencies: [media.length, template.photoPresentation] }
+  );
 
   if (!media.length) return null;
+
+  const presentation = template.photoPresentation;
 
   return (
     <section ref={ref} className="v2-container pb-16 sm:pb-24">
@@ -207,52 +288,166 @@ export function MemoriesScene({
           marginBottom: '1.5rem',
         }}
       >
-        זוכר/ת את הרגעים האלה?
+        {media.length > 1 ? 'זוכר/ת את הרגעים האלה?' : 'זוכר/ת את היום הזה?'}
       </p>
 
-      <div className="flex flex-col gap-6">
-        {media.map((item, i) => (
-          <figure key={`${item.url}-${i}`} data-reveal className="m-0">
-            <div
-              className="overflow-hidden rounded-2xl"
+      {/* ---- Polaroid stack: tilted prints with a caption strip ---- */}
+      {presentation === 'polaroid' && (
+        <div className="flex flex-col items-center gap-7">
+          {media.map((item, i) => (
+            <figure
+              key={item.id}
+              data-reveal
+              className="m-0"
               style={{
-                border: '1.5px solid var(--v2-surface-border)',
-                boxShadow: '0 18px 50px -22px var(--v2-glow)',
-                // Slight alternating tilt so a run of photos reads as a
-                // scattered pile rather than a uniform column.
-                transform: `rotate(${i % 2 === 0 ? -1.1 : 1.1}deg)`,
+                background: '#fffdf8',
+                padding: '0.75rem 0.75rem 0',
+                borderRadius: '0.4rem',
+                boxShadow: '0 20px 46px -22px rgba(0,0,0,0.55)',
+                transform: `rotate(${i % 2 === 0 ? -2.4 : 2.1}deg)`,
+                maxWidth: '22rem',
+                width: '100%',
               }}
             >
-              {item.type === 'video' ? (
-                <video
-                  src={item.url}
-                  controls
-                  playsInline
-                  preload="metadata"
-                  className="w-full block"
-                  style={{ maxHeight: '70vh' }}
-                />
-              ) : (
-                <img
-                  src={item.url}
-                  alt={item.caption || `זיכרון ${i + 1}`}
-                  loading="lazy"
-                  className="w-full block"
-                  style={{ maxHeight: '70vh', objectFit: 'cover' }}
-                />
-              )}
-            </div>
-            {item.caption ? (
+              <MediaFrame item={item} style={{ maxHeight: '62vh', objectFit: 'cover' }} />
               <figcaption
-                className="mt-3 text-center text-sm"
-                style={{ color: 'var(--v2-ink-soft)' }}
+                className="text-center py-3 text-sm"
+                style={{ color: '#4a4038', minHeight: '2.6rem' }}
               >
-                {item.caption}
+                {item.caption || ''}
               </figcaption>
-            ) : null}
-          </figure>
-        ))}
-      </div>
+            </figure>
+          ))}
+        </div>
+      )}
+
+      {/* ---- Cinematic: full-bleed with a slow Ken Burns push ---- */}
+      {presentation === 'cinematic' && (
+        <div className="flex flex-col gap-8">
+          {media.map((item) => (
+            <figure key={item.id} data-reveal className="m-0">
+              <div
+                className="overflow-hidden rounded-2xl"
+                style={{ boxShadow: '0 22px 56px -26px var(--v2-glow)' }}
+              >
+                <MediaFrame
+                  item={item}
+                  dataAttr="data-kenburns"
+                  className="will-change-transform"
+                  style={{ maxHeight: '72vh', objectFit: 'cover' }}
+                />
+              </div>
+              {item.caption ? (
+                <figcaption
+                  className="mt-3 text-center text-sm"
+                  style={{ color: 'var(--v2-ink-soft)' }}
+                >
+                  {item.caption}
+                </figcaption>
+              ) : null}
+            </figure>
+          ))}
+        </div>
+      )}
+
+      {/* ---- 3D cards: perspective tilt on hover/scroll ---- */}
+      {presentation === 'cards3d' && (
+        <div className="flex flex-col gap-8" style={{ perspective: '1100px' }}>
+          {media.map((item, i) => (
+            <figure
+              key={item.id}
+              data-reveal
+              className="m-0 transition-transform duration-500 hover:!rotate-0"
+              style={{
+                transform: `rotateY(${i % 2 === 0 ? 7 : -7}deg) rotateX(3deg)`,
+                transformStyle: 'preserve-3d',
+              }}
+            >
+              <div
+                className="overflow-hidden rounded-3xl"
+                style={{
+                  border: '1.5px solid var(--v2-surface-border)',
+                  boxShadow: '0 30px 70px -30px var(--v2-glow)',
+                }}
+              >
+                <MediaFrame item={item} style={{ maxHeight: '68vh', objectFit: 'cover' }} />
+              </div>
+              {item.caption ? (
+                <figcaption
+                  className="mt-3 text-center text-sm"
+                  style={{ color: 'var(--v2-ink-soft)' }}
+                >
+                  {item.caption}
+                </figcaption>
+              ) : null}
+            </figure>
+          ))}
+        </div>
+      )}
+
+      {/* ---- Parallax: images drift against the scroll ---- */}
+      {presentation === 'parallax' && (
+        <div className="flex flex-col gap-10">
+          {media.map((item) => (
+            <figure key={item.id} data-reveal className="m-0">
+              <div
+                className="overflow-hidden rounded-none"
+                style={{ height: '58vh', border: '1px solid var(--v2-surface-border)' }}
+              >
+                <MediaFrame
+                  item={item}
+                  dataAttr="data-parallax"
+                  className="will-change-transform"
+                  style={{ height: '116%', objectFit: 'cover' }}
+                />
+              </div>
+              {item.caption ? (
+                <figcaption
+                  className="mt-3 text-center text-sm tracking-widest uppercase"
+                  style={{ color: 'var(--v2-ink-soft)' }}
+                >
+                  {item.caption}
+                </figcaption>
+              ) : null}
+            </figure>
+          ))}
+        </div>
+      )}
+
+      {/* ---- Wall: dense scrapbook collage ---- */}
+      {presentation === 'wall' && (
+        <div className="grid grid-cols-2 gap-3">
+          {media.map((item, i) => (
+            <figure
+              key={item.id}
+              data-reveal
+              className="m-0"
+              style={{
+                gridColumn: i % 5 === 0 ? 'span 2' : 'span 1',
+                transform: `rotate(${(i % 3) - 1}deg)`,
+              }}
+            >
+              <div
+                className="overflow-hidden rounded-xl"
+                style={{ border: '3px solid var(--v2-ink)' }}
+              >
+                <MediaFrame
+                  item={item}
+                  style={{ aspectRatio: i % 5 === 0 ? '16/9' : '1/1', objectFit: 'cover' }}
+                />
+              </div>
+              {item.caption ? (
+                <figcaption
+                  className="mt-1.5 text-center text-xs font-bold"
+                  style={{ color: 'var(--v2-ink)' }}
+                >
+                  {item.caption}
+                </figcaption>
+              ) : null}
+            </figure>
+          ))}
+        </div>
+      )}
     </section>
   );
 }

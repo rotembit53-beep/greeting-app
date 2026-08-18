@@ -20,6 +20,8 @@ export interface EditorState {
   content: GreetingContent;
   templateId: TemplateId;
   media: MediaItem[];
+  /** id of the media item used as the opening image. */
+  coverMediaId: string;
   musicTrack: string;
   musicEnabled: boolean;
 }
@@ -84,7 +86,7 @@ export default function Editor({
           disabled={publishing}
           className="v2-btn v2-btn-primary flex-1"
         >
-          {publishing ? 'מכינים…' : '🔗 קבלו לינק'}
+          {publishing ? 'מכינים…' : '🎁 להוספת מתנה'}
         </button>
       </div>
 
@@ -205,13 +207,50 @@ export default function Editor({
 
       {/* ---------------- Images ---------------- */}
       {tab === 'images' && (
-        <MediaUploader
-          draftId={draftId}
-          media={state.media}
-          maxImages={maxImagesFor(premium ? 'premium' : 'free')}
-          allowVideo={premium}
-          onChange={(media) => onChange({ media })}
-        />
+        <>
+          <MediaUploader
+            draftId={draftId}
+            media={state.media}
+            maxImages={maxImagesFor(premium ? 'premium' : 'free')}
+            allowVideo={premium}
+            onChange={(media) => onChange({ media })}
+          />
+
+          {state.media.some((m) => m.type === 'image') && (
+            <div className="mt-7">
+              <span className="v2-label">תמונת פתיחה</span>
+              <p className="v2-hint">התמונה שתופיע ראשונה, לפני הטקסט</p>
+              <div className="grid grid-cols-4 gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => onChange({ coverMediaId: '' })}
+                  data-selected={!state.coverMediaId}
+                  className="v2-choice !py-4 text-xs font-semibold"
+                >
+                  ללא
+                </button>
+                {state.media
+                  .filter((m) => m.type === 'image')
+                  .map((m) => (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => onChange({ coverMediaId: m.id })}
+                      className="relative aspect-square rounded-xl overflow-hidden"
+                      style={{
+                        border:
+                          state.coverMediaId === m.id
+                            ? '2.5px solid var(--v2-accent)'
+                            : '1.5px solid var(--v2-surface-border)',
+                      }}
+                    >
+                      <img src={m.url} alt="" className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {/* ---------------- Music ---------------- */}

@@ -8,13 +8,19 @@ import {
   EVENT_TYPES,
   GreetingContentSchema,
   GreetingV2,
+  MEDIA_ROLES,
   TEMPLATE_IDS,
 } from '@/lib/v2/types';
+import { GiftSchema, INTEREST_IDS } from '@/lib/v2/gifts';
 
 const MediaSchema = z.object({
+  id: z.string().min(1).max(64),
   url: z.string().max(500),
-  type: z.enum(['image', 'video']),
+  type: z.enum(['image', 'video', 'audio']),
   caption: z.string().max(200).optional().default(''),
+  role: z.enum(MEDIA_ROLES).optional().default('library'),
+  width: z.number().optional(),
+  height: z.number().optional(),
 });
 
 const BodySchema = z.object({
@@ -31,6 +37,10 @@ const BodySchema = z.object({
   musicTrack: z.string().max(300).optional().default(''),
   musicEnabled: z.boolean().optional().default(true),
   media: z.array(MediaSchema).max(60).optional().default([]),
+  coverMediaId: z.string().max(64).optional().default(''),
+  gift: GiftSchema.nullable().optional(),
+  giftInterests: z.array(z.enum(INTEREST_IDS)).optional().default([]),
+  giftBudget: z.string().max(20).optional().default(''),
 });
 
 /** Retries on the (astronomically unlikely) slug collision. */
@@ -70,6 +80,10 @@ export async function POST(req: NextRequest) {
       musicTrack: input.musicTrack,
       musicEnabled: input.musicEnabled,
       media,
+      coverMediaId: input.coverMediaId,
+      gift: input.gift ?? null,
+      giftInterests: input.giftInterests,
+      giftBudget: input.giftBudget,
       plan: 'free',
       status: 'published',
       allowContributions: false,

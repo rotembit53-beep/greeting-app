@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { DEFAULT_TEMPLATE, getTemplate } from '@/lib/v2/templates';
 import { defaultTrackForMood, trackUrl } from '@/lib/v2/music';
 import { track } from '@/lib/v2/analytics';
+import { Gift } from '@/lib/v2/gifts';
 import {
   EVENT_BY_ID,
   EventType,
@@ -19,8 +20,9 @@ import DetailsForm, { DetailsValue } from './DetailsForm';
 import Generating from './Generating';
 import Editor, { EditorState } from './Editor';
 import SharePanel from './SharePanel';
+import GiftStep from './GiftStep';
 
-type Stage = 'event' | 'details' | 'generating' | 'editor' | 'preview' | 'share';
+type Stage = 'event' | 'details' | 'generating' | 'editor' | 'gift' | 'preview' | 'share';
 
 const DRAFT_KEY = 'interagift-v2-draft';
 
@@ -49,6 +51,7 @@ export default function CreateFlow() {
   const [genError, setGenError] = useState<string | null>(null);
   const [generated, setGenerated] = useState<GreetingContent | null>(null);
   const [editor, setEditor] = useState<EditorState | null>(null);
+  const [gift, setGift] = useState<Gift | null>(null);
   const [publishing, setPublishing] = useState(false);
   const [published, setPublished] = useState<{ slug: string; id?: string } | null>(null);
 
@@ -150,6 +153,7 @@ export default function CreateFlow() {
         content,
         templateId,
         media: [],
+        coverMediaId: '',
         musicTrack: suggested ? trackUrl(suggested) : '',
         musicEnabled: true,
       });
@@ -189,6 +193,10 @@ export default function CreateFlow() {
           musicTrack: editor.musicTrack,
           musicEnabled: editor.musicEnabled,
           media: editor.media,
+          coverMediaId: editor.coverMediaId,
+          gift,
+          giftInterests: [],
+          giftBudget: '',
         }),
       });
 
@@ -238,6 +246,8 @@ export default function CreateFlow() {
       musicTrack: editor.musicTrack,
       musicEnabled: editor.musicEnabled,
       media: editor.media,
+      coverMediaId: editor.coverMediaId,
+      gift,
       plan: premium ? 'premium' : 'free',
       status: 'draft',
       allowContributions: false,
@@ -246,7 +256,7 @@ export default function CreateFlow() {
       createdAt: now,
       updatedAt: now,
     });
-  }, [editor, eventType, details, premium]);
+  }, [editor, eventType, details, premium, gift]);
 
   /* ---------------- Preview takes over the screen ---------------- */
 
@@ -300,8 +310,8 @@ export default function CreateFlow() {
 
         {stage !== 'share' && (
           <div className="flex items-center gap-1.5" aria-hidden="true">
-            {(['event', 'details', 'editor'] as const).map((s, i) => {
-              const order = { event: 0, details: 1, generating: 2, editor: 2, preview: 2, share: 3 };
+            {(['event', 'details', 'editor', 'gift'] as const).map((s, i) => {
+              const order = { event: 0, details: 1, generating: 2, editor: 2, preview: 2, gift: 3, share: 3 };
               const active = order[stage] >= i;
               return (
                 <span
@@ -395,11 +405,26 @@ export default function CreateFlow() {
               premium={premium}
               onChange={(patch) => setEditor((s) => (s ? { ...s, ...patch } : s))}
               onPreview={() => setStage('preview')}
-              onPublish={() => void publish()}
+              onPublish={() => setStage('gift')}
               publishing={publishing}
               onPremiumClick={() => track('premium_click', { props: { from: 'editor' } })}
             />
           </>
+        )}
+
+        {stage === 'gift' && (
+          <GiftStep
+            recipientName={details.recipientName}
+            aboutThem={details.aboutThem}
+            sharedMemory={details.sharedMemory}
+            gift={gift}
+            onChange={setGift}
+            onDone={() => void publish()}
+            onSkip={() => {
+              setGift(null);
+              void publish();
+            }}
+          />
         )}
 
         {stage === 'share' && published && (

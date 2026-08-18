@@ -1,4 +1,4 @@
-import { MusicMood, SceneKind, TemplateId } from './types';
+import { MusicMood, PhotoPresentation, SceneKind, TemplateId } from './types';
 
 /**
  * A template is pure data. It decides the palette, the type treatment, the
@@ -66,6 +66,9 @@ export interface TemplateDef {
   };
 
   musicMood: MusicMood;
+
+  /** How this template stages a set of photos. */
+  photoPresentation: PhotoPresentation;
 }
 
 export const TEMPLATES: Record<TemplateId, TemplateDef> = {
@@ -112,6 +115,7 @@ export const TEMPLATES: Record<TemplateId, TemplateDef> = {
       'messages',
       'memories',
       'surprise',
+      'gift',
       'closing',
     ],
     gate: {
@@ -122,6 +126,7 @@ export const TEMPLATES: Record<TemplateId, TemplateDef> = {
     },
     motion: { duration: 0.8, stagger: 0.1, ease: 'back.out(1.4)' },
     musicMood: 'happy',
+    photoPresentation: 'polaroid',
   },
 
   /* ---------------------------------------------------------------- *
@@ -161,7 +166,7 @@ export const TEMPLATES: Record<TemplateId, TemplateDef> = {
       palette: ['#ff8fab', '#f76b8a', '#ffc2d4', '#c96496'],
       density: 26,
     },
-    scenes: ['gate-envelope', 'reveal', 'memories', 'messages', 'closing'],
+    scenes: ['gate-envelope', 'reveal', 'memories', 'messages', 'gift', 'closing'],
     gate: {
       badge: '💌 מכתב בשבילך',
       title: 'מישהו כתב לך משהו',
@@ -170,6 +175,7 @@ export const TEMPLATES: Record<TemplateId, TemplateDef> = {
     },
     motion: { duration: 1.25, stagger: 0.14, ease: 'power3.out' },
     musicMood: 'romantic',
+    photoPresentation: 'cinematic',
   },
 
   /* ---------------------------------------------------------------- *
@@ -209,7 +215,7 @@ export const TEMPLATES: Record<TemplateId, TemplateDef> = {
       palette: ['#d4af37', '#f4efe2', '#b8912c'],
       density: 22,
     },
-    scenes: ['gate-gift', 'reveal', 'messages', 'memories', 'closing'],
+    scenes: ['gate-gift', 'reveal', 'messages', 'memories', 'gift', 'closing'],
     gate: {
       badge: '✦ הזמנה אישית',
       title: 'נשמר עבורכם',
@@ -218,6 +224,7 @@ export const TEMPLATES: Record<TemplateId, TemplateDef> = {
     },
     motion: { duration: 1.4, stagger: 0.16, ease: 'power2.out' },
     musicMood: 'emotional',
+    photoPresentation: 'parallax',
   },
 
   /* ---------------------------------------------------------------- *
@@ -257,7 +264,7 @@ export const TEMPLATES: Record<TemplateId, TemplateDef> = {
       palette: ['#1a1a1a', '#ff5f6d', '#00c2ff', '#ff9d00'],
       density: 60,
     },
-    scenes: ['gate-gift', 'reveal', 'messages', 'surprise', 'memories', 'closing'],
+    scenes: ['gate-gift', 'reveal', 'messages', 'surprise', 'memories', 'gift', 'closing'],
     gate: {
       badge: '👀 אל תלחצו. סתם, כן תלחצו',
       title: 'יש לך חבילה חשודה',
@@ -266,6 +273,7 @@ export const TEMPLATES: Record<TemplateId, TemplateDef> = {
     },
     motion: { duration: 0.55, stagger: 0.07, ease: 'back.out(2.6)' },
     musicMood: 'funny',
+    photoPresentation: 'wall',
   },
 
   /* ---------------------------------------------------------------- *
@@ -301,7 +309,7 @@ export const TEMPLATES: Record<TemplateId, TemplateDef> = {
       bodyLeading: '2.1',
     },
     decor: { kind: 'none', palette: [], density: 0 },
-    scenes: ['gate-envelope', 'reveal', 'memories', 'closing'],
+    scenes: ['gate-envelope', 'reveal', 'memories', 'gift', 'closing'],
     gate: {
       badge: '—',
       title: 'משהו קטן בשבילך',
@@ -310,6 +318,7 @@ export const TEMPLATES: Record<TemplateId, TemplateDef> = {
     },
     motion: { duration: 1.1, stagger: 0.12, ease: 'power2.out' },
     musicMood: 'calm',
+    photoPresentation: 'cinematic',
   },
 
   /* ---------------------------------------------------------------- *
@@ -355,6 +364,7 @@ export const TEMPLATES: Record<TemplateId, TemplateDef> = {
       'messages',
       'memories',
       'surprise',
+      'gift',
       'closing',
     ],
     gate: {
@@ -365,6 +375,7 @@ export const TEMPLATES: Record<TemplateId, TemplateDef> = {
     },
     motion: { duration: 0.7, stagger: 0.08, ease: 'back.out(1.8)' },
     musicMood: 'party',
+    photoPresentation: 'cards3d',
   },
 };
 

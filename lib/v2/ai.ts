@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI, GoogleGenerativeAIFetchError } from '@google/generative-ai';
 import { getCloudflareContext } from '@opennextjs/cloudflare';
+import { z } from 'zod';
 import {
   EVENT_BY_ID,
   EventType,
@@ -284,4 +285,72 @@ export async function generateGreetingContent(
   }
 
   return parsed.data;
+}
+
+/* ------------------------------------------------------------------ *
+ * Gift interest matching
+ * ------------------------------------------------------------------ */
+
+const GIFT_SYSTEM_PROMPT = `You infer what someone would enjoy receiving, from a free-text
+description written by the person who knows them.
+
+You do NOT invent gifts, brands, businesses, prices, or availability. Your ONLY job is to
+pick which of a fixed list of interest categories the description supports.
+
+Return JSON: { "interests": ["id", ...], "reason": "<one short Hebrew sentence>" }
+
+- Pick 2-4 ids, most confident first.
+- Use ONLY ids from the allowed list you are given. Never invent an id.
+- If the description gives you nothing to go on, return ["surprise"].
+- "reason" is one short sentence in Hebrew explaining the match, addressed to the sender.`;
+
+/**
+ * Maps a free-text description onto the fixed interest taxonomy.
+ *
+ * Constrained to a closed enum by design: the model chooses categories, and
+ * the catalogue turns those into gift ideas. That makes it structurally
+ * impossible for the AI to fabricate a vendor, a price or a product.
+ */
+export async function suggestGiftInterests(input: {
+  aboutThem?: string;
+  sharedMemory?: string;
+  recipientName?: string;
+  allowedIds: readonly string[];
+}): Promise<{ interests: string[]; reason: string }> {
+  const description = [input.aboutThem, input.sharedMemory].filter(Boolean).join('\n');
+
+  if (!description.trim()) {
+    return { interests: ['surprise'], reason: '' };
+  }
+
+  const prompt = `${GIFT_SYSTEM_PROMPT}
+
+Allowed interest ids: ${input.allowedIds.join(', ')}
+
+Recipient: ${input.recipientName || 'unknown'}
+What the sender wrote about them:
+"""
+${description}
+"""`;
+
+  const raw = await runPrompt(prompt);
+  const parsed = z
+    .object({
+      interests: z.array(z.string()).max(6).optional().default([]),
+      reason: z.string().max(300).optional().default(''),
+    })
+    .safeParse(extractJson(raw));
+
+  if (!parsed.success) {
+    throw new AIError('AI_INVALID_RESPONSE', 'Gift interest matching returned bad JSON');
+  }
+
+  // Drop anything outside the taxonomy rather than trusting the model.
+  const allowed = new Set(input.allowedIds);
+  const interests = parsed.data.interests.filter((i) => allowed.has(i));
+
+  return {
+    interests: interests.length ? interests : ['surprise'],
+    reason: parsed.data.reason,
+  };
 }

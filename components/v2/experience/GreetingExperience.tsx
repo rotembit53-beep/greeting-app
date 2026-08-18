@@ -5,10 +5,12 @@ import gsap from 'gsap';
 import { getTemplate } from '@/lib/v2/templates';
 import { PublicGreetingV2 } from '@/lib/v2/types';
 import { track } from '@/lib/v2/analytics';
+import { hasGift } from '@/lib/v2/gifts';
 import TemplateSurface from '@/components/v2/TemplateSurface';
 import Decor from '@/components/v2/Decor';
 import Gate from './Gate';
 import MusicPlayer from './MusicPlayer';
+import GiftScene from './GiftScene';
 import {
   ClosingScene,
   MemoriesScene,
@@ -37,7 +39,14 @@ export default function GreetingExperience({ greeting, preview = false }: Props)
   const completedRef = useRef(false);
 
   const musicSrc = greeting.musicEnabled ? greeting.musicTrack : '';
-  const hasGift = greeting.media.length > 0 || Boolean(greeting.content.surprise);
+  const giftAttached = hasGift(greeting.gift);
+
+  // Photos assigned to a scene are shown there; everything else stays in the
+  // library and never renders. Legacy items (no role) default to memories.
+  const memoryMedia = greeting.media.filter(
+    (m) => m.role === 'memory' || m.role === undefined || m.role === 'library'
+  );
+  const cover = greeting.media.find((m) => m.id === greeting.coverMediaId);
 
   // Lock scrolling behind the gate so the content can't be peeked at.
   useEffect(() => {
@@ -94,7 +103,7 @@ export default function GreetingExperience({ greeting, preview = false }: Props)
           template={template}
           recipientName={greeting.recipientName}
           senderName={greeting.senderName}
-          hasGift={hasGift}
+          hasGift={giftAttached}
           onOpen={handleOpen}
         />
       )}
@@ -111,6 +120,28 @@ export default function GreetingExperience({ greeting, preview = false }: Props)
       ) : null}
 
       <div ref={contentRef} className="relative z-10">
+        {cover ? (
+          <div className="v2-container pt-10">
+            <div
+              className="overflow-hidden rounded-3xl"
+              style={{
+                border: '1.5px solid var(--v2-surface-border)',
+                boxShadow: '0 26px 64px -30px var(--v2-glow)',
+              }}
+            >
+              {cover.type === 'video' ? (
+                <video src={cover.url} controls playsInline className="w-full block" />
+              ) : (
+                <img
+                  src={cover.url}
+                  alt={greeting.recipientName}
+                  className="w-full block"
+                  style={{ maxHeight: '62vh', objectFit: 'cover' }}
+                />
+              )}
+            </div>
+          </div>
+        ) : null}
         {template.scenes.map((scene) => {
           switch (scene) {
             case 'reveal':
@@ -119,10 +150,21 @@ export default function GreetingExperience({ greeting, preview = false }: Props)
               return <MessagesScene key={scene} {...sceneProps} />;
             case 'memories':
               return (
-                <MemoriesScene key={scene} template={template} media={greeting.media} />
+                <MemoriesScene key={scene} template={template} media={memoryMedia} />
               );
             case 'surprise':
               return <SurpriseScene key={scene} {...sceneProps} />;
+            case 'gift':
+              // Only rendered when a real gift is attached, so the scene list
+              // can carry it unconditionally.
+              return giftAttached && greeting.gift ? (
+                <GiftScene
+                  key={scene}
+                  template={template}
+                  gift={greeting.gift}
+                  recipientName={greeting.recipientName}
+                />
+              ) : null;
             case 'closing':
               return (
                 <ClosingScene
