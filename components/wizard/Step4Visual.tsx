@@ -187,18 +187,10 @@ export default function Step4Visual({ state, updateState }: StepProps) {
           className="p-6 sm:p-10 rounded-xl transition-all"
           style={{ background: style.pageBackground }}
         >
-          <div
-            className="max-w-md mx-auto overflow-hidden transition-all relative"
-            style={{
-              background: style.cardBackground,
-              border: `1px solid ${style.cardBorder}`,
-              boxShadow: style.cardShadow,
-              borderRadius: style.borderRadius,
-            }}
-          >
+          <div className="max-w-md mx-auto transition-all relative">
             {style.pattern && (
               <div
-                className="absolute inset-x-0 top-0 h-3"
+                className="absolute inset-x-0 top-0 h-3 rounded-full"
                 style={{
                   backgroundImage:
                     'radial-gradient(circle, rgba(191,85,57,0.35) 1.5px, transparent 1.5px)',
@@ -207,7 +199,7 @@ export default function Step4Visual({ state, updateState }: StepProps) {
               />
             )}
 
-            <div className="relative aspect-video overflow-hidden">
+            <div className="relative aspect-video overflow-hidden rounded-2xl">
               {state.mediaFiles?.length > 0 ? (
                 isVideoFile(state.mediaFiles[0]) ? (
                   <video
@@ -250,16 +242,19 @@ export default function Step4Visual({ state, updateState }: StepProps) {
               </div>
             </div>
 
-            <div className="p-6 space-y-3">
-              <h3 className="text-2xl font-extrabold" style={{ color: style.nameColor }}>
+            <div className="pt-6 space-y-3">
+              <h3
+                className="text-2xl font-extrabold"
+                style={{ color: style.pageNameColor ?? style.nameColor }}
+              >
                 {state.recipientName || 'שם הנמען'}
               </h3>
-              <p className="font-medium" style={{ color: style.eventColor }}>
+              <p className="font-medium" style={{ color: style.pageEventColor ?? style.eventColor }}>
                 {state.eventType || 'סוג האירוע'}
               </p>
               <p
                 className="text-sm leading-relaxed line-clamp-3"
-                style={{ color: style.bodyColor }}
+                style={{ color: style.pageBodyColor ?? style.bodyColor }}
               >
                 {state.aiText?.fullGreeting ||
                   'נוסח הברכה המלא יופיע כאן לאחר שתייצרו אותו בשלב הקודם'}

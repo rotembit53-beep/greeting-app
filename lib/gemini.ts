@@ -286,7 +286,7 @@ AVAILABLE BASE STYLES (pick the closest starting point):
 - minimal: clean, warm cream background, strong typography, lots of air
 - warm: warm terracotta/gold, homely and soft
 - cinematic: DARK near-black background, dramatic, high contrast, gold accents
-- elegant: DARK navy background with a cream card and gold accents, formal and luxurious
+- elegant: DARK navy background with cream text and gold accents, formal and luxurious
 - festive: bright, colorful, party energy
 - romantic: blush pink and plum, soft and loving
 - playful: bright primary colors, fun, youthful
@@ -302,7 +302,11 @@ RULES:
 4. background_colors: 2-3 hex colors; they will be blended into a gradient.
 5. Set dark_surface to true ONLY if the background colors you chose are dark
    (so light text is used). If you omit background_colors, omit dark_surface too.
-6. Ensure strong contrast: name_color/body_color must be clearly readable on card_background.
+6. Ensure strong contrast: name_color/body_color/event_color must be clearly readable
+   directly on background_colors — the greeting text sits right on the page now, not
+   inside a separate card. card_background is only used for one small internal panel
+   (the gift-card reveal), so if you set dark_surface true, keep card_background light
+   enough that the same name_color/body_color also stay readable there too.
 7. explanation: 1-2 short sentences IN HEBREW telling the user what you designed and why.
 8. Output STRICT JSON only. No markdown fences, no commentary.
 

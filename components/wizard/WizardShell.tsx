@@ -61,7 +61,22 @@ interface WizardState {
 
 gsap.registerPlugin(useGSAP);
 
-const STORAGE_KEY = 'interagift-wizard';
+// Keyed per-draft (not one shared key) so two tabs — or two different people
+// on the same browser/device — never overwrite each other's in-progress
+// greeting. The draft id also lives in the URL (?id=...) so each draft has
+// its own resumable link, distinct from every other draft.
+const STORAGE_PREFIX = 'interagift-wizard-';
+const storageKeyFor = (id: string) => `${STORAGE_PREFIX}${id}`;
+
+function getUrlDraftId(): string | null {
+  return new URLSearchParams(window.location.search).get('id');
+}
+
+function setUrlDraftId(id: string) {
+  const url = new URL(window.location.href);
+  url.searchParams.set('id', id);
+  window.history.replaceState(null, '', url.toString());
+}
 
 function freshState(): WizardState {
   return {
@@ -115,13 +130,17 @@ export default function WizardShell() {
     });
   });
 
-  // Restore the last session (form fields + current step) on mount
+  // Resume this exact draft (by its id in the URL) on mount — or, if this
+  // tab has no draft id yet, mint a fresh one and stamp it into the URL so
+  // this tab/session never shares storage with any other draft.
   useEffect(() => {
+    const urlId = getUrlDraftId();
+
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
+      const saved = urlId ? localStorage.getItem(storageKeyFor(urlId)) : null;
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (parsed?.state?.id) {
+        if (parsed?.state?.id === urlId) {
           // Merge over fresh defaults so a draft saved before a new field
           // (e.g. recipientGender, giftCard.company) existed doesn't end up
           // with it undefined — giftCard needs its own nested merge since
@@ -134,18 +153,27 @@ export default function WizardShell() {
             giftCard: { ...fresh.giftCard, ...parsed.state.giftCard },
           });
           if (typeof parsed.step === 'number') setCurrentStep(parsed.step);
+          setHydrated(true);
+          return;
         }
       }
     } catch {
-      // Corrupted storage — start fresh
+      // Corrupted storage — fall through to a fresh draft
     }
+
+    // No resumable draft for this URL's id (or no id yet) — start a new,
+    // independent draft and give it its own URL.
+    const fresh = urlId ? { ...freshState(), id: urlId } : freshState();
+    setState(fresh);
+    setCurrentStep(1);
+    setUrlDraftId(fresh.id);
     setHydrated(true);
   }, []);
 
   // Persist every change so the user never loses their progress
   useEffect(() => {
     if (!hydrated) return;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ state, step: currentStep }));
+    localStorage.setItem(storageKeyFor(state.id), JSON.stringify({ state, step: currentStep }));
   }, [state, currentStep, hydrated]);
 
   const updateState = (updates: Partial<WizardState>) => {
@@ -153,9 +181,11 @@ export default function WizardShell() {
   };
 
   const startFresh = () => {
-    localStorage.removeItem(STORAGE_KEY);
-    setState(freshState());
+    localStorage.removeItem(storageKeyFor(state.id));
+    const fresh = freshState();
+    setState(fresh);
     setCurrentStep(1);
+    setUrlDraftId(fresh.id);
   };
 
   const nextStep = () => {
@@ -192,6 +222,15 @@ export default function WizardShell() {
               >
                 ברכה חדשה
               </button>
+              {/* Version switch, for comparing V1 and V2 side by side. */}
+              <a
+                href="/v2"
+                className="text-xs font-bold px-3 py-1.5 rounded-lg transition-opacity hover:opacity-85"
+                style={{ background: 'var(--primary)', color: '#fff' }}
+                title="מעבר לגרסה 2 (ניסיונית)"
+              >
+                ✨ גרסה 2
+              </a>
             </div>
           </div>
 

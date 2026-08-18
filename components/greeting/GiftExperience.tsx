@@ -499,19 +499,10 @@ export default function GiftExperience({ greeting }: GiftExperienceProps) {
           <Logo size={40} tone={style.darkSurface ? 'light' : 'dark'} />
         </div>
 
-        <div
-          ref={cardRef}
-          className="overflow-hidden relative"
-          style={{
-            background: style.cardBackground,
-            border: `1px solid ${style.cardBorder}`,
-            boxShadow: style.cardShadow,
-            borderRadius: style.borderRadius,
-          }}
-        >
+        <div ref={cardRef} className="relative">
           {style.pattern && (
             <div
-              className="absolute inset-x-0 top-0 h-4 z-10"
+              className="absolute inset-x-0 top-0 h-4 z-10 rounded-full"
               style={{
                 backgroundImage:
                   'radial-gradient(circle, rgba(191,85,57,0.35) 2px, transparent 2px)',
@@ -520,10 +511,11 @@ export default function GiftExperience({ greeting }: GiftExperienceProps) {
             />
           )}
 
-          {/* Hero Image with 3D tilt */}
+          {/* Hero Image with 3D tilt — kept as its own rounded photo insert
+              now that it isn't clipped by a surrounding card */}
           {greeting.mediaFiles.length > 0 && (
             <div style={{ perspective: '900px' }}>
-              <div ref={heroWrapRef} className="will-change-transform">
+              <div ref={heroWrapRef} className="will-change-transform rounded-2xl overflow-hidden">
                 <HeroCarousel
                   media={greeting.mediaFiles}
                   alt={`ברכה עבור ${greeting.recipientName}`}
@@ -537,19 +529,25 @@ export default function GiftExperience({ greeting }: GiftExperienceProps) {
           )}
 
           {/* Content */}
-          <div className="p-6 sm:p-12">
-            <h1 className="reveal text-4xl font-extrabold mb-2" style={{ color: style.nameColor }}>
+          <div className="pt-8 pb-6 sm:pt-10 sm:pb-8">
+            <h1
+              className="reveal text-4xl font-extrabold mb-2"
+              style={{ color: style.pageNameColor ?? style.nameColor }}
+            >
               {greeting.recipientName}
             </h1>
 
-            <p className="reveal text-2xl mb-8" style={{ color: style.eventColor }}>
+            <p
+              className="reveal text-2xl mb-8"
+              style={{ color: style.pageEventColor ?? style.eventColor }}
+            >
               {greeting.eventType}
             </p>
 
             <div className="reveal mb-8">
               <p
                 className="text-lg leading-relaxed whitespace-pre-wrap"
-                style={{ color: style.bodyColor }}
+                style={{ color: style.pageBodyColor ?? style.bodyColor }}
               >
                 {greeting.aiText.fullGreeting}
               </p>
@@ -560,7 +558,7 @@ export default function GiftExperience({ greeting }: GiftExperienceProps) {
                 className="reveal mb-8 p-6 rounded-xl border"
                 style={{ borderColor: style.cardBorder, background: 'rgba(0,0,0,0.03)' }}
               >
-                <p className="field-label" style={{ color: style.bodyColor }}>
+                <p className="field-label" style={{ color: style.pageBodyColor ?? style.bodyColor }}>
                   המוזיקה שנבחרה במיוחד בשבילך
                 </p>
                 <audio ref={audioRef} src={greeting.audioTrack} controls className="w-full rounded-lg" />
@@ -577,12 +575,18 @@ export default function GiftExperience({ greeting }: GiftExperienceProps) {
                     <Icon name="gift" size={20} />
                   </span>
                   <div>
-                    <p className="text-lg font-bold" style={{ color: style.nameColor }}>
+                    <p
+                      className="text-lg font-bold"
+                      style={{ color: style.pageNameColor ?? style.nameColor }}
+                    >
                       {giftCount > 1
                         ? `יש לך ${giftCount} מתנות שמחכות שתממש אותן!`
                         : 'יש לך מתנה שמחכה שתממש אותה!'}
                     </p>
-                    <p className="text-sm mt-1 leading-relaxed" style={{ color: style.bodyColor }}>
+                    <p
+                      className="text-sm mt-1 leading-relaxed"
+                      style={{ color: style.pageBodyColor ?? style.bodyColor }}
+                    >
                       {giftCount > 1
                         ? 'כל מתנה מוסתרת מתחת לשכבה כסופה נפרדת. העבירו את האצבע (או את העכבר) על כל שכבה כדי לגרד אותה — בדיוק כמו בכרטיס גירוד — וכל מתנה תתגלה בנפרד.'
                         : 'פרטי המתנה מוסתרים מתחת לשכבה הכסופה שלמטה. העבירו את האצבע (או את העכבר) על השכבה כדי לגרד אותה — בדיוק כמו בכרטיס גירוד — והמתנה שלכם תתגלה.'}
@@ -598,7 +602,7 @@ export default function GiftExperience({ greeting }: GiftExperienceProps) {
                   >
                     <p
                       className="text-sm font-bold mb-3 flex items-center gap-2"
-                      style={{ color: style.eventColor }}
+                      style={{ color: style.pageEventColor ?? style.eventColor }}
                     >
                       <span
                         className="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs text-white"
@@ -685,7 +689,7 @@ export default function GiftExperience({ greeting }: GiftExperienceProps) {
                   >
                     <p
                       className="text-sm font-bold mb-3 flex items-center gap-2"
-                      style={{ color: style.eventColor }}
+                      style={{ color: style.pageEventColor ?? style.eventColor }}
                     >
                       <span
                         className="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs text-white"
@@ -884,11 +888,11 @@ export default function GiftExperience({ greeting }: GiftExperienceProps) {
           <div>
             <h1
               className="text-3xl font-extrabold mb-2"
-              style={{ color: style.gateTitleColor ?? style.nameColor }}
+              style={{ color: style.pageNameColor ?? style.nameColor }}
             >
               {greeting.recipientName}, מחכה לך כאן מתנה
             </h1>
-            <p style={{ color: style.gateBodyColor ?? style.bodyColor, opacity: 0.75 }}>
+            <p style={{ color: style.pageBodyColor ?? style.bodyColor, opacity: 0.75 }}>
               מישהו שאוהב אותך הכין עבורך ברכה אישית
             </p>
 

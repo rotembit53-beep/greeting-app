@@ -34,6 +34,8 @@ export interface VisualStyle {
   borderRadius: string;
   /** Gradient drawn over the hero photo; null means no overlay (plain photo). */
   heroOverlay: string | null;
+  /** Text colors tuned for the small on-card surfaces that remain (the
+   * gift-card scratch reveal panel) — i.e. readable against cardBackground. */
   nameColor: string;
   eventColor: string;
   bodyColor: string;
@@ -46,9 +48,17 @@ export interface VisualStyle {
   /** Which floating decoration this style uses by default (event type can override). */
   decorKind: DecorKind;
   decorPalette: string[];
-  /** Text colors for the opening gate — defaults to nameColor/bodyColor when omitted. */
-  gateTitleColor?: string;
-  gateBodyColor?: string;
+  /**
+   * Text colors for content sitting directly on pageBackground — the opening
+   * gate, and the greeting itself now that it isn't wrapped in its own card.
+   * Default to nameColor/eventColor/bodyColor, which is correct whenever
+   * pageBackground and cardBackground are close in tone (true for every
+   * built-in style except 'elegant', a deliberate dark-page design where the
+   * card-tuned colors would be unreadable directly on the page).
+   */
+  pageNameColor?: string;
+  pageEventColor?: string;
+  pageBodyColor?: string;
   /** True when the page background is dark, so the logo needs its light variant. */
   darkSurface?: boolean;
 }
@@ -134,8 +144,9 @@ export const VISUAL_STYLES: Record<VisualConcept, VisualStyle> = {
     glow: 'rgba(201, 164, 99, 0.35)',
     decorKind: 'bubbles',
     decorPalette: ['#c9a463', '#e5d3ac', '#f5f1e8'],
-    gateTitleColor: '#f5f1e8',
-    gateBodyColor: '#cfc8b8',
+    pageNameColor: '#f5f1e8',
+    pageEventColor: '#c9a463',
+    pageBodyColor: '#cfc8b8',
     darkSurface: true,
   },
   festive: {
@@ -266,9 +277,15 @@ export function resolveVisualStyle(
       bow: safeHex(overrides.gift?.bow) ?? base.gift.bow,
     },
     darkSurface: overrides.darkSurface ?? base.darkSurface,
-    gateTitleColor: overrides.darkSurface
+    // Only needed when the AI deliberately chose a dark page: the card-tuned
+    // nameColor/eventColor/bodyColor above would otherwise be unreadable
+    // directly on that dark page (the greeting isn't wrapped in a card).
+    pageNameColor: overrides.darkSurface
       ? safeHex(overrides.nameColor) ?? '#f5f1e8'
-      : base.gateTitleColor,
-    gateBodyColor: overrides.darkSurface ? '#cfc8b8' : base.gateBodyColor,
+      : base.pageNameColor,
+    pageEventColor: overrides.darkSurface
+      ? safeHex(overrides.eventColor) ?? '#c9a463'
+      : base.pageEventColor,
+    pageBodyColor: overrides.darkSurface ? '#cfc8b8' : base.pageBodyColor,
   };
 }

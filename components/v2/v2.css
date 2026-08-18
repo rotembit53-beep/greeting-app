@@ -1,0 +1,215 @@
+/*
+ * V2-only styles.
+ *
+ * Imported exclusively by the V2 layouts (/v2 and /g/[slug]) and every rule
+ * is scoped under .v2-scope, so nothing here can reach V1's pages even
+ * though both versions share the same Tailwind build and globals.css.
+ */
+
+.v2-scope {
+  /* Filled in per-template at runtime via inline custom properties. */
+  --v2-ink: #1f1d1a;
+  --v2-ink-soft: #7c766c;
+  --v2-accent: #e8365d;
+  --v2-accent-soft: rgba(232, 54, 93, 0.12);
+  --v2-surface: #ffffff;
+  --v2-surface-border: rgba(0, 0, 0, 0.08);
+  --v2-glow: rgba(232, 54, 93, 0.3);
+
+  color: var(--v2-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Templates that ask for a display serif get it here; the rest inherit Heebo. */
+.v2-scope .v2-serif {
+  font-family: var(--font-v2-display), Georgia, 'Times New Roman', serif;
+}
+
+/* ---------- Layout helpers ---------- */
+
+.v2-shell {
+  min-height: 100dvh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.v2-container {
+  width: 100%;
+  max-width: 46rem;
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+}
+
+.v2-container-wide {
+  width: 100%;
+  max-width: 72rem;
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+}
+
+/* ---------- Buttons ---------- */
+
+.v2-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 1rem 1.75rem;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease,
+    border-color 0.18s ease, opacity 0.18s ease;
+  -webkit-tap-highlight-color: transparent;
+  text-align: center;
+}
+
+.v2-btn:active {
+  transform: scale(0.97);
+}
+
+.v2-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.v2-btn-primary {
+  background: var(--v2-accent);
+  color: var(--v2-on-accent, #fff);
+  box-shadow: 0 10px 30px -8px var(--v2-glow);
+}
+
+.v2-btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 40px -10px var(--v2-glow);
+}
+
+.v2-btn-ghost {
+  background: transparent;
+  color: var(--v2-ink);
+  border-color: var(--v2-surface-border);
+}
+
+.v2-btn-ghost:hover:not(:disabled) {
+  background: var(--v2-accent-soft);
+  border-color: var(--v2-accent);
+}
+
+/* ---------- Inputs ---------- */
+
+.v2-field {
+  width: 100%;
+  border-radius: 1rem;
+  border: 1.5px solid var(--v2-surface-border);
+  background: var(--v2-surface);
+  color: var(--v2-ink);
+  padding: 0.95rem 1.1rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.v2-field::placeholder {
+  color: var(--v2-ink-soft);
+  opacity: 0.75;
+}
+
+.v2-field:focus {
+  outline: none;
+  border-color: var(--v2-accent);
+  box-shadow: 0 0 0 4px var(--v2-accent-soft);
+}
+
+.v2-label {
+  display: block;
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+  color: var(--v2-ink);
+}
+
+.v2-hint {
+  font-size: 0.85rem;
+  color: var(--v2-ink-soft);
+  margin-bottom: 0.75rem;
+}
+
+/* ---------- Choice chips / cards ---------- */
+
+.v2-choice {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  border-radius: 1.15rem;
+  border: 1.5px solid var(--v2-surface-border);
+  background: var(--v2-surface);
+  padding: 1rem 0.75rem;
+  cursor: pointer;
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+  text-align: center;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.v2-choice:hover {
+  transform: translateY(-3px);
+  border-color: var(--v2-accent);
+}
+
+.v2-choice[data-selected='true'] {
+  border-color: var(--v2-accent);
+  box-shadow: 0 0 0 3px var(--v2-accent-soft), 0 12px 28px -14px var(--v2-glow);
+}
+
+/* ---------- Scroll & motion ---------- */
+
+.v2-scope :where(h1, h2, h3, p) {
+  text-wrap: pretty;
+}
+
+.v2-noscroll {
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v2-scope *,
+  .v2-scope *::before,
+  .v2-scope *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------- Decorative layers ---------- */
+
+.v2-decor-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  overflow: hidden;
+}
+
+.v2-glow-blob {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(70px);
+  pointer-events: none;
+}
+
+/* ---------- Scrollbar (desktop polish) ---------- */
+
+.v2-scope ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.v2-scope ::-webkit-scrollbar-thumb {
+  background: var(--v2-accent-soft);
+  border-radius: 999px;
+}
