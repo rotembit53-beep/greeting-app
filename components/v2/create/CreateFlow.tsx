@@ -294,7 +294,7 @@ export default function CreateFlow() {
       }}
     >
       <header className="v2-container pt-7 pb-2 flex items-center justify-between">
-        <Link href="/v2" className="font-extrabold text-lg" style={{ color: 'var(--v2-ink)' }}>
+        <Link href="/" className="font-extrabold text-lg" style={{ color: 'var(--v2-ink)' }}>
           Intera<span style={{ color: 'var(--v2-accent)' }}>gift</span>
         </Link>
 

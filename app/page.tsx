@@ -1,5 +1,5 @@
-import WizardShell from '@/components/wizard/WizardShell';
+import Landing from '@/components/v2/landing/Landing';
 
-export default function Home() {
-  return <WizardShell />;
+export default function HomePage() {
+  return <Landing />;
 }

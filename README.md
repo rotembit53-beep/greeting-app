@@ -1,36 +1,94 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Interagift — מחולל ההפתעות האינטראקטיביות
 
-## Getting Started
+זו הגרסה הראשית של המוצר (מה שנקרא בעבר V2).
 
-First, run the development server:
+## כתובות
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+| | כתובת |
+|---|---|
+| דף הבית | `/` |
+| יצירה | `/create` |
+| הברכה שהנמען מקבל | `/g/<slug>` |
+
+V1 הוסרה מהקוד ב-2026-08-18; היא שמורה בהיסטוריית git (commit `83a62c5`).
+
+## מבנה
+
+| שכבה | קבצים |
+|---|---|
+| טבלאות | `greetings_v2`, `greeting_contributions`, `analytics_events` |
+| Data layer | `lib/v2/db.ts` |
+| AI | `lib/v2/ai.ts` |
+| קומפוננטות | `components/v2/**` |
+| API | `/api/v2/*` · מדיה: `/api/upload-media`, `/api/media/[...path]` |
+| עיצוב | `app/globals.css` + `components/v2/v2.css` (תחת `.v2-scope`) |
+
+## הארכיטקטורה — ה-AI מחזיר מסמך, לא טקסט
+
+`/api/v2/generate` מחזיר JSON מובנה (`GreetingContent` ב-`lib/v2/types.ts`):
+
+```jsonc
+{
+  "title": "...", "intro": "...",
+  "sections": [{ "heading": "...", "body": "...", "kind": "memory|quality|wish|joke|story" }],
+  "messages": ["..."], "closing": "...", "surprise": "...",
+  "tone": "...", "animation": "...", "template": "...", "musicMood": "..."
+}
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+ה-Frontend מרנדר את המבנה הזה. לכן אפשר להוסיף Templates חדשים בלי לגעת
+במנגנון ה-AI.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Templates
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+שישה, ב-`lib/v2/templates.ts`. כל אחד מגדיר לא רק צבעים אלא גם טיפוגרפיה,
+עיטורים, פרופיל תנועה **ואת רצף הסצנות** — כך ששניים מהם נבדלים מבנית ולא
+רק בגוון:
 
-## Learn More
+`birthday` · `romantic` · `elegant` (premium) · `funny` · `minimal` · `party` (premium)
 
-To learn more about Next.js, take a look at the following resources:
+הסצנות: `gate-envelope` / `gate-gift` / `gate-balloons` → `reveal` →
+`messages` → `memories` → `surprise` → `closing`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## מוזיקה
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+`lib/v2/music.ts` — 21 טראקים מאורגנים לפי **אווירה** (רומנטי / מרגש / שמח /
+מצחיק / מסיבה / רגוע) עם Preview לכל טראק, ON/OFF ושליטת ווליום.
+כל הקבצים הם אותם royalty-free שכבר קיימים ב-R2 עבור V1 — לא נוסף ולא הוסר
+דבר, והקטגוריות של V1 ממשיכות לעבוד כרגיל.
 
-## Deploy on Vercel
+המוזיקה מתחילה רק אחרי אינטראקציה של המשתמש (פתיחת המעטפה/המתנה), ואם
+הדפדפן בכל זאת חוסם — היא עולה מושתקת עם כפתור הפעלה ברור.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Analytics
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+`/api/v2/analytics` (POST לרישום, GET ל-Funnel). אירועים:
+`landing_view`, `started_creating`, `event_selected`, `completed_details`,
+`generated_greeting`, `opened_editor`, `greeting_published`, `greeting_shared`,
+`greeting_opened`, `greeting_completed`, `premium_click`, `purchase`.
+
+לכל ברכה נשמרים גם `viewCount` ו-`openCount`.
+
+## Migration
+
+```bash
+wrangler d1 execute interagift-db --remote --file=./d1/migrations/0003_v2_schema.sql
+```
+
+(הורדת `--remote` להרצה מקומית. הועבר כבר על מסד הפיתוח המקומי.)
+
+## מה הוכן אבל לא מומש — במכוון
+
+- **תשלומים.** `plan` הוא עמודה, וכל השערים קוראים מ-`lib/v2/plan.ts`.
+  חיבור ספק תשלום = עדכון `plan` ל-`premium` אחרי webhook. לא נבנתה מערכת
+  תשלומים לפני שה-MVP עובד, בהתאם להנחיה.
+- **ברכות קבוצתיות.** `greeting_contributions` ו-`allowContributions` כבר
+  קיימים, כך שהפעלה בעתיד היא feature flag ולא מיגרציה של דאטה חי.
+- **וידאו.** הארכיטקטורה תומכת (`MediaItem.type === 'video'`, והסצנה
+  מרנדרת וידאו) והוא מוגדר כיכולת פרימיום.
+
+## הערה על ביצועים
+
+יצירת הברכה לוקחת כ-30 שניות מול Gemini. מסך ה-"בונה את ההפתעה" מחזיק
+את המשתמש עד שהתשובה חוזרת. אם רוצים לרדת מזה — כדאי לבדוק מודל מהיר יותר
+ב-`MODEL_CANDIDATES` שב-`lib/v2/ai.ts`.

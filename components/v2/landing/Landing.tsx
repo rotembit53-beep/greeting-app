@@ -88,16 +88,6 @@ export default function Landing() {
         <span className="font-extrabold text-xl" style={{ color: 'var(--v2-ink)' }}>
           Intera<span style={{ color: 'var(--v2-accent)' }}>gift</span>
         </span>
-        <Link
-          href="/"
-          className="text-xs font-semibold px-3 py-2 rounded-full"
-          style={{
-            border: '1px solid var(--v2-surface-border)',
-            color: 'var(--v2-ink-soft)',
-          }}
-        >
-          לגרסה הקודמת
-        </Link>
       </header>
 
       <section className="v2-container-wide pt-6 pb-16 sm:pt-12 sm:pb-24">
@@ -138,7 +128,7 @@ export default function Landing() {
 
             <div className="flex flex-wrap gap-3 justify-center lg:justify-start">
               <Link
-                href="/v2/create"
+                href="/create"
                 className="v2-btn v2-btn-primary text-lg"
                 onClick={() => track('started_creating', { props: { from: 'hero' } })}
               >
@@ -302,7 +292,7 @@ export default function Landing() {
             חינם לגמרי. פרימיום מ-{PREMIUM_PRICE_ILS.toFixed(2)} ₪ לברכה.
           </p>
           <Link
-            href="/v2/create"
+            href="/create"
             className="v2-btn text-lg"
             style={{ background: '#fff', color: '#b5179e' }}
             onClick={() => track('started_creating', { props: { from: 'footer_cta' } })}

@@ -141,7 +141,7 @@ export default function GreetingExperience({ greeting, preview = false }: Props)
         {greeting.plan === 'free' && (
           <div className="v2-container pb-16 text-center">
             <a
-              href="/v2"
+              href="/"
               className="inline-flex items-center gap-2 text-sm font-semibold px-5 py-3 rounded-full transition-transform hover:scale-105"
               style={{
                 background: 'var(--v2-surface)',
