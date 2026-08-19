@@ -78,7 +78,7 @@ export const TEMPLATES: Record<TemplateId, TemplateDef> = {
   birthday: {
     id: 'birthday',
     label: 'יום הולדת',
-    description: 'צבעוני, שמח ומלא קונפטי — החגיגה מתחילה ברגע הפתיחה',
+    description: 'צבעוני ורועש, עם קונפטי שלא נגמר — החגיגה מתחילה כבר ברגע הפתיחה',
     premium: false,
     preview: {
       gradient: 'linear-gradient(145deg, #ffb03a 0%, #ff5f6d 55%, #c9366f 100%)',
@@ -119,9 +119,9 @@ export const TEMPLATES: Record<TemplateId, TemplateDef> = {
       'closing',
     ],
     gate: {
-      badge: '🎈 יש לך הפתעה',
-      title: 'מחכה לך משהו מיוחד',
-      subtitle: 'מישהו הכין לך הפתעה ליום ההולדת',
+      badge: '🎈 מחכה לכם הפתעה',
+      title: 'מחכה לכם משהו מיוחד',
+      subtitle: 'מישהו הכין לכם הפתעה ליום ההולדת',
       cta: '🎉 פוצצו את הבלונים',
     },
     motion: { duration: 0.8, stagger: 0.1, ease: 'back.out(1.4)' },
@@ -135,7 +135,7 @@ export const TEMPLATES: Record<TemplateId, TemplateDef> = {
   romantic: {
     id: 'romantic',
     label: 'רומנטי',
-    description: 'עדין, חם ואיטי — עם מעטפה שנפתחת ועלי כותרת שנושרים',
+    description: 'עדין ואיטי, על רקע כהה — מעטפה שנפתחת ועלי כותרת שנושרים ברקע',
     premium: false,
     preview: {
       gradient: 'linear-gradient(145deg, #f76b8a 0%, #a4508b 60%, #5f0a87 100%)',
@@ -168,8 +168,8 @@ export const TEMPLATES: Record<TemplateId, TemplateDef> = {
     },
     scenes: ['gate-envelope', 'reveal', 'memories', 'messages', 'gift', 'closing'],
     gate: {
-      badge: '💌 מכתב בשבילך',
-      title: 'מישהו כתב לך משהו',
+      badge: '💌 מכתב בשבילכם',
+      title: 'מישהו כתב לכם משהו',
       subtitle: 'קחו רגע. זה נכתב במיוחד בשבילכם',
       cta: '💗 פתחו את המכתב',
     },
@@ -184,7 +184,7 @@ export const TEMPLATES: Record<TemplateId, TemplateDef> = {
   elegant: {
     id: 'elegant',
     label: 'יוקרתי',
-    description: 'נייבי וזהב, טיפוגרפיה מרווחת ותנועה מאופקת — לאירועים גדולים',
+    description: 'נייבי וזהב, אותיות מרווחות ותנועה מאופקת — לאירועים שדורשים כבוד',
     premium: true,
     preview: {
       gradient: 'linear-gradient(145deg, #d4af37 0%, #8a6d2f 45%, #14203a 100%)',
@@ -218,8 +218,8 @@ export const TEMPLATES: Record<TemplateId, TemplateDef> = {
     scenes: ['gate-gift', 'reveal', 'messages', 'memories', 'gift', 'closing'],
     gate: {
       badge: '✦ הזמנה אישית',
-      title: 'נשמר עבורכם',
-      subtitle: 'רגע אחד של כבוד, לפני שנפתח',
+      title: 'שמרנו לכם משהו',
+      subtitle: 'רגע אחד של כבוד, ואז נפתח',
       cta: '✦ פתחו',
     },
     motion: { duration: 1.4, stagger: 0.16, ease: 'power2.out' },
@@ -233,7 +233,7 @@ export const TEMPLATES: Record<TemplateId, TemplateDef> = {
   funny: {
     id: 'funny',
     label: 'מצחיק',
-    description: 'צהוב חזק, טיפוגרפיה שמנה ותנועה קופצנית — בשביל לצחוק',
+    description: 'צהוב זועק, אותיות שמנות ותנועה קופצנית — בנוי כדי להצחיק',
     premium: false,
     preview: {
       gradient: 'linear-gradient(145deg, #ffe029 0%, #ff9d00 55%, #1a1a1a 100%)',
@@ -266,10 +266,10 @@ export const TEMPLATES: Record<TemplateId, TemplateDef> = {
     },
     scenes: ['gate-gift', 'reveal', 'messages', 'surprise', 'memories', 'gift', 'closing'],
     gate: {
-      badge: '👀 אל תלחצו. סתם, כן תלחצו',
-      title: 'יש לך חבילה חשודה',
-      subtitle: 'אנחנו לא אחראים לתוכן. מישהו אחר כתב את זה',
-      cta: '😂 טוב, בוא נראה',
+      badge: '👀 אל תלחצו. סתם, תלחצו',
+      title: 'הגיעה אליכם חבילה חשודה',
+      subtitle: 'אנחנו לא אחראים לתוכן — מישהו אחר כתב את זה',
+      cta: '😂 טוב, בואו נראה',
     },
     motion: { duration: 0.55, stagger: 0.07, ease: 'back.out(2.6)' },
     musicMood: 'funny',
@@ -282,7 +282,7 @@ export const TEMPLATES: Record<TemplateId, TemplateDef> = {
   minimal: {
     id: 'minimal',
     label: 'מינימלי',
-    description: 'שקט, נקי ומרווח — הטקסט הוא הגיבור',
+    description: 'שקט, נקי והרבה אוויר — כאן המילים הן הגיבור',
     premium: false,
     preview: {
       gradient: 'linear-gradient(145deg, #f5f2ec 0%, #ddd6ca 60%, #a89f90 100%)',
@@ -312,8 +312,8 @@ export const TEMPLATES: Record<TemplateId, TemplateDef> = {
     scenes: ['gate-envelope', 'reveal', 'memories', 'gift', 'closing'],
     gate: {
       badge: '—',
-      title: 'משהו קטן בשבילך',
-      subtitle: 'בלי רעש. רק מילים שנכתבו במיוחד',
+      title: 'משהו קטן בשבילכם',
+      subtitle: 'בלי רעש — רק מילים שנכתבו במיוחד',
       cta: 'פתחו',
     },
     motion: { duration: 1.1, stagger: 0.12, ease: 'power2.out' },
@@ -327,7 +327,7 @@ export const TEMPLATES: Record<TemplateId, TemplateDef> = {
   party: {
     id: 'party',
     label: 'מסיבה',
-    description: 'ניאון על רקע כהה, אנרגיה גבוהה והמון תנועה',
+    description: 'ניאון על רקע כהה, אנרגיה גבוהה ותנועה בלי הפסקה',
     premium: true,
     preview: {
       gradient: 'linear-gradient(145deg, #00f5d4 0%, #9b5de5 50%, #f15bb5 100%)',
@@ -369,13 +369,205 @@ export const TEMPLATES: Record<TemplateId, TemplateDef> = {
     ],
     gate: {
       badge: '🔊 מומלץ עם סאונד',
-      title: 'הדלקנו לך את האורות',
+      title: 'הדלקנו לכם את האורות',
       subtitle: 'לחצו — וזה מתחיל',
-      cta: '🎉 יאללה, תתחיל',
+      cta: '🎉 יאללה, מתחילים',
     },
     motion: { duration: 0.7, stagger: 0.08, ease: 'back.out(1.8)' },
     musicMood: 'party',
     photoPresentation: 'cards3d',
+  },
+
+  /* ---------------------------------------------------------------- *
+   * BOTANICAL — sage + terracotta, botanical calm. Slow and gentle.
+   * ---------------------------------------------------------------- */
+  botanical: {
+    id: 'botanical',
+    label: 'טבעי',
+    description: 'ירוק מרווה וגווני אדמה, עם עלים שנעים לאט — רגוע ונושם',
+    premium: false,
+    preview: {
+      gradient: 'linear-gradient(145deg, #cfe0c3 0%, #8aa87b 50%, #4f6b45 100%)',
+      emoji: '🌿',
+    },
+    palette: {
+      pageBg: 'radial-gradient(circle at 22% 0%, #f4f6ee 0%, #e6ece0 45%, #d9e2d2 100%)',
+      ink: '#2b3527',
+      inkSoft: '#6a7a63',
+      accent: '#4f6b45',
+      accentSoft: 'rgba(79, 107, 69, 0.12)',
+      surface: '#fdfefb',
+      surfaceBorder: '#c9d6c0',
+      glow: 'rgba(120, 150, 105, 0.32)',
+    },
+    dark: false,
+    type: {
+      display: 'serif',
+      titleSize: 'clamp(2.1rem, 8vw, 3.4rem)',
+      titleWeight: 500,
+      titleTracking: '-0.012em',
+      titleTransform: 'none',
+      bodySize: 'clamp(1.05rem, 4vw, 1.2rem)',
+      bodyLeading: '2',
+    },
+    decor: {
+      kind: 'petals',
+      palette: ['#7d9b6c', '#a8bf97', '#c4956a', '#5f7d52'],
+      density: 20,
+    },
+    scenes: ['gate-envelope', 'reveal', 'memories', 'messages', 'gift', 'closing'],
+    gate: {
+      badge: '🌿 משהו שקט בשבילכם',
+      title: 'מחכה לכם רגע של נחת',
+      subtitle: 'בלי מהומה. רק מילים טובות',
+      cta: '🌱 פתחו בעדינות',
+    },
+    motion: { duration: 1.2, stagger: 0.13, ease: 'power2.out' },
+    musicMood: 'calm',
+    photoPresentation: 'cinematic',
+  },
+
+  /* ---------------------------------------------------------------- *
+   * RETRO — 70s amber & rust, chunky rounded type, warm grain.
+   * ---------------------------------------------------------------- */
+  retro: {
+    id: 'retro',
+    label: 'רטרו',
+    description: 'כתום שנות ה-70 ואותיות עגלגלות — נוסטלגי, חם וקצת שובב',
+    premium: false,
+    preview: {
+      gradient: 'linear-gradient(145deg, #f6c65b 0%, #e07a3f 52%, #8c3b1e 100%)',
+      emoji: '📻',
+    },
+    palette: {
+      pageBg: 'linear-gradient(165deg, #f9e6c4 0%, #f0c893 45%, #e0a367 100%)',
+      ink: '#3d2314',
+      inkSoft: '#7d5a3c',
+      accent: '#c1440e',
+      accentSoft: 'rgba(193, 68, 14, 0.14)',
+      surface: '#fff6e6',
+      surfaceBorder: '#d8ab73',
+      glow: 'rgba(224, 122, 63, 0.42)',
+    },
+    dark: false,
+    type: {
+      display: 'sans',
+      titleSize: 'clamp(2.4rem, 10vw, 4rem)',
+      titleWeight: 900,
+      titleTracking: '-0.035em',
+      titleTransform: 'none',
+      bodySize: 'clamp(1.05rem, 4.2vw, 1.24rem)',
+      bodyLeading: '1.8',
+    },
+    decor: {
+      kind: 'confetti',
+      palette: ['#c1440e', '#f6c65b', '#7d9b6c', '#e07a3f'],
+      density: 44,
+    },
+    scenes: ['gate-gift', 'reveal', 'messages', 'memories', 'gift', 'closing'],
+    gate: {
+      badge: '📼 הקלטנו לכם משהו',
+      title: 'חוזרים רגע אחורה',
+      subtitle: 'הכנו לכם משהו בסגנון הישן והטוב',
+      cta: '▶ נגנו את זה',
+    },
+    motion: { duration: 0.75, stagger: 0.09, ease: 'back.out(1.6)' },
+    musicMood: 'happy',
+    photoPresentation: 'polaroid',
+  },
+
+  /* ---------------------------------------------------------------- *
+   * MIDNIGHT — deep indigo, starfield, dreamy and quiet.
+   * ---------------------------------------------------------------- */
+  midnight: {
+    id: 'midnight',
+    label: 'חצות',
+    description: 'כחול עמוק עם נצנוצים כמו שמי לילה — חלומי, שקט ומרגש',
+    premium: true,
+    preview: {
+      gradient: 'linear-gradient(145deg, #8ea7e9 0%, #3b4a91 50%, #10132e 100%)',
+      emoji: '🌙',
+    },
+    palette: {
+      pageBg: 'radial-gradient(circle at 70% 8%, #26305e 0%, #171d3d 50%, #0b0e22 100%)',
+      ink: '#eaf0ff',
+      inkSoft: '#9aa6cc',
+      accent: '#8ea7e9',
+      accentSoft: 'rgba(142, 167, 233, 0.16)',
+      surface: 'rgba(255, 255, 255, 0.06)',
+      surfaceBorder: 'rgba(142, 167, 233, 0.32)',
+      glow: 'rgba(120, 145, 220, 0.45)',
+    },
+    dark: true,
+    type: {
+      display: 'serif',
+      titleSize: 'clamp(2.2rem, 8.6vw, 3.6rem)',
+      titleWeight: 500,
+      titleTracking: '-0.005em',
+      titleTransform: 'none',
+      bodySize: 'clamp(1.05rem, 4.1vw, 1.2rem)',
+      bodyLeading: '2',
+    },
+    decor: {
+      kind: 'sparkles',
+      palette: ['#eaf0ff', '#8ea7e9', '#c3d0f5'],
+      density: 40,
+    },
+    scenes: ['gate-envelope', 'reveal', 'memories', 'messages', 'gift', 'closing'],
+    gate: {
+      badge: '🌙 מחכה לכם עד הלילה',
+      title: 'שמרנו לכם רגע שקט',
+      subtitle: 'הכי יפה לפתוח את זה לבד',
+      cta: '✧ פתחו',
+    },
+    motion: { duration: 1.35, stagger: 0.15, ease: 'power3.out' },
+    musicMood: 'emotional',
+    photoPresentation: 'parallax',
+  },
+
+  /* ---------------------------------------------------------------- *
+   * BOLD — high-contrast type-first. Loud without being childish.
+   * ---------------------------------------------------------------- */
+  bold: {
+    id: 'bold',
+    label: 'נועז',
+    description: 'ניגודיות חדה ואותיות ענקיות — ישיר, חזק ובלי לרכך',
+    premium: false,
+    preview: {
+      gradient: 'linear-gradient(145deg, #ff5252 0%, #1a1a1a 55%, #000000 100%)',
+      emoji: '⚡',
+    },
+    palette: {
+      pageBg: 'linear-gradient(170deg, #141414 0%, #1d1d1d 55%, #0a0a0a 100%)',
+      ink: '#f5f5f5',
+      inkSoft: '#9a9a9a',
+      accent: '#ff5252',
+      accentSoft: 'rgba(255, 82, 82, 0.16)',
+      surface: 'rgba(255, 255, 255, 0.05)',
+      surfaceBorder: 'rgba(255, 82, 82, 0.4)',
+      glow: 'rgba(255, 82, 82, 0.42)',
+    },
+    dark: true,
+    type: {
+      display: 'sans',
+      titleSize: 'clamp(2.8rem, 13vw, 5.4rem)',
+      titleWeight: 900,
+      titleTracking: '-0.05em',
+      titleTransform: 'uppercase',
+      bodySize: 'clamp(1.05rem, 4.2vw, 1.25rem)',
+      bodyLeading: '1.7',
+    },
+    decor: { kind: 'none', palette: [], density: 0 },
+    scenes: ['gate-gift', 'reveal', 'messages', 'memories', 'gift', 'closing'],
+    gate: {
+      badge: '⚡ ישר לעניין',
+      title: 'הכנו לכם משהו',
+      subtitle: 'בלי הקדמות. פשוט תפתחו',
+      cta: '⚡ פתחו',
+    },
+    motion: { duration: 0.6, stagger: 0.07, ease: 'power4.out' },
+    musicMood: 'party',
+    photoPresentation: 'wall',
   },
 };
 

@@ -1,3 +1,4 @@
+import { TEMPLATES } from './templates';
 import { PlanId, TemplateId } from './types';
 
 /**
@@ -45,7 +46,14 @@ export const PREMIUM_PRICE_ILS = 19.9;
 /** Future group-greeting tier. */
 export const GROUP_PRICE_ILS = 39;
 
-export const PREMIUM_TEMPLATES: TemplateId[] = ['elegant', 'party'];
+/**
+ * Derived from the templates themselves rather than hand-listed: keeping a
+ * second copy here meant a new premium template could silently stay free
+ * (or vice versa) if someone updated only one of the two places.
+ */
+export const PREMIUM_TEMPLATES: TemplateId[] = Object.values(TEMPLATES)
+  .filter((t) => t.premium)
+  .map((t) => t.id);
 
 export function limitsFor(plan: PlanId): PlanLimits {
   return PLANS[plan] ?? PLANS.free;

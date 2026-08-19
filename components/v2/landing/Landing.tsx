@@ -203,7 +203,9 @@ export default function Landing() {
           className="text-center font-extrabold mb-3"
           style={{ fontSize: 'clamp(1.9rem, 6vw, 2.8rem)', color: 'var(--v2-ink)' }}
         >
-          שישה סגנונות. אף אחד לא דומה לשני.
+          {/* Count is derived, not written out — a hard-coded "שישה" went stale
+              the moment four more templates were added. */}
+          {TEMPLATE_LIST.length} סגנונות. אף אחד לא דומה לשני.
         </h2>
         <p
           data-anim
