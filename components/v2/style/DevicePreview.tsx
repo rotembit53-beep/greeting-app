@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { TemplateDef } from '@/lib/v2/templates';
@@ -24,6 +24,10 @@ export default function DevicePreview({ template, previewKey }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const deviceRef = useRef<HTMLDivElement>(null);
   const screenRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  // The greeting is usually taller than the screen — this hints that the
+  // rest is one scroll away, then gets out of the way once it's obvious.
+  const [showScrollHint, setShowScrollHint] = useState(false);
 
   useGSAP(
     () => {
@@ -86,6 +90,28 @@ export default function DevicePreview({ template, previewKey }: Props) {
     { dependencies: [previewKey], scope: wrapRef }
   );
 
+  // A new style may render taller or shorter than the last one — jump the
+  // scroll position back to the top and re-check whether there's now
+  // anything to scroll to.
+  useGSAP(
+    () => {
+      const scroller = scrollRef.current;
+      if (!scroller) return;
+
+      scroller.scrollTop = 0;
+      setShowScrollHint(scroller.scrollHeight > scroller.clientHeight + 4);
+
+      const onScroll = () => {
+        setShowScrollHint(
+          scroller.scrollHeight - scroller.clientHeight - scroller.scrollTop > 12
+        );
+      };
+      scroller.addEventListener('scroll', onScroll, { passive: true });
+      return () => scroller.removeEventListener('scroll', onScroll);
+    },
+    { dependencies: [previewKey], scope: wrapRef }
+  );
+
   return (
     <div ref={wrapRef} style={{ perspective: '1400px', padding: '1.5rem 0' }}>
       {/* Glow pool on the surface, tinted by the current style. */}
@@ -138,7 +164,50 @@ export default function DevicePreview({ template, previewKey }: Props) {
           }}
         >
           <div ref={screenRef} style={{ width: '100%', height: '100%' }}>
-            <GreetingPreview template={template} animationKey={previewKey} />
+            <div
+              ref={scrollRef}
+              className="dp-scroll"
+              style={{ width: '100%', height: '100%', overflowY: 'auto' }}
+            >
+              <GreetingPreview template={template} animationKey={previewKey} />
+            </div>
+          </div>
+
+          {/* "there's more below" hint — fades away once it's obvious */}
+          <div
+            aria-hidden="true"
+            style={{
+              position: 'absolute',
+              insetInline: 0,
+              bottom: 0,
+              height: '3.4rem',
+              zIndex: 4,
+              pointerEvents: 'none',
+              display: 'flex',
+              alignItems: 'flex-end',
+              justifyContent: 'center',
+              paddingBottom: '.5rem',
+              background: 'linear-gradient(0deg, rgba(0,0,0,.32) 0%, transparent 100%)',
+              opacity: showScrollHint ? 1 : 0,
+              transition: 'opacity .4s ease',
+            }}
+          >
+            <span
+              className="sa-float"
+              style={{
+                width: '1.7rem',
+                height: '1.7rem',
+                borderRadius: 999,
+                display: 'grid',
+                placeItems: 'center',
+                background: 'rgba(255,255,255,.22)',
+                backdropFilter: 'blur(3px)',
+                color: '#fff',
+                fontSize: '.8rem',
+              }}
+            >
+              ⌄
+            </span>
           </div>
 
           {/* dynamic island */}

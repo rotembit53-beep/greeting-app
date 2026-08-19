@@ -951,6 +951,219 @@ export default function StyleArt({ template, active = false, className = '', sty
       );
       break;
 
+    /* ---------- FAIRYTALE: crescent moon, castle silhouette, sparkle dust --- */
+    case 'fairytale':
+      art = (
+        <>
+          <div style={{ position: 'absolute', inset: 0, ...lift(2) }}>
+            <Starfield seed="fable" count={28} color="#f3ecff" />
+          </div>
+          <div
+            className="sa-float"
+            style={{
+              position: 'absolute',
+              insetInlineEnd: '14%',
+              top: '12%',
+              width: 40,
+              height: 40,
+              borderRadius: '999px',
+              background: 'radial-gradient(circle at 36% 32%, #fff8e0 0%, #e8c766 55%, #b98f2e 100%)',
+              boxShadow: '0 0 30px 8px rgba(232,199,102,.45)',
+            }}
+          />
+          <svg
+            viewBox="0 0 200 100"
+            style={{ position: 'absolute', insetInline: 0, bottom: 0, width: '100%', height: '46%', ...lift(4) }}
+            aria-hidden="true"
+          >
+            <g fill="#1a0f36" opacity=".92">
+              <rect x="30" y="46" width="16" height="54" />
+              <polygon points="38,30 30,46 46,46" />
+              <rect x="70" y="30" width="22" height="70" />
+              <polygon points="81,10 68,30 94,30" />
+              <rect x="112" y="50" width="14" height="50" />
+              <polygon points="119,36 111,50 127,50" />
+              <rect x="150" y="42" width="18" height="58" />
+              <polygon points="159,24 149,42 169,42" />
+            </g>
+          </svg>
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'radial-gradient(60% 46% at 74% 16%, rgba(232,199,102,.28) 0%, transparent 66%)',
+            }}
+          />
+        </>
+      );
+      break;
+
+    /* ---------- SPORTS: diagonal stadium stripes + spotlight beam -------- */
+    case 'sports':
+      art = (
+        <>
+          {[0, 1, 2, 3].map((i) => (
+            <div
+              key={i}
+              style={{
+                position: 'absolute',
+                insetInlineStart: `${-10 + i * 30}%`,
+                top: '-20%',
+                width: '14%',
+                height: '150%',
+                background: i % 2 === 0 ? 'rgba(255,122,26,.22)' : 'rgba(255,255,255,.07)',
+                transform: `rotate(-18deg) translateX(${active ? 6 : 0}px)`,
+                transition: 'transform .5s ease',
+              }}
+            />
+          ))}
+          <div
+            className="sa-float"
+            style={{
+              position: 'absolute',
+              insetInlineEnd: '16%',
+              top: '22%',
+              width: 56,
+              height: 56,
+              borderRadius: '999px',
+              background: 'radial-gradient(circle at 34% 30%, #fff 0%, #ffb570 45%, #ff7a1a 100%)',
+              boxShadow: '0 0 34px 10px rgba(255,122,26,.5)',
+            }}
+          />
+          <div style={{ position: 'absolute', inset: 0, ...lift(4) }}>
+            <Confetti seed="sport" colors={['#ff7a1a', '#ffffff', '#2ecc71']} count={16} />
+          </div>
+        </>
+      );
+      break;
+
+    /* ---------- MILITARY: stencilled star + camo blot silhouettes -------- */
+    case 'military':
+      art = (
+        <>
+          <svg
+            viewBox="0 0 200 140"
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
+            aria-hidden="true"
+          >
+            <g fill="#4a5240" opacity=".55">
+              <ellipse cx="34" cy="30" rx="30" ry="20" transform="rotate(-12 34 30)" />
+              <ellipse cx="150" cy="24" rx="26" ry="17" transform="rotate(10 150 24)" />
+              <ellipse cx="168" cy="104" rx="34" ry="22" transform="rotate(-6 168 104)" />
+              <ellipse cx="26" cy="112" rx="24" ry="16" transform="rotate(14 26 112)" />
+            </g>
+          </svg>
+          <div
+            className="sa-float"
+            style={{
+              position: 'absolute',
+              insetInlineStart: '50%',
+              top: '50%',
+              transform: `translate(-50%,-50%) scale(${active ? 1.1 : 1})`,
+              transition: 'transform .5s ease',
+              color: '#c2a35e',
+              fontSize: 44,
+              filter: 'drop-shadow(0 6px 14px rgba(0,0,0,.4))',
+            }}
+          >
+            ★
+          </div>
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(180deg, rgba(0,0,0,.28) 0%, transparent 40%, rgba(0,0,0,.24) 100%)',
+            }}
+          />
+        </>
+      );
+      break;
+
+    /* ---------- SEA: layered waves + rising bubbles ---------------------- */
+    case 'sea':
+      art = (
+        <>
+          {[
+            { c: 'rgba(14,147,168,.5)', y: '58%', d: '0s' },
+            { c: 'rgba(79,168,201,.55)', y: '70%', d: '1.1s' },
+            { c: 'rgba(234,247,251,.7)', y: '82%', d: '2.2s' },
+          ].map((w, i) => (
+            <svg
+              key={i}
+              className="sa-drift"
+              viewBox="0 0 200 40"
+              preserveAspectRatio="none"
+              style={{
+                position: 'absolute',
+                insetInline: 0,
+                top: w.y,
+                width: '100%',
+                height: '30%',
+                animationDelay: w.d,
+              }}
+              aria-hidden="true"
+            >
+              <path
+                d="M0 20 C 30 4, 60 36, 100 20 S 170 4, 200 20 V40 H0 Z"
+                fill={w.c}
+              />
+            </svg>
+          ))}
+          <div style={{ position: 'absolute', inset: 0, ...lift(3) }}>
+            <Confetti seed="sea" colors={['#0e93a8', '#4fa8c9']} count={10} />
+          </div>
+        </>
+      );
+      break;
+
+    /* ---------- WORLD: dotted travel route across a paper map ------------ */
+    case 'world':
+      art = (
+        <>
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundImage:
+                "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E\")",
+              opacity: 0.28,
+              mixBlendMode: 'multiply',
+            }}
+          />
+          <svg
+            viewBox="0 0 200 140"
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', ...lift(4) }}
+            aria-hidden="true"
+          >
+            <path
+              d="M22 112 C 60 100, 70 60, 108 58 S 150 34, 178 24"
+              stroke="#2b4a6b"
+              strokeWidth="1.6"
+              strokeDasharray="1 7"
+              strokeLinecap="round"
+              fill="none"
+              opacity=".85"
+            />
+            <circle cx="22" cy="112" r="4" fill="#2b4a6b" />
+            <circle cx="108" cy="58" r="3" fill="#2b4a6b" opacity=".8" />
+          </svg>
+          <div
+            className="sa-float"
+            style={{
+              position: 'absolute',
+              insetInlineEnd: '14%',
+              top: '10%',
+              fontSize: 26,
+              transform: `rotate(${active ? 18 : 8}deg)`,
+              transition: 'transform .5s ease',
+            }}
+          >
+            ✈️
+          </div>
+        </>
+      );
+      break;
+
     default:
       art = null;
   }

@@ -659,8 +659,8 @@ export const TEMPLATES: Record<TemplateId, TemplateDef> = {
    * ---------------------------------------------------------------- */
   noir: {
     id: 'noir',
-    label: 'נואר',
-    description: 'שחור-לבן חד עם נגיעת אדום אחת — קולנועי, מסתורי ומדויק',
+    label: 'מסתורי',
+    description: 'שחור-לבן חד עם נגיעת אדום אחת — קולנועי ומדויק',
     premium: true,
     preview: { gradient: 'linear-gradient(145deg, #e8e8e8 0%, #2a2a2a 50%, #000000 100%)', emoji: '🎬' },
     palette: {
@@ -736,6 +736,146 @@ export const TEMPLATES: Record<TemplateId, TemplateDef> = {
       subtitle: 'קחו רגע. אין למהר', cta: '— פתחו' },
     motion: { duration: 1.4, stagger: 0.15, ease: 'power2.out' },
     musicMood: 'calm', photoPresentation: 'parallax',
+  },
+
+  /* ---------------------------------------------------------------- *
+   * FAIRYTALE — deep violet night, gold sparkle, storybook whimsy.
+   * ---------------------------------------------------------------- */
+  fairytale: {
+    id: 'fairytale',
+    label: 'אגדה',
+    description: 'סגול עמוק וניצוצות זהב — קסום, חלומי וכמו יצא מספר סיפורים',
+    premium: true,
+    preview: { gradient: 'linear-gradient(145deg, #f3ecff 0%, #c98bf0 45%, #2d1b4e 100%)', emoji: '🏰' },
+    palette: {
+      pageBg: 'linear-gradient(170deg, #2d1b4e 0%, #1a0f36 55%, #0f0824 100%)',
+      ink: '#f3ecff', inkSoft: '#b5a3d9', accent: '#e8c766',
+      accentSoft: 'rgba(232, 199, 102, 0.14)',
+      surface: 'rgba(255,255,255,0.05)', surfaceBorder: 'rgba(232,199,102,0.3)',
+      glow: 'rgba(201, 139, 240, 0.4)',
+    },
+    dark: true,
+    type: { display: 'serif', titleSize: 'clamp(2.2rem, 9vw, 3.6rem)', titleWeight: 600,
+      titleTracking: '-0.01em', titleTransform: 'none',
+      bodySize: 'clamp(1.05rem, 4.1vw, 1.22rem)', bodyLeading: '1.95' },
+    decor: { kind: 'sparkles', palette: ['#e8c766', '#c98bf0', '#f3ecff'], density: 24 },
+    scenes: ['gate-gift', 'reveal', 'messages', 'memories', 'gift', 'closing'],
+    gate: { badge: '🏰 היה היה', title: 'פרק חדש מתחיל',
+      subtitle: 'פתחו את הספר', cta: '✨ פתחו' },
+    motion: { duration: 1.15, stagger: 0.14, ease: 'power2.out' },
+    musicMood: 'calm', photoPresentation: 'cards3d',
+  },
+
+  /* ---------------------------------------------------------------- *
+   * SPORTS — stadium lights, victory orange, bold uppercase energy.
+   * ---------------------------------------------------------------- */
+  sports: {
+    id: 'sports',
+    label: 'ספורט',
+    description: 'ירוק אצטדיון ואור זרקורים עם נגיעת כתום חד — אנרגטי ותחרותי',
+    premium: false,
+    preview: { gradient: 'linear-gradient(145deg, #ffb570 0%, #ff7a1a 45%, #123524 100%)', emoji: '🏆' },
+    palette: {
+      pageBg: 'linear-gradient(155deg, #123524 0%, #0b2318 55%, #051209 100%)',
+      ink: '#f2fbf4', inkSoft: '#9fc2ac', accent: '#ff7a1a',
+      accentSoft: 'rgba(255, 122, 26, 0.15)',
+      surface: 'rgba(255,255,255,0.05)', surfaceBorder: 'rgba(255,255,255,0.18)',
+      glow: 'rgba(255, 122, 26, 0.4)',
+    },
+    dark: true,
+    type: { display: 'sans', titleSize: 'clamp(2.3rem, 9.5vw, 3.8rem)', titleWeight: 900,
+      titleTracking: '-0.03em', titleTransform: 'uppercase',
+      bodySize: 'clamp(1.05rem, 4.1vw, 1.2rem)', bodyLeading: '1.7' },
+    decor: { kind: 'confetti', palette: ['#ff7a1a', '#ffffff', '#2ecc71'], density: 22 },
+    scenes: ['gate-gift', 'reveal', 'messages', 'memories', 'gift', 'closing'],
+    gate: { badge: '🏆 שריקת פתיחה', title: 'זה הרגע שלכם',
+      subtitle: 'תנו לזה הכול', cta: '⚡ פתחו' },
+    motion: { duration: 0.75, stagger: 0.09, ease: 'power3.out' },
+    musicMood: 'party', photoPresentation: 'wall',
+  },
+
+  /* ---------------------------------------------------------------- *
+   * MILITARY — olive drab, brass gold, disciplined stencil energy.
+   * ---------------------------------------------------------------- */
+  military: {
+    id: 'military',
+    label: 'צבאי',
+    description: 'ירוק זית וזהב פליז — מכובד, ממושמע ומדויק, לגיוס או שחרור',
+    premium: true,
+    preview: { gradient: 'linear-gradient(145deg, #c2a35e 0%, #3a4231 55%, #14170f 100%)', emoji: '🎖️' },
+    palette: {
+      pageBg: 'linear-gradient(165deg, #3a4231 0%, #262b1f 55%, #14170f 100%)',
+      ink: '#eef0e6', inkSoft: '#a3a894', accent: '#c2a35e',
+      accentSoft: 'rgba(194, 163, 94, 0.15)',
+      surface: 'rgba(255,255,255,0.045)', surfaceBorder: 'rgba(238,240,230,0.16)',
+      glow: 'rgba(194, 163, 94, 0.3)',
+    },
+    dark: true,
+    type: { display: 'sans', titleSize: 'clamp(2rem, 8vw, 3.2rem)', titleWeight: 800,
+      titleTracking: '0.06em', titleTransform: 'uppercase',
+      bodySize: 'clamp(1rem, 3.9vw, 1.15rem)', bodyLeading: '1.85' },
+    decor: { kind: 'none', palette: [], density: 0 },
+    scenes: ['gate-envelope', 'reveal', 'messages', 'memories', 'gift', 'closing'],
+    gate: { badge: '🎖️ פקודת יום', title: 'יש לנו הודעה בשבילכם',
+      subtitle: 'לפני שממשיכים — רגע של תשומת לב', cta: '⟶ פתחו' },
+    motion: { duration: 1.0, stagger: 0.12, ease: 'power2.out' },
+    musicMood: 'emotional', photoPresentation: 'parallax',
+  },
+
+  /* ---------------------------------------------------------------- *
+   * SEA — bright ocean teal, foam and bubbles, calm and nautical.
+   * ---------------------------------------------------------------- */
+  sea: {
+    id: 'sea',
+    label: 'ים',
+    description: 'תכלת עמוקה וקצף גלים — רגוע, נקי ונאוטי',
+    premium: false,
+    preview: { gradient: 'linear-gradient(145deg, #eaf7fb 0%, #bfe8ee 45%, #4fa8c9 100%)', emoji: '🌊' },
+    palette: {
+      pageBg: 'linear-gradient(175deg, #eaf7fb 0%, #bfe8ee 40%, #4fa8c9 100%)',
+      ink: '#0d2b36', inkSoft: '#4a7688', accent: '#0e93a8',
+      accentSoft: 'rgba(14, 147, 168, 0.13)',
+      surface: '#ffffff', surfaceBorder: 'rgba(14,147,168,0.22)',
+      glow: 'rgba(14, 147, 168, 0.32)',
+    },
+    dark: false,
+    type: { display: 'serif', titleSize: 'clamp(2.1rem, 8.5vw, 3.4rem)', titleWeight: 500,
+      titleTracking: '-0.01em', titleTransform: 'none',
+      bodySize: 'clamp(1.05rem, 4.1vw, 1.2rem)', bodyLeading: '1.9' },
+    decor: { kind: 'bubbles', palette: ['#0e93a8', '#4fa8c9', '#ffffff'], density: 20 },
+    scenes: ['gate-envelope', 'reveal', 'messages', 'memories', 'gift', 'closing'],
+    gate: { badge: '🌊 מעבר לגלים', title: 'הפלגנו למצוא לכם משהו',
+      subtitle: 'צללו פנימה', cta: '🐚 פתחו' },
+    motion: { duration: 1.1, stagger: 0.13, ease: 'sine.inOut' },
+    musicMood: 'calm', photoPresentation: 'cinematic',
+  },
+
+  /* ---------------------------------------------------------------- *
+   * WORLD — vintage map paper, navy ink, wanderlust.
+   * ---------------------------------------------------------------- */
+  world: {
+    id: 'world',
+    label: 'מסעות',
+    description: 'נייר מפה עתיק ודיו כחולה — נוסטלגי, פתוח לדרך ומלא סקרנות',
+    premium: false,
+    preview: { gradient: 'linear-gradient(145deg, #f6ecd8 0%, #d9c49a 55%, #2b4a6b 100%)', emoji: '🧭' },
+    palette: {
+      pageBg: 'radial-gradient(120% 90% at 30% 0%, #f6ecd8 0%, #eddfc0 45%, #d9c49a 100%)',
+      ink: '#3c2f1f', inkSoft: '#8a7658', accent: '#2b4a6b',
+      accentSoft: 'rgba(43, 74, 107, 0.12)',
+      surface: '#fffaf0', surfaceBorder: 'rgba(43,74,107,0.2)',
+      glow: 'rgba(43, 74, 107, 0.28)',
+    },
+    dark: false,
+    type: { display: 'serif', titleSize: 'clamp(2rem, 8vw, 3.3rem)', titleWeight: 500,
+      titleTracking: '0.01em', titleTransform: 'none',
+      bodySize: 'clamp(1.05rem, 4vw, 1.2rem)', bodyLeading: '1.9' },
+    decor: { kind: 'none', palette: [], density: 0 },
+    scenes: ['gate-envelope', 'reveal', 'messages', 'memories', 'gift', 'closing'],
+    gate: { badge: '🧭 יעד לא ידוע', title: 'ארזנו לכם משהו',
+      subtitle: 'הכינו דרכון, יוצאים לדרך', cta: '✈ פתחו' },
+    motion: { duration: 1.05, stagger: 0.12, ease: 'power2.out' },
+    musicMood: 'happy', photoPresentation: 'polaroid',
   },
 };
 

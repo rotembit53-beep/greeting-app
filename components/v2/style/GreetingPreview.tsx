@@ -73,7 +73,11 @@ export default function GreetingPreview({ template, animationKey }: Props) {
       className="gp-in"
       style={{
         alignSelf: 'center',
-        marginTop: 'auto',
+        // Fixed, not `auto` — an auto top-margin here fights the flex
+        // container's min-height floor and pins the whole box at exactly
+        // the screen height, clipping `extra` (the messages/signoff below)
+        // instead of letting the card grow tall enough to scroll to it.
+        marginTop: '1.4rem',
         fontSize: '.68rem',
         fontWeight: 700,
         padding: '.5rem 1.05rem',
@@ -106,6 +110,91 @@ export default function GreetingPreview({ template, animationKey }: Props) {
     </div>
   );
 
+  /* ---- extra beats below the hero, so there's a real "rest of the card"
+   * to scroll to — matches the real product's Reveal -> Memories -> Messages
+   * -> Closing beats, and gives every layout (even the short editorial
+   * ones) enough height to actually need the scroll. */
+  const extra = (
+    <div
+      className="gp-in"
+      style={{ display: 'flex', flexDirection: 'column', gap: '.6rem', marginTop: '1.6rem', animationDelay: '.6s' }}
+    >
+      <figure
+        className="m-0"
+        style={{
+          position: 'relative',
+          borderRadius: '.85rem',
+          overflow: 'hidden',
+          aspectRatio: '4 / 3',
+          border: `1px solid ${p.surfaceBorder}`,
+          boxShadow: `0 16px 34px -20px ${p.glow}`,
+          marginBottom: '.3rem',
+        }}
+      >
+        <StyleArt template={template} />
+        <figcaption
+          style={{
+            position: 'absolute',
+            insetInline: 0,
+            bottom: 0,
+            padding: '.4rem .6rem',
+            fontSize: '.62rem',
+            fontWeight: 600,
+            color: '#fff',
+            textShadow: '0 1px 6px rgba(0,0,0,.6)',
+            background: 'linear-gradient(0deg, rgba(0,0,0,.4) 0%, transparent 100%)',
+          }}
+        >
+          רגע שנשמר
+        </figcaption>
+      </figure>
+
+      {spec.sample.messages.map((m, i) => (
+        <div
+          key={i}
+          style={{
+            fontSize: '.72rem',
+            fontWeight: 600,
+            lineHeight: 1.5,
+            padding: '.65rem .85rem',
+            borderRadius: '.9rem',
+            background: p.surface,
+            border: `1px solid ${p.surfaceBorder}`,
+            color: p.ink,
+            marginInlineStart: i % 2 === 0 ? 0 : 'clamp(0px, 8vw, 1.6rem)',
+            marginInlineEnd: i % 2 === 0 ? 'clamp(0px, 8vw, 1.6rem)' : 0,
+          }}
+        >
+          <span style={{ color: p.accent, marginInlineEnd: '.4rem' }}>✦</span>
+          {m}
+        </div>
+      ))}
+
+      <div
+        style={{
+          textAlign: 'center',
+          marginTop: '1rem',
+          paddingTop: '1.1rem',
+          borderTop: `1px solid ${p.surfaceBorder}`,
+        }}
+      >
+        <p
+          className={serif ? 'v2-serif' : ''}
+          style={{
+            fontSize: '.78rem',
+            lineHeight: 1.6,
+            color: p.ink,
+            opacity: 0.85,
+            fontWeight: serif ? 500 : 600,
+            margin: 0,
+          }}
+        >
+          {spec.sample.signoff}
+        </p>
+      </div>
+    </div>
+  );
+
   let inner: React.ReactNode;
 
   switch (spec.layout) {
@@ -126,11 +215,15 @@ export default function GreetingPreview({ template, animationKey }: Props) {
       );
       break;
 
-    /* Type is the whole event. */
+    /* Type is the whole event.
+     * A bounded, self-centering box rather than `margin: auto 0` on a flex
+     * item — that trick pins the whole gp-root to exactly its min-height
+     * floor and swallows any content that should extend it (see the
+     * celebration case below for the same fix). */
     case 'punch':
       inner = (
-        <>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '.6rem', margin: 'auto 0' }}>
+        <div style={{ minHeight: '18rem', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '.6rem' }}>
             {kicker}
             <h3
               className={`gp-in ${serif ? 'v2-serif' : ''}`}
@@ -145,15 +238,15 @@ export default function GreetingPreview({ template, animationKey }: Props) {
             {body}
           </div>
           {cta}
-        </>
+        </div>
       );
       break;
 
-    /* Refined, rule-led, lots of air. */
+    /* Refined, rule-led, lots of air. Same bounded-box fix as punch. */
     case 'editorial':
       inner = (
-        <>
-          <div style={{ margin: 'auto 0', display: 'flex', flexDirection: 'column', gap: '.75rem' }}>
+        <div style={{ minHeight: '18rem', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '.75rem' }}>
             {kicker}
             <div
               className="gp-in"
@@ -165,7 +258,7 @@ export default function GreetingPreview({ template, animationKey }: Props) {
             {body}
           </div>
           {cta}
-        </>
+        </div>
       );
       break;
 
@@ -186,11 +279,14 @@ export default function GreetingPreview({ template, animationKey }: Props) {
       );
       break;
 
-    /* Celebration: art fills the frame, type sits on top of it. */
+    /* Celebration: art fills the frame, type sits on top of it.
+     * Bounded to its own height (not gp-root's, which grows with `extra`
+     * below) — otherwise the confetti/balloons would stretch to cover the
+     * whole scrollable card instead of just the hero. */
     case 'celebration':
     default:
       inner = (
-        <>
+        <div style={{ position: 'relative', minHeight: '19rem', display: 'flex', flexDirection: 'column' }}>
           <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
             <StyleArt template={template} active />
           </div>
@@ -214,8 +310,8 @@ export default function GreetingPreview({ template, animationKey }: Props) {
             </h3>
             {body}
           </div>
-          <div style={{ position: 'relative', zIndex: 1, display: 'contents' }}>{cta}</div>
-        </>
+          <div style={{ position: 'relative', zIndex: 1 }}>{cta}</div>
+        </div>
       );
   }
 
@@ -226,7 +322,7 @@ export default function GreetingPreview({ template, animationKey }: Props) {
       style={{
         position: 'relative',
         width: '100%',
-        height: '100%',
+        minHeight: '100%',
         background: p.pageBg,
         color: p.ink,
         padding: '1.6rem 1.15rem 1.35rem',
@@ -236,6 +332,7 @@ export default function GreetingPreview({ template, animationKey }: Props) {
       }}
     >
       {inner}
+      {extra}
     </div>
   );
 }

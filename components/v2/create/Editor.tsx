@@ -122,6 +122,7 @@ export default function Editor({
             <input
               id="v2-ed-title"
               className="v2-field font-bold"
+              dir="rtl"
               value={content.title}
               onChange={(e) => patchContent({ title: e.target.value })}
               maxLength={80}
@@ -135,6 +136,7 @@ export default function Editor({
             <textarea
               id="v2-ed-intro"
               className="v2-field resize-none"
+              dir="rtl"
               rows={3}
               value={content.intro}
               onChange={(e) => patchContent({ intro: e.target.value })}
@@ -150,6 +152,7 @@ export default function Editor({
               <textarea
                 id={`v2-ed-sec-${i}`}
                 className="v2-field resize-none"
+                dir="rtl"
                 rows={4}
                 value={section.body}
                 onChange={(e) => patchSection(i, e.target.value)}
@@ -166,6 +169,7 @@ export default function Editor({
                   <input
                     key={i}
                     className="v2-field"
+                    dir="rtl"
                     value={message}
                     onChange={(e) => patchMessage(i, e.target.value)}
                     maxLength={180}
@@ -182,6 +186,7 @@ export default function Editor({
             <textarea
               id="v2-ed-closing"
               className="v2-field resize-none"
+              dir="rtl"
               rows={3}
               value={content.closing}
               onChange={(e) => patchContent({ closing: e.target.value })}
@@ -197,6 +202,7 @@ export default function Editor({
             <textarea
               id="v2-ed-surprise"
               className="v2-field resize-none"
+              dir="rtl"
               rows={3}
               value={content.surprise ?? ''}
               onChange={(e) => patchContent({ surprise: e.target.value })}

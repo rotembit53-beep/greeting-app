@@ -227,6 +227,11 @@ export const TEMPLATE_IDS = [
   'noir',
   'candy',
   'marble',
+  'fairytale',
+  'sports',
+  'military',
+  'sea',
+  'world',
 ] as const;
 
 export type TemplateId = (typeof TEMPLATE_IDS)[number];

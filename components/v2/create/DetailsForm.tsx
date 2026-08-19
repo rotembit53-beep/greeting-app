@@ -53,6 +53,7 @@ export default function DetailsForm({ value, onChange, error }: Props) {
           <input
             id="v2-name"
             className="v2-field"
+            dir="rtl"
             value={value.recipientName}
             onChange={(e) => onChange({ recipientName: e.target.value })}
             placeholder="לדוגמה: נועה"
@@ -86,6 +87,7 @@ export default function DetailsForm({ value, onChange, error }: Props) {
             <input
               id="v2-age"
               className="v2-field"
+              dir="ltr"
               value={value.recipientAge}
               onChange={(e) => onChange({ recipientAge: e.target.value.replace(/\D/g, '').slice(0, 3) })}
               placeholder="29"
@@ -99,6 +101,7 @@ export default function DetailsForm({ value, onChange, error }: Props) {
             <input
               id="v2-sender"
               className="v2-field"
+              dir="rtl"
               value={value.senderName}
               onChange={(e) => onChange({ senderName: e.target.value })}
               placeholder="מי שולח/ת?"
@@ -116,6 +119,7 @@ export default function DetailsForm({ value, onChange, error }: Props) {
           <textarea
             id="v2-about"
             className="v2-field resize-none"
+            dir="rtl"
             rows={4}
             value={value.aboutThem}
             onChange={(e) => onChange({ aboutThem: e.target.value })}
@@ -132,6 +136,7 @@ export default function DetailsForm({ value, onChange, error }: Props) {
           <textarea
             id="v2-memory"
             className="v2-field resize-none"
+            dir="rtl"
             rows={3}
             value={value.sharedMemory}
             onChange={(e) => onChange({ sharedMemory: e.target.value })}

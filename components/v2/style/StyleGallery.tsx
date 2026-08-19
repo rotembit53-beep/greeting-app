@@ -79,11 +79,11 @@ export default function StyleGallery({
 
   return (
     <div ref={rootRef}>
-      <div
-        className={showDevice ? 'grid gap-10 lg:gap-14 items-start lg:grid-cols-[1fr_auto]' : ''}
-      >
+      <div className={showDevice ? 'style-gallery' : ''}>
         {/* ---------------- cards ---------------- */}
-        <div className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
+        <div
+          className={`grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 ${showDevice ? 'style-gallery-cards' : ''}`}
+        >
           {TEMPLATE_LIST.map((t) => {
             const spec = styleArt(t.id);
             const locked = lockedIds.includes(t.id);
@@ -160,7 +160,7 @@ export default function StyleGallery({
 
         {/* ---------------- live device ---------------- */}
         {showDevice && (
-          <div className="lg:sticky lg:top-8 flex flex-col items-center">
+          <div className="style-gallery-device flex flex-col items-center">
             <div style={{ position: 'relative' }}>
               <DevicePreview template={shown} previewKey={shown.id} />
             </div>

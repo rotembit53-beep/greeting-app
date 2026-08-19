@@ -157,6 +157,7 @@ export default function GiftStep({
             ))}
             <input
               className="v2-field !py-2 text-center text-sm"
+              dir="ltr"
               value={customBudget}
               onChange={(e) => {
                 setCustomBudget(e.target.value.replace(/\D/g, '').slice(0, 6));
@@ -288,6 +289,7 @@ export default function GiftStep({
           <input
             id="gift-title"
             className="v2-field"
+            dir="rtl"
             value={gift.title}
             onChange={(e) => patch({ title: e.target.value })}
             maxLength={120}
@@ -349,6 +351,7 @@ export default function GiftStep({
           <textarea
             id="gift-note"
             className="v2-field resize-none"
+            dir="rtl"
             rows={3}
             value={gift.note ?? ''}
             onChange={(e) => patch({ note: e.target.value })}
