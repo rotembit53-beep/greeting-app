@@ -300,25 +300,15 @@ export default function CreateFlow() {
   const canContinueFromDetails = details.recipientName.trim().length > 0;
 
   return (
-    <div
-      className="v2-scope v2-shell"
-      style={{
-        background:
-          'radial-gradient(circle at 12% -5%, #ffe9d6 0%, #ffe2ea 40%, #f3e8ff 100%)',
-        ['--v2-ink' as string]: '#241019',
-        ['--v2-ink-soft' as string]: '#6d5560',
-        ['--v2-accent' as string]: '#e8365d',
-        ['--v2-accent-soft' as string]: 'rgba(232, 54, 93, 0.12)',
-        ['--v2-surface' as string]: '#ffffff',
-        ['--v2-surface-border' as string]: 'rgba(36, 16, 25, 0.1)',
-        ['--v2-glow' as string]: 'rgba(232, 54, 93, 0.35)',
-        ['--v2-on-accent' as string]: '#ffffff',
-      }}
-    >
+    <div className="v2-scope v2-studio v2-shell">
       <header className="v2-container pt-6 pb-3 flex flex-col gap-4">
         <div className="flex items-center justify-between">
-          <Link href="/" className="font-extrabold text-lg" style={{ color: 'var(--v2-ink)' }}>
-            Intera<span style={{ color: 'var(--v2-accent)' }}>gift</span>
+          <Link
+            href="/"
+            className="v2-display"
+            style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--v2-ink)', direction: 'ltr' }}
+          >
+            Intera<span className="v2-logo-gi">gift</span>
           </Link>
           {details.recipientName && stage !== 'event' && stage !== 'share' && (
             <span

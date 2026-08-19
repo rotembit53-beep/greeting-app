@@ -68,85 +68,66 @@ export default function Landing() {
   );
 
   return (
-    <div
-      ref={rootRef}
-      className="v2-scope v2-shell"
-      style={{
-        background:
-          'radial-gradient(circle at 12% -5%, #ffe9d6 0%, #ffe2ea 40%, #f3e8ff 100%)',
-        ['--v2-ink' as string]: '#241019',
-        ['--v2-ink-soft' as string]: '#6d5560',
-        ['--v2-accent' as string]: '#e8365d',
-        ['--v2-accent-soft' as string]: 'rgba(232, 54, 93, 0.12)',
-        ['--v2-surface' as string]: '#ffffff',
-        ['--v2-surface-border' as string]: 'rgba(36, 16, 25, 0.1)',
-        ['--v2-glow' as string]: 'rgba(232, 54, 93, 0.35)',
-      }}
-    >
-      {/* ---------------- Hero ---------------- */}
-      <header className="v2-container-wide pt-8 pb-4 flex items-center justify-between">
-        <span className="font-extrabold text-xl" style={{ color: 'var(--v2-ink)' }}>
-          Intera<span style={{ color: 'var(--v2-accent)' }}>gift</span>
-        </span>
-      </header>
+    <div ref={rootRef} className="v2-scope v2-studio v2-shell">
+      {/* ---------------- Masthead ---------------- */}
+      <section className="v2-container-wide pt-10 pb-4 sm:pt-16 text-center">
+        <div data-hero>
+          <p className="v2-eyebrow mb-5">ברכות אינטראקטיביות</p>
 
-      <section className="v2-container-wide pt-6 pb-16 sm:pt-12 sm:pb-24">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          <div data-hero className="text-center lg:text-start">
-            <span
-              className="inline-block text-xs font-bold px-4 py-2 rounded-full mb-5"
-              style={{ background: 'var(--v2-accent-soft)', color: 'var(--v2-accent)' }}
+          <h1 className="v2-logo">
+            Intera<span className="gi">gift</span>
+          </h1>
+
+          <div className="v2-gold-rule" />
+
+          <p
+            className="v2-display mx-auto"
+            style={{
+              fontSize: 'clamp(1.3rem, 4.2vw, 2.1rem)',
+              color: 'var(--v2-ink)',
+              lineHeight: 1.5,
+              maxWidth: '24ch',
+            }}
+          >
+            הפתעה שאי אפשר לשכוח
+          </p>
+
+          <p
+            className="mx-auto mt-4"
+            style={{
+              fontSize: 'clamp(1rem, 3.4vw, 1.15rem)',
+              color: 'var(--v2-ink-soft)',
+              lineHeight: 1.8,
+              maxWidth: '44ch',
+            }}
+          >
+            צרו ברכה אינטראקטיבית ומותאמת אישית תוך פחות מדקה — ושלחו אותה
+            בלינק אחד בוואטסאפ.
+          </p>
+
+          <div className="flex flex-wrap gap-3 justify-center mt-8">
+            <Link
+              href="/create"
+              className="v2-btn v2-btn-primary text-lg"
+              onClick={() => track('started_creating', { props: { from: 'hero' } })}
             >
-              ✨ חדש — ברכות אינטראקטיביות
-            </span>
-
-            <h1
-              className="font-extrabold leading-[1.05] mb-5"
-              style={{
-                fontSize: 'clamp(2.5rem, 8vw, 4.25rem)',
-                color: 'var(--v2-ink)',
-                letterSpacing: '-0.035em',
-              }}
-            >
-              הפתעה שאי אפשר
-              <br />
-              לשכוח <span style={{ color: 'var(--v2-accent)' }}>❤️</span>
-            </h1>
-
-            <p
-              className="mb-8 mx-auto lg:mx-0"
-              style={{
-                fontSize: 'clamp(1.05rem, 4vw, 1.3rem)',
-                color: 'var(--v2-ink-soft)',
-                lineHeight: 1.7,
-                maxWidth: '32rem',
-              }}
-            >
-              צרו ברכה אינטראקטיבית ומותאמת אישית תוך פחות מדקה — ושלחו אותה
-              בלינק אחד בוואטסאפ.
-            </p>
-
-            <div className="flex flex-wrap gap-3 justify-center lg:justify-start">
-              <Link
-                href="/create"
-                className="v2-btn v2-btn-primary text-lg"
-                onClick={() => track('started_creating', { props: { from: 'hero' } })}
-              >
-                ✨ צור ברכה
-              </Link>
-              <Link href="/g/dugma" className="v2-btn v2-btn-ghost text-lg">
-                👀 ראה דוגמה
-              </Link>
-            </div>
-
-            <p className="mt-5 text-sm" style={{ color: 'var(--v2-ink-soft)' }}>
-              בחינם · בלי הרשמה · מוכן תוך דקה
-            </p>
+              ✨ צור ברכה
+            </Link>
+            <Link href="/g/dugma" className="v2-btn v2-btn-ghost text-lg">
+              👀 ראה דוגמה
+            </Link>
           </div>
 
-          <div className="flex justify-center">
-            <PhonePreview template={TEMPLATE_LIST[previewIndex]} />
-          </div>
+          <p className="mt-5 text-sm" style={{ color: 'var(--v2-ink-soft)' }}>
+            בחינם · בלי הרשמה · מוכן תוך דקה
+          </p>
+        </div>
+      </section>
+
+      {/* The device sits on the studio surface, below the masthead. */}
+      <section className="v2-container-wide pb-16 sm:pb-24 flex justify-center">
+        <div data-anim>
+          <PhonePreview template={TEMPLATE_LIST[previewIndex]} />
         </div>
       </section>
 
@@ -154,8 +135,13 @@ export default function Landing() {
       <section className="v2-container-wide py-16 sm:py-20">
         <h2
           data-anim
-          className="text-center font-extrabold mb-3"
-          style={{ fontSize: 'clamp(1.9rem, 6vw, 2.8rem)', color: 'var(--v2-ink)' }}
+          className="v2-display text-center mb-3"
+          style={{
+            fontSize: 'clamp(1.9rem, 6vw, 2.8rem)',
+            color: 'var(--v2-ink)',
+            fontWeight: 700,
+            letterSpacing: '-0.01em',
+          }}
         >
           איך זה עובד?
         </h2>
@@ -172,12 +158,7 @@ export default function Landing() {
             <div
               key={step.n}
               data-anim
-              className="rounded-2xl p-6 text-center"
-              style={{
-                background: 'var(--v2-surface)',
-                border: '1.5px solid var(--v2-surface-border)',
-                boxShadow: '0 12px 34px -24px rgba(36,16,25,0.5)',
-              }}
+              className="v2-panel p-6 text-center"
             >
               <div
                 className="w-12 h-12 rounded-full mx-auto mb-4 flex items-center justify-center text-xl"
@@ -200,8 +181,13 @@ export default function Landing() {
       <section className="v2-container-wide py-16 sm:py-20">
         <h2
           data-anim
-          className="text-center font-extrabold mb-3"
-          style={{ fontSize: 'clamp(1.9rem, 6vw, 2.8rem)', color: 'var(--v2-ink)' }}
+          className="v2-display text-center mb-3"
+          style={{
+            fontSize: 'clamp(1.9rem, 6vw, 2.8rem)',
+            color: 'var(--v2-ink)',
+            fontWeight: 700,
+            letterSpacing: '-0.01em',
+          }}
         >
           {/* Count is derived, not written out — a hard-coded "שישה" went stale
               the moment four more templates were added. */}
@@ -220,12 +206,7 @@ export default function Landing() {
             <div
               key={t.id}
               data-anim
-              className="rounded-2xl overflow-hidden"
-              style={{
-                border: '1.5px solid var(--v2-surface-border)',
-                background: 'var(--v2-surface)',
-                boxShadow: '0 16px 40px -28px rgba(36,16,25,0.6)',
-              }}
+              className="v2-panel overflow-hidden"
             >
               <div
                 className="h-36 flex items-center justify-center text-5xl relative"
@@ -261,12 +242,8 @@ export default function Landing() {
             <span
               key={e.id}
               data-anim
-              className="text-sm font-semibold px-4 py-2.5 rounded-full"
-              style={{
-                background: 'var(--v2-surface)',
-                border: '1.5px solid var(--v2-surface-border)',
-                color: 'var(--v2-ink)',
-              }}
+              className="v2-panel text-sm font-semibold px-4 py-2.5"
+              style={{ borderRadius: '999px' }}
             >
               {e.emoji} {e.label}
             </span>
@@ -280,23 +257,29 @@ export default function Landing() {
           data-anim
           className="rounded-3xl px-6 py-12 sm:px-12"
           style={{
-            background: 'linear-gradient(135deg, #e8365d 0%, #b5179e 100%)',
-            boxShadow: '0 30px 70px -40px rgba(181,23,158,0.9)',
+            background: 'linear-gradient(150deg, #3A0F2E 0%, #26091F 62%, #1A0615 100%)',
+            boxShadow: '0 34px 74px -38px rgba(58,15,46,0.85)',
+            border: '1px solid rgba(201,162,39,0.34)',
           }}
         >
           <h2
-            className="font-extrabold mb-4 text-white"
-            style={{ fontSize: 'clamp(1.7rem, 6vw, 2.6rem)', letterSpacing: '-0.03em' }}
+            className="v2-display mb-4"
+            style={{
+              fontSize: 'clamp(1.7rem, 6vw, 2.6rem)',
+              letterSpacing: '-0.01em',
+              fontWeight: 700,
+              color: '#F6ECDC',
+            }}
           >
             מישהו מחכה להפתעה שלכם
           </h2>
-          <p className="mb-8 text-white/85" style={{ fontSize: '1.05rem' }}>
+          <p className="mb-8" style={{ fontSize: '1.05rem', color: 'rgba(246,236,220,0.82)' }}>
             חינם לגמרי. פרימיום מ-{PREMIUM_PRICE_ILS.toFixed(2)} ₪ לברכה.
           </p>
           <Link
             href="/create"
             className="v2-btn text-lg"
-            style={{ background: '#fff', color: '#b5179e' }}
+            style={{ background: '#EBD08A', color: '#26091F' }}
             onClick={() => track('started_creating', { props: { from: 'footer_cta' } })}
           >
             ✨ צור ברכה עכשיו

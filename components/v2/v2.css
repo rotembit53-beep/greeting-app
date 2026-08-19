@@ -213,3 +213,108 @@
   background: var(--v2-accent-soft);
   border-radius: 999px;
 }
+
+
+/* ==========================================================================
+   Studio chrome — the product's own shell (landing + create flow).
+   A warm cream surface under raking light, with plum and gold, replacing the
+   earlier pink/coral. Defined AFTER .v2-scope so it overrides those defaults
+   at equal specificity; the recipient page keeps its per-template palette.
+   ========================================================================== */
+
+.v2-studio{
+  --v2-ink:#241A22;
+  --v2-ink-soft:#7A6A72;
+  --v2-ink-faint:#A2929A;
+  --v2-accent:#3A0F2E;
+  --v2-accent-soft:rgba(58, 15, 46, 0.09);
+  --v2-gold:#C9A227;
+  --v2-gold-lit:#EBD08A;
+  --v2-surface:#FFFCF6;
+  --v2-surface-2:#FBF4E9;
+  --v2-surface-border:#D9C9B3;
+  --v2-glow:rgba(201, 162, 39, 0.34);
+  --v2-on-accent:#F6ECDC;
+
+  color:var(--v2-ink);
+  background:
+    radial-gradient(120% 80% at 68% -10%, #F7F1E7 0%, transparent 58%),
+    radial-gradient(90% 70% at 12% 108%, #E2D5C3 0%, transparent 60%),
+    #EFE6D9;
+  position:relative;
+}
+
+/* Paper grain: the surface the UI sits on. */
+.v2-studio::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  z-index:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='0.42'/%3E%3C/svg%3E");
+  opacity:.2;
+  mix-blend-mode:multiply;
+}
+.v2-studio > *{position:relative;z-index:1;}
+
+/* Floating artifact, not a flat card. */
+.v2-panel{
+  position:relative;
+  background:linear-gradient(176deg, var(--v2-surface) 0%, var(--v2-surface-2) 100%);
+  border:1px solid var(--v2-surface-border);
+  border-radius:1.15rem;
+  box-shadow:0 18px 40px -22px rgba(58,40,30,.5), 0 3px 10px rgba(58,40,30,.08);
+}
+.v2-panel::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  pointer-events:none;
+  background:linear-gradient(172deg, rgba(255,255,255,.85) 0%, transparent 34%);
+  mix-blend-mode:soft-light;
+}
+
+/* Display face — the product's serif, already loaded by the root layout. */
+.v2-display{font-family:var(--font-v2-display), Georgia, 'Times New Roman', serif;}
+
+/* Masthead logo */
+.v2-logo{
+  font-family:var(--font-v2-display), Georgia, serif;
+  font-weight:700;
+  font-size:clamp(3rem, 11vw, 6.6rem);
+  line-height:.94;
+  letter-spacing:-.022em;
+  margin:0;
+  color:var(--v2-ink);
+  direction:ltr;
+}
+.v2-logo .gi{
+  background:linear-gradient(168deg, var(--v2-gold) 8%, #9A7A18 52%, var(--v2-gold-lit) 96%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+}
+
+.v2-gold-rule{
+  width:clamp(4rem, 10vw, 7rem);
+  height:2px;
+  margin:1.5rem auto 1.3rem;
+  background:linear-gradient(90deg, transparent, var(--v2-gold), transparent);
+}
+
+.v2-eyebrow{
+  font-size:.72rem;
+  letter-spacing:.32em;
+  text-transform:uppercase;
+  color:var(--v2-ink-faint);
+  font-weight:600;
+}
+
+/* Gold-foil half of the wordmark, at nav scale. */
+.v2-logo-gi{
+  background:linear-gradient(168deg, var(--v2-gold) 8%, #9A7A18 52%, var(--v2-gold-lit) 96%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+}
