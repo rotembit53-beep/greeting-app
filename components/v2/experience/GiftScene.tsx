@@ -326,12 +326,20 @@ export default function GiftScene({ template, gift, recipientName }: Props) {
             ) : null}
 
             {gift.note ? (
-              <p
-                className="text-sm mt-5 leading-relaxed"
-                style={{ color: 'var(--v2-ink)', opacity: 0.85 }}
+              <div
+                className="text-start mt-5 py-0.5"
+                style={{ borderInlineStart: `2px solid ${accent}`, paddingInlineStart: '0.9rem' }}
               >
-                “{gift.note}”
-              </p>
+                <p className="text-xs font-bold mb-1" style={{ color: 'var(--v2-ink-soft)' }}>
+                  משפט אישי
+                </p>
+                <p
+                  className="text-sm leading-relaxed"
+                  style={{ color: 'var(--v2-ink)', opacity: 0.9 }}
+                >
+                  {gift.note}
+                </p>
+              </div>
             ) : null}
 
             {gift.provider ? (
