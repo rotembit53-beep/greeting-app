@@ -198,6 +198,49 @@ export const STYLE_ART: Record<TemplateId, StyleArtSpec> = {
       cta: '⚡ פתחו',
     },
   },
+
+  aurora: {
+    pitch: 'גלי אור על שמיים קפואים — שקט, רחב ומהפנט.',
+    tags: [{ emoji: '🌌', label: 'מהפנט' }, { emoji: '❄️', label: 'קריר' }, { emoji: '✨', label: 'זוהר' }],
+    layout: 'cinematic',
+    sample: { kicker: 'מתחת לשמיים', title: 'שמרנו לכם רגע נדיר',
+      body: 'יש לילות שבהם השמיים עושים משהו שאי אפשר לתכנן. זה אחד מהם.', cta: '✦ פתחו' },
+  },
+  blueprint: {
+    pitch: 'רשת טכנית וקווי מדידה — מדויק, נקי וחכם.',
+    tags: [{ emoji: '📐', label: 'מדויק' }, { emoji: '🔷', label: 'טכני' }, { emoji: '🤍', label: 'נקי' }],
+    layout: 'editorial',
+    sample: { kicker: 'מתוכנן בקפידה', title: 'הכנו לכם משהו מדויק',
+      body: 'כל פרט כאן נבחר בכוונה — בדיוק כמו שאתם הייתם רוצים.', cta: '→ פתחו' },
+  },
+  sunset: {
+    pitch: 'שמיים בשעת בין ערביים — ורוד, כתום וזהוב שנמסים זה בזה.',
+    tags: [{ emoji: '🌅', label: 'חמים' }, { emoji: '📸', label: 'תמונות' }, { emoji: '💛', label: 'רך' }],
+    layout: 'cinematic',
+    sample: { kicker: 'לפני שהשמש שוקעת', title: 'תפסנו לכם רגע יפה',
+      body: 'יש שעה ביום שבה הכול נראה טוב יותר. שמרנו לכם אותה.', cta: '☀ פתחו' },
+  },
+  noir: {
+    pitch: 'שחור-לבן חד עם נגיעת אדום אחת — קולנועי ומסתורי.',
+    tags: [{ emoji: '🎬', label: 'קולנועי' }, { emoji: '🖤', label: 'חד' }, { emoji: '🔴', label: 'דרמטי' }],
+    layout: 'punch',
+    sample: { kicker: 'סצנה אחת', title: 'יש לנו סיפור בשבילכם',
+      body: 'אורות כבים, המוזיקה נכנסת, ואז מתחיל החלק שבו אתם.', cta: '● נגנו' },
+  },
+  candy: {
+    pitch: 'ורוד ותכלת רכים עם צורות עגלגלות — מתוק וקליל.',
+    tags: [{ emoji: '🍬', label: 'מתוק' }, { emoji: '🫧', label: 'קליל' }, { emoji: '🎈', label: 'שובב' }],
+    layout: 'celebration',
+    sample: { kicker: 'משהו מתוק', title: 'הכנו לכם משהו קטן ומתוק',
+      body: 'זה לא גדול ולא מסובך. זה פשוט נחמד, וזה בדיוק הרעיון.', cta: '🎈 פתחו' },
+  },
+  marble: {
+    pitch: 'עורקי אבן ושקט של מוזיאון — יוקרה מאופקת בלי זהב.',
+    tags: [{ emoji: '🏛️', label: 'מאופק' }, { emoji: '📖', label: 'עריכתי' }, { emoji: '🤍', label: 'יוקרתי' }],
+    layout: 'editorial',
+    sample: { kicker: 'נשמר בקפידה', title: 'משהו ששווה לעצור בשבילו',
+      body: 'לא כל דבר צריך לצעוק כדי להיות חשוב. קחו רגע.', cta: '— פתחו' },
+  },
 };
 
 export function styleArt(id: TemplateId): StyleArtSpec {

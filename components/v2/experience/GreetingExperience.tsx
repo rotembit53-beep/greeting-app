@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import gsap from 'gsap';
 import { getTemplate } from '@/lib/v2/templates';
 import { PublicGreetingV2 } from '@/lib/v2/types';
@@ -182,7 +183,7 @@ export default function GreetingExperience({ greeting, preview = false }: Props)
         {/* Free-plan branding — the viral loop back to the product. */}
         {greeting.plan === 'free' && (
           <div className="v2-container pb-16 text-center">
-            <a
+            <Link
               href="/"
               className="inline-flex items-center gap-2 text-sm font-semibold px-5 py-3 rounded-full transition-transform hover:scale-105"
               style={{
@@ -193,7 +194,7 @@ export default function GreetingExperience({ greeting, preview = false }: Props)
               onClick={() => track('premium_click', { greetingId: greeting.id, props: { from: 'recipient_footer' } })}
             >
               ✨ רוצים להכין הפתעה כזאת? צרו אחת בחינם
-            </a>
+            </Link>
           </div>
         )}
       </div>

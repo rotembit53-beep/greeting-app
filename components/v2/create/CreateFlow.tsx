@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { DEFAULT_TEMPLATE, getTemplate } from '@/lib/v2/templates';
 import { defaultTrackForMood, trackUrl } from '@/lib/v2/music';
@@ -57,11 +57,12 @@ export default function CreateFlow() {
   const [published, setPublished] = useState<{ slug: string; id?: string } | null>(null);
 
   // A stable id for this draft, used as the R2 upload folder before the
-  // greeting itself exists.
-  const draftIdRef = useRef<string>('');
-  if (!draftIdRef.current && typeof crypto !== 'undefined') {
-    draftIdRef.current = crypto.randomUUID();
-  }
+  // greeting itself exists. Held in state, not a ref: it is read during
+  // render (passed to the editor), and lazily mutating a ref mid-render can
+  // leave the tree rendering a stale value.
+  const [draftId, setDraftId] = useState<string>(() =>
+    typeof crypto !== 'undefined' ? crypto.randomUUID() : ''
+  );
 
   // Premium is scaffolding only for now — no payment provider is wired up
   // yet, so every draft is on the free plan and the gates simply prompt.
@@ -71,15 +72,24 @@ export default function CreateFlow() {
     track('started_creating');
   }, []);
 
-  /* -------- Restore an in-progress draft (survives a refresh) -------- */
+  /* -------- Restore an in-progress draft (survives a refresh) --------
+   * This has to be an effect: localStorage doesn't exist during SSR, so
+   * restoring in a lazy useState initialiser would make the server and
+   * client render different trees and break hydration. */
   useEffect(() => {
     try {
       const saved = localStorage.getItem(DRAFT_KEY);
       if (!saved) return;
       const parsed = JSON.parse(saved);
+      /* eslint-disable react-hooks/set-state-in-effect --
+         These run once on mount and React batches them into a single
+         re-render, so there is no cascade. The rule's suggested fix (a lazy
+         initialiser) is not available here: localStorage doesn't exist
+         during SSR, so seeding state from it would desync hydration. */
       if (parsed?.eventType) setEventType(parsed.eventType);
       if (parsed?.details) setDetails({ ...emptyDetails, ...parsed.details });
-      if (parsed?.draftId) draftIdRef.current = parsed.draftId;
+      if (parsed?.draftId) setDraftId(parsed.draftId);
+      /* eslint-enable react-hooks/set-state-in-effect */
     } catch {
       // Corrupt draft — start clean.
     }
@@ -90,12 +100,12 @@ export default function CreateFlow() {
     try {
       localStorage.setItem(
         DRAFT_KEY,
-        JSON.stringify({ eventType, details, draftId: draftIdRef.current })
+        JSON.stringify({ eventType, details, draftId })
       );
     } catch {
       // Storage full / disabled — the flow still works, just not resumable.
     }
-  }, [eventType, details, stage]);
+  }, [eventType, details, stage, draftId]);
 
   /** Jumps back to an earlier, already-completed step. Never skips ahead —
    * the Stepper only makes past steps clickable in the first place, but this
@@ -395,7 +405,7 @@ export default function CreateFlow() {
               </div>
             )}
             <Editor
-              draftId={draftIdRef.current}
+              draftId={draftId}
               state={editor}
               premium={premium}
               onChange={(patch) => setEditor((s) => (s ? { ...s, ...patch } : s))}

@@ -43,7 +43,7 @@ export interface TemplateDef {
   };
 
   decor: {
-    kind: 'confetti' | 'petals' | 'sparkles' | 'balloons' | 'none' | 'orbs';
+    kind: 'confetti' | 'petals' | 'sparkles' | 'balloons' | 'bubbles' | 'none' | 'orbs';
     palette: string[];
     density: number;
   };
@@ -568,6 +568,174 @@ export const TEMPLATES: Record<TemplateId, TemplateDef> = {
     motion: { duration: 0.6, stagger: 0.07, ease: 'power4.out' },
     musicMood: 'party',
     photoPresentation: 'wall',
+  },
+
+  /* ---------------------------------------------------------------- *
+   * AURORA — cold northern light over deep teal. Slow and hypnotic.
+   * ---------------------------------------------------------------- */
+  aurora: {
+    id: 'aurora',
+    label: 'זוהר צפוני',
+    description: 'גלי אור ירוקים-סגולים על שמיים קפואים — שקט, רחב ומהפנט',
+    premium: true,
+    preview: { gradient: 'linear-gradient(145deg, #64f0c4 0%, #4a6ed6 50%, #0b1230 100%)', emoji: '🌌' },
+    palette: {
+      pageBg: 'radial-gradient(circle at 50% 108%, #123 0%, #0d1430 45%, #060a1c 100%)',
+      ink: '#e8f4ff', inkSoft: '#93a8c9', accent: '#64f0c4',
+      accentSoft: 'rgba(100, 240, 196, 0.14)',
+      surface: 'rgba(255,255,255,0.055)', surfaceBorder: 'rgba(100,240,196,0.3)',
+      glow: 'rgba(80, 200, 190, 0.42)',
+    },
+    dark: true,
+    type: { display: 'sans', titleSize: 'clamp(2.2rem, 9vw, 3.7rem)', titleWeight: 300,
+      titleTracking: '0.01em', titleTransform: 'none',
+      bodySize: 'clamp(1.05rem, 4.1vw, 1.2rem)', bodyLeading: '2' },
+    decor: { kind: 'sparkles', palette: ['#64f0c4', '#8aa9ff', '#d8f6ff'], density: 30 },
+    scenes: ['gate-envelope', 'reveal', 'memories', 'messages', 'gift', 'closing'],
+    gate: { badge: '🌌 מתחת לשמיים', title: 'שמרנו לכם רגע נדיר',
+      subtitle: 'קחו נשימה לפני שנפתח', cta: '✦ פתחו' },
+    motion: { duration: 1.5, stagger: 0.16, ease: 'power2.out' },
+    musicMood: 'calm', photoPresentation: 'parallax',
+  },
+
+  /* ---------------------------------------------------------------- *
+   * BLUEPRINT — technical grid, precise, quietly clever.
+   * ---------------------------------------------------------------- */
+  blueprint: {
+    id: 'blueprint',
+    label: 'שרטוט',
+    description: 'רשת טכנית וקווי מדידה על כחול עמוק — מדויק, נקי וחכם',
+    premium: false,
+    preview: { gradient: 'linear-gradient(145deg, #7fb2ff 0%, #1d4b8f 55%, #0a1c33 100%)', emoji: '📐' },
+    palette: {
+      pageBg: 'linear-gradient(168deg, #0e2440 0%, #0a1c33 55%, #061426 100%)',
+      ink: '#dbeaff', inkSoft: '#8ba6c9', accent: '#7fb2ff',
+      accentSoft: 'rgba(127, 178, 255, 0.13)',
+      surface: 'rgba(255,255,255,0.05)', surfaceBorder: 'rgba(127,178,255,0.32)',
+      glow: 'rgba(90, 150, 240, 0.35)',
+    },
+    dark: true,
+    type: { display: 'sans', titleSize: 'clamp(2rem, 8vw, 3.2rem)', titleWeight: 700,
+      titleTracking: '-0.02em', titleTransform: 'none',
+      bodySize: 'clamp(1rem, 3.9vw, 1.14rem)', bodyLeading: '1.9' },
+    decor: { kind: 'none', palette: [], density: 0 },
+    scenes: ['gate-gift', 'reveal', 'messages', 'memories', 'gift', 'closing'],
+    gate: { badge: '📐 מתוכנן בקפידה', title: 'הכנו לכם משהו מדויק',
+      subtitle: 'כל פרט כאן נבחר בכוונה', cta: '→ פתחו' },
+    motion: { duration: 0.85, stagger: 0.1, ease: 'power3.out' },
+    musicMood: 'calm', photoPresentation: 'wall',
+  },
+
+  /* ---------------------------------------------------------------- *
+   * SUNSET — warm dusk gradient, soft haze, golden hour.
+   * ---------------------------------------------------------------- */
+  sunset: {
+    id: 'sunset',
+    label: 'שקיעה',
+    description: 'שמיים בשעת בין ערביים — ורוד, כתום וזהוב שנמסים זה בזה',
+    premium: false,
+    preview: { gradient: 'linear-gradient(145deg, #ffd28a 0%, #ff7e6b 50%, #7b3f6e 100%)', emoji: '🌅' },
+    palette: {
+      pageBg: 'linear-gradient(178deg, #ffd9a0 0%, #ff9e7d 34%, #d96a8a 66%, #6d3a6b 100%)',
+      ink: '#3a1630', inkSoft: '#7d4a60', accent: '#c2385f',
+      accentSoft: 'rgba(194, 56, 95, 0.13)',
+      surface: 'rgba(255,255,255,0.72)', surfaceBorder: 'rgba(122,58,90,0.22)',
+      glow: 'rgba(255, 140, 110, 0.45)',
+    },
+    dark: false,
+    type: { display: 'serif', titleSize: 'clamp(2.2rem, 9vw, 3.6rem)', titleWeight: 500,
+      titleTracking: '-0.015em', titleTransform: 'none',
+      bodySize: 'clamp(1.05rem, 4.1vw, 1.22rem)', bodyLeading: '1.9' },
+    decor: { kind: 'orbs', palette: ['#ffd28a', '#ff9e7d', '#ffe9c9'], density: 18 },
+    scenes: ['gate-envelope', 'reveal', 'memories', 'messages', 'gift', 'closing'],
+    gate: { badge: '🌅 לפני שהשמש שוקעת', title: 'תפסנו לכם רגע יפה',
+      subtitle: 'הכי טוב לפתוח את זה לאט', cta: '☀ פתחו' },
+    motion: { duration: 1.25, stagger: 0.13, ease: 'power2.out' },
+    musicMood: 'romantic', photoPresentation: 'cinematic',
+  },
+
+  /* ---------------------------------------------------------------- *
+   * NOIR — high-contrast monochrome, film grain, one red accent.
+   * ---------------------------------------------------------------- */
+  noir: {
+    id: 'noir',
+    label: 'נואר',
+    description: 'שחור-לבן חד עם נגיעת אדום אחת — קולנועי, מסתורי ומדויק',
+    premium: true,
+    preview: { gradient: 'linear-gradient(145deg, #e8e8e8 0%, #2a2a2a 50%, #000000 100%)', emoji: '🎬' },
+    palette: {
+      pageBg: 'linear-gradient(172deg, #1a1a1a 0%, #0d0d0d 55%, #000000 100%)',
+      ink: '#f0efed', inkSoft: '#9a9895', accent: '#e02b3c',
+      accentSoft: 'rgba(224, 43, 60, 0.14)',
+      surface: 'rgba(255,255,255,0.05)', surfaceBorder: 'rgba(240,239,237,0.22)',
+      glow: 'rgba(224, 43, 60, 0.3)',
+    },
+    dark: true,
+    type: { display: 'serif', titleSize: 'clamp(2rem, 8vw, 3.3rem)', titleWeight: 400,
+      titleTracking: '0.08em', titleTransform: 'uppercase',
+      bodySize: 'clamp(1rem, 3.9vw, 1.15rem)', bodyLeading: '2' },
+    decor: { kind: 'none', palette: [], density: 0 },
+    scenes: ['gate-envelope', 'reveal', 'messages', 'memories', 'gift', 'closing'],
+    gate: { badge: '🎬 סצנה אחת', title: 'יש לנו סיפור בשבילכם',
+      subtitle: 'אורות כבים. מתחילים', cta: '● נגנו' },
+    motion: { duration: 1.1, stagger: 0.14, ease: 'power2.inOut' },
+    musicMood: 'emotional', photoPresentation: 'cinematic',
+  },
+
+  /* ---------------------------------------------------------------- *
+   * CANDY — soft pastel, rounded, sweet without being childish.
+   * ---------------------------------------------------------------- */
+  candy: {
+    id: 'candy',
+    label: 'פסטל',
+    description: 'ורוד ותכלת רכים עם צורות עגלגלות — מתוק, קליל ונעים לעין',
+    premium: false,
+    preview: { gradient: 'linear-gradient(145deg, #ffd6ec 0%, #c5e4ff 52%, #d9c9ff 100%)', emoji: '🍬' },
+    palette: {
+      pageBg: 'radial-gradient(circle at 24% 4%, #fff0f8 0%, #ffe0ef 38%, #dce9ff 100%)',
+      ink: '#4a3350', inkSoft: '#8a7395', accent: '#ef7fb4',
+      accentSoft: 'rgba(239, 127, 180, 0.15)',
+      surface: '#fffdff', surfaceBorder: '#f2d5e6',
+      glow: 'rgba(239, 127, 180, 0.36)',
+    },
+    dark: false,
+    type: { display: 'sans', titleSize: 'clamp(2.3rem, 9.5vw, 3.8rem)', titleWeight: 800,
+      titleTracking: '-0.03em', titleTransform: 'none',
+      bodySize: 'clamp(1.05rem, 4.1vw, 1.22rem)', bodyLeading: '1.85' },
+    decor: { kind: 'bubbles', palette: ['#ef7fb4', '#8ec9ff', '#c9b0ff', '#ffd6ec'], density: 26 },
+    scenes: ['gate-balloons', 'reveal', 'messages', 'memories', 'gift', 'closing'],
+    gate: { badge: '🍬 משהו מתוק', title: 'הכנו לכם משהו קטן ומתוק',
+      subtitle: 'זה לא גדול. זה פשוט נחמד', cta: '🎈 פתחו' },
+    motion: { duration: 0.8, stagger: 0.1, ease: 'back.out(1.5)' },
+    musicMood: 'happy', photoPresentation: 'polaroid',
+  },
+
+  /* ---------------------------------------------------------------- *
+   * MARBLE — stone veining, museum calm, restrained luxury.
+   * ---------------------------------------------------------------- */
+  marble: {
+    id: 'marble',
+    label: 'שיש',
+    description: 'עורקי אבן בהירים ושקט של מוזיאון — יוקרה מאופקת בלי זהב',
+    premium: true,
+    preview: { gradient: 'linear-gradient(145deg, #f7f5f2 0%, #ddd8d1 48%, #9a938a 100%)', emoji: '🏛️' },
+    palette: {
+      pageBg: 'linear-gradient(160deg, #faf8f5 0%, #efece7 45%, #e2ded7 100%)',
+      ink: '#2c2825', inkSoft: '#7c766d', accent: '#8a7c66',
+      accentSoft: 'rgba(138, 124, 102, 0.11)',
+      surface: '#fffefc', surfaceBorder: '#ded9d1',
+      glow: 'rgba(138, 124, 102, 0.24)',
+    },
+    dark: false,
+    type: { display: 'serif', titleSize: 'clamp(2rem, 8vw, 3.3rem)', titleWeight: 400,
+      titleTracking: '0.02em', titleTransform: 'none',
+      bodySize: 'clamp(1.02rem, 4vw, 1.18rem)', bodyLeading: '2.05' },
+    decor: { kind: 'none', palette: [], density: 0 },
+    scenes: ['gate-envelope', 'reveal', 'memories', 'messages', 'gift', 'closing'],
+    gate: { badge: '🏛️ נשמר בקפידה', title: 'משהו ששווה לעצור בשבילו',
+      subtitle: 'קחו רגע. אין למהר', cta: '— פתחו' },
+    motion: { duration: 1.4, stagger: 0.15, ease: 'power2.out' },
+    musicMood: 'calm', photoPresentation: 'parallax',
   },
 };
 

@@ -89,7 +89,9 @@ export default function GiftScene({ template, gift, recipientName }: Props) {
     { scope: rootRef, dependencies: [template.id] }
   );
 
-  const open = contextSafe(() => {
+  // contextSafe() reads a ref, so it's resolved here at click time
+  // rather than during render.
+  const open = () => contextSafe(() => {
     if (opened) return;
 
     if (prefersReduced()) {
@@ -125,7 +127,7 @@ export default function GiftScene({ template, gift, recipientName }: Props) {
     if (glowRef.current) {
       tl.to(glowRef.current, { scale: 3.2, opacity: 0, duration: 0.7 }, '<');
     }
-  });
+  })();
 
   // Reveal animation, once the box has gone
   useGSAP(

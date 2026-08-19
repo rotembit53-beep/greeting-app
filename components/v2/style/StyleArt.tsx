@@ -696,6 +696,261 @@ export default function StyleArt({ template, active = false, className = '', sty
       );
       break;
 
+    /* ---------- AURORA: layered light ribbons over a starfield ---------- */
+    case 'aurora':
+      art = (
+        <>
+          <div style={{ position: 'absolute', inset: 0, ...lift(2) }}>
+            <Starfield seed="aur" count={34} color="#dbe8ff" />
+          </div>
+          {[
+            { c: 'rgba(100,240,196,.55)', x: '-10%', w: '58%', r: -16, d: '0s' },
+            { c: 'rgba(138,169,255,.5)', x: '26%', w: '52%', r: 12, d: '1.4s' },
+            { c: 'rgba(180,120,240,.42)', x: '58%', w: '48%', r: -8, d: '2.6s' },
+          ].map((b, i) => (
+            <div
+              key={i}
+              className="sa-float"
+              style={{
+                position: 'absolute',
+                insetInlineStart: b.x,
+                top: '-14%',
+                width: b.w,
+                height: '86%',
+                background: `linear-gradient(180deg, transparent 0%, ${b.c} 42%, transparent 92%)`,
+                filter: 'blur(20px)',
+                transform: `rotate(${b.r}deg) translateY(${active ? -12 : 0}px)`,
+                transition: 'transform .7s ease',
+                animationDelay: b.d,
+              }}
+            />
+          ))}
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'radial-gradient(70% 34% at 50% 106%, rgba(20,40,70,.85) 0%, transparent 72%)',
+            }}
+          />
+        </>
+      );
+      break;
+
+    /* ---------- BLUEPRINT: measured grid + dimension lines ---------- */
+    case 'blueprint':
+      art = (
+        <>
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundImage:
+                'linear-gradient(rgba(127,178,255,.20) 1px, transparent 1px), linear-gradient(90deg, rgba(127,178,255,.20) 1px, transparent 1px)',
+              backgroundSize: '20px 20px',
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundImage:
+                'linear-gradient(rgba(127,178,255,.34) 1px, transparent 1px), linear-gradient(90deg, rgba(127,178,255,.34) 1px, transparent 1px)',
+              backgroundSize: '100px 100px',
+            }}
+          />
+          <svg
+            viewBox="0 0 200 150"
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', ...lift(4) }}
+            aria-hidden="true"
+          >
+            <g stroke="#7fb2ff" strokeWidth="1.3" fill="none">
+              <rect x="52" y="42" width="96" height="66" rx="3" opacity=".95" />
+              <circle cx="100" cy="75" r="20" opacity=".7" />
+              {/* dimension line */}
+              <path d="M52 122 H148" strokeDasharray="3 3" opacity=".8" />
+              <path d="M52 118 V126 M148 118 V126" opacity=".8" />
+            </g>
+            <circle cx="100" cy="75" r="3" fill="#7fb2ff" />
+          </svg>
+        </>
+      );
+      break;
+
+    /* ---------- SUNSET: banded dusk sky + low sun + haze ---------- */
+    case 'sunset':
+      art = (
+        <>
+          <div
+            className="sa-float"
+            style={{
+              position: 'absolute',
+              insetInlineStart: '50%',
+              bottom: '-14%',
+              width: '44%',
+              aspectRatio: '1',
+              transform: 'translateX(-50%)',
+              borderRadius: '999px',
+              background: 'radial-gradient(circle at 46% 38%, #fff6d8 0%, #ffd07a 42%, #ff9557 100%)',
+              boxShadow: '0 0 70px 26px rgba(255,170,110,.6)',
+            }}
+          />
+          {[0, 1, 2].map((i) => (
+            <div
+              key={i}
+              style={{
+                position: 'absolute',
+                insetInline: 0,
+                bottom: `${16 + i * 13}%`,
+                height: 5,
+                background: 'rgba(255,255,255,.32)',
+                filter: 'blur(3px)',
+                transform: `translateY(${active ? -4 - i * 2 : 0}px)`,
+                transition: 'transform .6s ease',
+              }}
+            />
+          ))}
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(180deg, rgba(120,60,110,.34) 0%, transparent 46%)',
+            }}
+          />
+        </>
+      );
+      break;
+
+    /* ---------- NOIR: hard light shaft + grain + a single red mark ------ */
+    case 'noir':
+      art = (
+        <>
+          <div
+            style={{
+              position: 'absolute',
+              inset: '-30%',
+              background:
+                'linear-gradient(108deg, transparent 34%, rgba(255,255,255,.16) 44%, rgba(255,255,255,.05) 50%, transparent 58%)',
+              transform: `translateX(${active ? '6%' : '0%'})`,
+              transition: 'transform .7s ease',
+            }}
+          />
+          {/* venetian blind bars */}
+          {Array.from({ length: 7 }).map((_, i) => (
+            <div
+              key={i}
+              style={{
+                position: 'absolute',
+                insetInline: 0,
+                top: `${6 + i * 13}%`,
+                height: '4%',
+                background: 'rgba(0,0,0,.55)',
+              }}
+            />
+          ))}
+          <div
+            style={{
+              position: 'absolute',
+              insetInlineEnd: '16%',
+              bottom: '18%',
+              width: 34,
+              height: 34,
+              borderRadius: '999px',
+              background: '#e02b3c',
+              boxShadow: '0 0 26px 6px rgba(224,43,60,.5)',
+              transform: active ? 'scale(1.15)' : 'scale(1)',
+              transition: 'transform .5s ease',
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundImage:
+                "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E\")",
+              opacity: 0.22,
+            }}
+          />
+        </>
+      );
+      break;
+
+    /* ---------- CANDY: soft overlapping blobs + bubbles ---------- */
+    case 'candy':
+      art = (
+        <>
+          {[
+            { c: '#ffc2e0', x: '6%', y: '10%', s: 96, d: '0s' },
+            { c: '#a8d8ff', x: '52%', y: '-6%', s: 118, d: '1.2s' },
+            { c: '#d9c2ff', x: '30%', y: '46%', s: 88, d: '2.1s' },
+          ].map((b, i) => (
+            <div
+              key={i}
+              className="sa-float"
+              style={{
+                position: 'absolute',
+                insetInlineStart: b.x,
+                top: b.y,
+                width: b.s,
+                height: b.s,
+                borderRadius: '48% 52% 55% 45% / 52% 46% 54% 48%',
+                background: `radial-gradient(circle at 34% 30%, #fff 0%, ${b.c} 48%, ${b.c} 100%)`,
+                filter: 'blur(.4px)',
+                opacity: 0.9,
+                animationDelay: b.d,
+                transform: active ? 'scale(1.06)' : 'scale(1)',
+                transition: 'transform .55s ease',
+              }}
+            />
+          ))}
+          <div style={{ position: 'absolute', inset: 0, ...lift(4) }}>
+            <Confetti seed="candy" colors={['#ef7fb4', '#8ec9ff', '#c9b0ff']} count={14} />
+          </div>
+        </>
+      );
+      break;
+
+    /* ---------- MARBLE: stone veining, museum quiet ---------- */
+    case 'marble':
+      art = (
+        <>
+          <svg
+            viewBox="0 0 200 150"
+            preserveAspectRatio="none"
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', ...lift(3) }}
+            aria-hidden="true"
+          >
+            <g stroke="#b9b0a3" fill="none" strokeLinecap="round">
+              <path d="M-10 40 C 40 24, 78 62, 120 44 S 190 28, 214 52" strokeWidth="1.6" opacity=".75" />
+              <path d="M-10 68 C 46 54, 92 92, 140 70 S 196 58, 214 78" strokeWidth="1.1" opacity=".55" />
+              <path d="M-10 104 C 52 92, 84 122, 132 106 S 188 96, 214 112" strokeWidth="1.4" opacity=".45" />
+              <path d="M20 -10 C 34 40, 12 78, 30 122" strokeWidth=".9" opacity=".4" />
+              <path d="M168 -10 C 152 44, 182 84, 162 128" strokeWidth=".9" opacity=".35" />
+            </g>
+          </svg>
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'radial-gradient(62% 50% at 28% 6%, rgba(255,255,255,.8) 0%, transparent 62%)',
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              insetInlineStart: '50%',
+              top: '50%',
+              width: 44,
+              height: 44,
+              transform: `translate(-50%,-50%) rotate(45deg) scale(${active ? 1.12 : 1})`,
+              transition: 'transform .55s ease',
+              border: '1px solid #8a7c66',
+              opacity: 0.6,
+            }}
+          />
+        </>
+      );
+      break;
+
     default:
       art = null;
   }

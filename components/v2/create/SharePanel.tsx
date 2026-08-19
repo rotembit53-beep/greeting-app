@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState, useSyncExternalStore } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { track } from '@/lib/v2/analytics';
@@ -21,11 +21,15 @@ function whatsappText(recipientName: string, url: string): string {
 export default function SharePanel({ slug, recipientName, greetingId }: Props) {
   const rootRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
-  const [url, setUrl] = useState('');
-
-  useEffect(() => {
-    setUrl(`${window.location.origin}/g/${slug}`);
-  }, [slug]);
+  // The origin is a browser-only value. useSyncExternalStore is the
+  // idiomatic way to read one: it gives the server an explicit snapshot
+  // instead of setting state from an effect after hydration.
+  const origin = useSyncExternalStore(
+    () => () => {},
+    () => window.location.origin,
+    () => ''
+  );
+  const url = origin ? `${origin}/g/${slug}` : '';
 
   useGSAP(
     () => {

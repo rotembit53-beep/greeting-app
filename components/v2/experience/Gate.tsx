@@ -109,7 +109,9 @@ export default function Gate({
 
   /* ---------------- Opening ---------------- */
 
-  const runOpen = contextSafe(() => {
+  // contextSafe() reads a ref, so it's resolved here at click time
+  // rather than during render.
+  const runOpen = () => contextSafe(() => {
     if (opening) return;
     setOpening(true);
 
@@ -171,27 +173,28 @@ export default function Gate({
     }
 
     tl.to(rootRef.current, { autoAlpha: 0, duration: 0.5, ease: 'power2.inOut' }, '-=0.15');
-  });
+  })();
 
   /** Balloon gate: pop them one by one, then it opens itself. */
-  const popBalloon = contextSafe((index: number, el: HTMLElement) => {
-    if (opening) return;
+  const popBalloon = (index: number, el: HTMLElement) =>
+    contextSafe(() => {
+      if (opening) return;
 
-    if (!reduceMotion()) {
-      gsap
-        .timeline()
-        .to(el, { scale: 1.35, duration: 0.12, ease: 'power2.out' })
-        .to(el, { scale: 0, autoAlpha: 0, duration: 0.22, ease: 'back.in(2)' });
-    } else {
-      gsap.set(el, { autoAlpha: 0 });
-    }
+      if (!reduceMotion()) {
+        gsap
+          .timeline()
+          .to(el, { scale: 1.35, duration: 0.12, ease: 'power2.out' })
+          .to(el, { scale: 0, autoAlpha: 0, duration: 0.22, ease: 'back.in(2)' });
+      } else {
+        gsap.set(el, { autoAlpha: 0 });
+      }
 
-    const next = poppedCount + 1;
-    setPoppedCount(next);
-    if (next >= balloonCount) {
-      window.setTimeout(runOpen, 320);
-    }
-  });
+      const next = poppedCount + 1;
+      setPoppedCount(next);
+      if (next >= balloonCount) {
+        window.setTimeout(runOpen, 320);
+      }
+    })();
 
   /* ---------------- Art ---------------- */
 
