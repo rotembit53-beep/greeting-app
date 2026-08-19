@@ -21,8 +21,9 @@ import Generating from './Generating';
 import Editor, { EditorState } from './Editor';
 import SharePanel from './SharePanel';
 import GiftStep from './GiftStep';
+import Stepper, { FlowStage } from './Stepper';
 
-type Stage = 'event' | 'details' | 'generating' | 'editor' | 'gift' | 'preview' | 'share';
+type Stage = FlowStage;
 
 const DRAFT_KEY = 'interagift-v2-draft';
 
@@ -95,6 +96,17 @@ export default function CreateFlow() {
       // Storage full / disabled — the flow still works, just not resumable.
     }
   }, [eventType, details, stage]);
+
+  /** Jumps back to an earlier, already-completed step. Never skips ahead —
+   * the Stepper only makes past steps clickable in the first place, but this
+   * guard makes that a real invariant rather than trusting the caller. */
+  const goToStage = (target: FlowStage) => {
+    const reachedEditor = Boolean(editor);
+    if (target === 'editor' && !reachedEditor) return;
+    if (target === 'gift' && !reachedEditor) return;
+    setGenError(null);
+    setStage(target);
+  };
 
   /* ---------------- Generation ---------------- */
 
@@ -303,30 +315,23 @@ export default function CreateFlow() {
         ['--v2-on-accent' as string]: '#ffffff',
       }}
     >
-      <header className="v2-container pt-7 pb-2 flex items-center justify-between">
-        <Link href="/" className="font-extrabold text-lg" style={{ color: 'var(--v2-ink)' }}>
-          Intera<span style={{ color: 'var(--v2-accent)' }}>gift</span>
-        </Link>
+      <header className="v2-container pt-6 pb-3 flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <Link href="/" className="font-extrabold text-lg" style={{ color: 'var(--v2-ink)' }}>
+            Intera<span style={{ color: 'var(--v2-accent)' }}>gift</span>
+          </Link>
+          {details.recipientName && stage !== 'event' && stage !== 'share' && (
+            <span
+              className="text-xs font-semibold px-3 py-1.5 rounded-full hidden sm:inline-block"
+              style={{ background: 'var(--v2-surface)', border: '1px solid var(--v2-surface-border)', color: 'var(--v2-ink-soft)' }}
+            >
+              {eventType ? `${EVENT_BY_ID[eventType]?.emoji} ` : ''}
+              עבור {details.recipientName}
+            </span>
+          )}
+        </div>
 
-        {stage !== 'share' && (
-          <div className="flex items-center gap-1.5" aria-hidden="true">
-            {(['event', 'details', 'editor', 'gift'] as const).map((s, i) => {
-              const order = { event: 0, details: 1, generating: 2, editor: 2, preview: 2, gift: 3, share: 3 };
-              const active = order[stage] >= i;
-              return (
-                <span
-                  key={s}
-                  className="rounded-full transition-all"
-                  style={{
-                    width: active ? 26 : 8,
-                    height: 8,
-                    background: active ? 'var(--v2-accent)' : 'var(--v2-surface-border)',
-                  }}
-                />
-              );
-            })}
-          </div>
-        )}
+        <Stepper stage={stage} onGoTo={goToStage} />
       </header>
 
       <main className="v2-container py-8 pb-24">

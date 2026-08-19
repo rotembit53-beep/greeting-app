@@ -71,8 +71,13 @@ export default function MusicPlayer({
     const start = performance.now();
     const from = audio.volume;
     const step = (now: number) => {
-      const t = Math.min(1, (now - start) / FADE_MS);
-      audio.volume = from + (target - from) * t;
+      // rAF's timestamp can land fractionally *before* the performance.now()
+      // sampled just above (a documented timing quirk), making the first
+      // frame's `t` negative. Setting audio.volume outside [0,1] throws
+      // synchronously, which — since the recursive rAF call comes after —
+      // silently kills the whole fade after one frame. Clamp both ends.
+      const t = Math.max(0, Math.min(1, (now - start) / FADE_MS));
+      audio.volume = Math.max(0, Math.min(1, from + (target - from) * t));
       if (t < 1) requestAnimationFrame(step);
     };
     requestAnimationFrame(step);

@@ -110,6 +110,20 @@ export const TRACKS: Track[] = [
     mood: 'happy',
     premium: true,
   },
+  {
+    id: 'happy-sunny-2',
+    key: 'audio/pop/aamirsomewhere-copyright-free-musicroyalty-free-music100-free-music-437089.mp3',
+    title: 'אנרגיה טובה',
+    mood: 'happy',
+    premium: false,
+  },
+  {
+    id: 'happy-lovely',
+    key: 'audio/party/bfcmusic-happy-lovely-xmas-249620.mp3',
+    title: 'שמח וחגיגי',
+    mood: 'happy',
+    premium: true,
+  },
 
   // — Funny ---------------------------------------------------------
   {
@@ -135,6 +149,13 @@ export const TRACKS: Track[] = [
   },
 
   // — Party ---------------------------------------------------------
+  {
+    id: 'party-joy',
+    key: 'audio/party/joyinsound-no-copyright-music-398375.mp3',
+    title: 'שמחה ואנרגיה',
+    mood: 'party',
+    premium: false,
+  },
   {
     id: 'party-trance',
     key: 'audio/gaming/playhousesound-forever-trance-royalty-free-music-play-house-287383.mp3',
