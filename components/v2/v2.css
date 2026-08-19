@@ -318,3 +318,144 @@
   background-clip:text;
   color:transparent;
 }
+
+/* ==========================================================================
+   Style art — ambient motion for the per-style compositions.
+   Transform/opacity only, so these stay on the compositor.
+   ========================================================================== */
+
+@keyframes sa-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-9px); }
+}
+@keyframes sa-drift {
+  0%, 100% { transform: translateY(0) rotate(0deg); opacity: inherit; }
+  50%      { transform: translateY(-7px) rotate(14deg); }
+}
+@keyframes sa-twinkle {
+  0%, 100% { opacity: .25; transform: scale(.85); }
+  50%      { opacity: 1;   transform: scale(1.15); }
+}
+
+.sa-float   { animation: sa-float 5.5s ease-in-out infinite; }
+.sa-drift   { animation: sa-drift 7s ease-in-out infinite; }
+.sa-twinkle { animation: sa-twinkle 3.6s ease-in-out infinite; }
+
+.sa-shell { isolation: isolate; }
+
+/* ---------- Premium style card ---------- */
+
+.style-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border-radius: 1.35rem;
+  overflow: hidden;
+  cursor: pointer;
+  text-align: start;
+  border: 1px solid var(--v2-surface-border);
+  background: linear-gradient(176deg, var(--v2-surface) 0%, var(--v2-surface-2, var(--v2-surface)) 100%);
+  box-shadow: 0 14px 34px -22px rgba(40, 26, 20, .55), 0 2px 6px rgba(40, 26, 20, .06);
+  transition: transform .45s cubic-bezier(.2, .8, .3, 1),
+              box-shadow .45s cubic-bezier(.2, .8, .3, 1),
+              border-color .3s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.style-card:hover,
+.style-card:focus-visible {
+  transform: translateY(-6px);
+  box-shadow: 0 34px 64px -30px rgba(40, 26, 20, .6), 0 6px 16px rgba(40, 26, 20, .1);
+  border-color: var(--v2-gold, var(--v2-accent));
+}
+
+.style-card:focus-visible { outline: 2px solid var(--v2-gold, var(--v2-accent)); outline-offset: 3px; }
+
+.style-card[data-selected='true'] {
+  border-color: var(--v2-gold, var(--v2-accent));
+  box-shadow: 0 0 0 2px var(--v2-gold, var(--v2-accent)),
+              0 30px 60px -28px rgba(40, 26, 20, .6);
+}
+
+/* The art window. Elements inside may break its edges by design. */
+.style-card .art-window {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-bottom: 1px solid var(--v2-surface-border);
+}
+
+.style-card .art-window::after { /* raking light across the art */
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(168deg, rgba(255,255,255,.22) 0%, transparent 40%);
+  mix-blend-mode: soft-light;
+}
+
+.style-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: .28rem;
+  font-size: .68rem;
+  font-weight: 600;
+  padding: .26rem .55rem;
+  border-radius: 999px;
+  background: var(--v2-accent-soft);
+  color: var(--v2-ink-soft);
+  border: 1px solid var(--v2-surface-border);
+  white-space: nowrap;
+}
+
+.style-check {
+  position: absolute;
+  top: .7rem;
+  inset-inline-end: .7rem;
+  width: 1.65rem;
+  height: 1.65rem;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: var(--v2-gold, var(--v2-accent));
+  color: #241A22;
+  font-size: .8rem;
+  font-weight: 800;
+  box-shadow: 0 6px 16px -6px rgba(0,0,0,.5);
+  transform: scale(0);
+  transition: transform .35s cubic-bezier(.2,1.4,.4,1);
+  z-index: 3;
+}
+.style-card[data-selected='true'] .style-check { transform: scale(1); }
+
+.premium-pill {
+  position: absolute;
+  top: .7rem;
+  inset-inline-start: .7rem;
+  z-index: 3;
+  font-size: .58rem;
+  font-weight: 800;
+  letter-spacing: .12em;
+  padding: .28rem .5rem;
+  border-radius: 999px;
+  background: rgba(20, 14, 10, .72);
+  color: #EBD08A;
+  border: 1px solid rgba(235, 208, 138, .4);
+  backdrop-filter: blur(4px);
+}
+
+/* ---------- Live preview entrance ---------- */
+
+@keyframes gp-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.gp-root .gp-in {
+  opacity: 0;
+  animation: gp-in .6s cubic-bezier(.2, .8, .3, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gp-root .gp-in { opacity: 1; animation: none; transform: none; }
+}

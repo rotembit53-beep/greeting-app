@@ -119,10 +119,14 @@ export default function Generating({ done, error, onRetry }: Props) {
               key={s.label}
               className="flex items-center gap-3 rounded-2xl px-4 py-3 transition-all"
               style={{
-                background: state === 'idle' ? 'transparent' : 'var(--v2-surface)',
-                border: `1.5px solid ${
-                  state === 'active' ? 'var(--v2-accent)' : 'var(--v2-surface-border)'
+                background:
+                  state === 'idle'
+                    ? 'transparent'
+                    : 'linear-gradient(176deg, var(--v2-surface) 0%, var(--v2-surface-2, var(--v2-surface)) 100%)',
+                border: `1px solid ${
+                  state === 'active' ? 'var(--v2-gold, var(--v2-accent))' : 'var(--v2-surface-border)'
                 }`,
+                boxShadow: state === 'idle' ? 'none' : '0 10px 26px -20px rgba(40,26,20,.5)',
                 opacity: state === 'idle' ? 0.45 : 1,
               }}
             >

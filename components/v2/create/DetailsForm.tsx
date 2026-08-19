@@ -26,7 +26,7 @@ export default function DetailsForm({ value, onChange, error }: Props) {
   return (
     <div>
       <h1
-        className="font-extrabold text-center mb-2"
+        className="v2-display text-center mb-2"
         style={{ fontSize: 'clamp(1.75rem, 6.5vw, 2.5rem)', color: 'var(--v2-ink)' }}
       >
         ספרו לנו עליו/עליה

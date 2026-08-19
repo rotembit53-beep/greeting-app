@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
@@ -9,7 +9,7 @@ import { TEMPLATE_LIST } from '@/lib/v2/templates';
 import { EVENTS } from '@/lib/v2/types';
 import { PREMIUM_PRICE_ILS } from '@/lib/v2/plan';
 import { track } from '@/lib/v2/analytics';
-import PhonePreview from './PhonePreview';
+import StyleGallery from '@/components/v2/style/StyleGallery';
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -22,19 +22,9 @@ const STEPS = [
 
 export default function Landing() {
   const rootRef = useRef<HTMLDivElement>(null);
-  const [previewIndex, setPreviewIndex] = useState(0);
 
   useEffect(() => {
     track('landing_view');
-  }, []);
-
-  // Cycle the hero preview through the templates so the value is obvious
-  // within a few seconds of landing.
-  useEffect(() => {
-    const id = window.setInterval(() => {
-      setPreviewIndex((i) => (i + 1) % TEMPLATE_LIST.length);
-    }, 3600);
-    return () => window.clearInterval(id);
   }, []);
 
   useGSAP(
@@ -124,13 +114,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* The device sits on the studio surface, below the masthead. */}
-      <section className="v2-container-wide pb-16 sm:pb-24 flex justify-center">
-        <div data-anim>
-          <PhonePreview template={TEMPLATE_LIST[previewIndex]} />
-        </div>
-      </section>
-
       {/* ---------------- How it works ---------------- */}
       <section className="v2-container-wide py-16 sm:py-20">
         <h2
@@ -177,8 +160,8 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ---------------- Templates ---------------- */}
-      <section className="v2-container-wide py-16 sm:py-20">
+      {/* ---------------- Styles: interactive gallery + live device ------- */}
+      <section className="v2-container-wide py-14 sm:py-20">
         <h2
           data-anim
           className="v2-display text-center mb-3"
@@ -189,50 +172,17 @@ export default function Landing() {
             letterSpacing: '-0.01em',
           }}
         >
-          {/* Count is derived, not written out — a hard-coded "שישה" went stale
-              the moment four more templates were added. */}
-          {TEMPLATE_LIST.length} סגנונות. אף אחד לא דומה לשני.
+          {TEMPLATE_LIST.length} סגנונות. כל אחד עולם אחר.
         </h2>
         <p
           data-anim
-          className="text-center mb-12"
+          className="text-center mb-10"
           style={{ color: 'var(--v2-ink-soft)', fontSize: '1.05rem' }}
         >
-          כל סגנון משנה לא רק צבע — אלא את כל החוויה
+          בחרו סגנון — והברכה בטלפון משתנה מולכם
         </p>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {TEMPLATE_LIST.map((t) => (
-            <div
-              key={t.id}
-              data-anim
-              className="v2-panel overflow-hidden"
-            >
-              <div
-                className="h-36 flex items-center justify-center text-5xl relative"
-                style={{ background: t.preview.gradient }}
-              >
-                {t.preview.emoji}
-                {t.premium && (
-                  <span
-                    className="absolute top-3 text-[10px] font-bold px-2.5 py-1 rounded-full"
-                    style={{ insetInlineEnd: '0.75rem', background: 'rgba(0,0,0,0.6)', color: '#fff' }}
-                  >
-                    PREMIUM
-                  </span>
-                )}
-              </div>
-              <div className="p-5">
-                <p className="font-extrabold mb-1.5" style={{ color: 'var(--v2-ink)' }}>
-                  {t.label}
-                </p>
-                <p className="text-sm leading-relaxed" style={{ color: 'var(--v2-ink-soft)' }}>
-                  {t.description}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
+        <StyleGallery />
       </section>
 
       {/* ---------------- Occasions ---------------- */}

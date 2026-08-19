@@ -112,7 +112,7 @@ export default function GiftStep({
         <div className="text-center mb-8">
           <div className="text-5xl mb-4">🎁</div>
           <h1
-            className="font-extrabold mb-2"
+            className="v2-display mb-2"
             style={{ fontSize: 'clamp(1.7rem, 6.5vw, 2.4rem)', color: 'var(--v2-ink)' }}
           >
             רוצים להוסיף גם מתנה?
@@ -198,7 +198,7 @@ export default function GiftStep({
     return (
       <div>
         <h1
-          className="font-extrabold text-center mb-2"
+          className="v2-display text-center mb-2"
           style={{ fontSize: 'clamp(1.6rem, 6vw, 2.2rem)', color: 'var(--v2-ink)' }}
         >
           מצאנו כמה רעיונות ❤️
@@ -271,7 +271,7 @@ export default function GiftStep({
   return (
     <div>
       <h1
-        className="font-extrabold text-center mb-2"
+        className="v2-display text-center mb-2"
         style={{ fontSize: 'clamp(1.6rem, 6vw, 2.2rem)', color: 'var(--v2-ink)' }}
       >
         {gift.emoji || meta.emoji} {gift.title}

@@ -37,7 +37,7 @@ export default function EventPicker({ value, onSelect }: Props) {
   return (
     <div ref={rootRef}>
       <h1
-        className="font-extrabold text-center mb-2"
+        className="v2-display text-center mb-2"
         style={{ fontSize: 'clamp(1.75rem, 6.5vw, 2.5rem)', color: 'var(--v2-ink)' }}
       >
         לכבוד מה ההפתעה?
@@ -56,24 +56,21 @@ export default function EventPicker({ value, onSelect }: Props) {
               type="button"
               onClick={() => onSelect(event.id)}
               aria-pressed={selected}
-              className="relative rounded-2xl overflow-hidden text-start transition-transform hover:-translate-y-1 active:scale-95"
-              style={{
-                border: selected
-                  ? '2.5px solid var(--v2-accent)'
-                  : '1.5px solid var(--v2-surface-border)',
-                boxShadow: selected
-                  ? '0 0 0 4px var(--v2-accent-soft), 0 18px 40px -24px rgba(0,0,0,0.5)'
-                  : '0 12px 30px -24px rgba(0,0,0,0.5)',
-              }}
+              data-selected={selected}
+              className="style-card active:scale-[.98]"
             >
+              <span className="style-check" aria-hidden="true">✓</span>
               <div
-                className="h-20 flex items-center justify-center text-4xl"
-                style={{ background: event.gradient }}
+                className="h-20 flex items-center justify-center text-4xl art-window"
+                style={{ background: event.gradient, aspectRatio: 'auto' }}
               >
                 {event.emoji}
               </div>
-              <div className="p-3.5" style={{ background: 'var(--v2-surface)' }}>
-                <p className="font-extrabold text-sm mb-0.5" style={{ color: 'var(--v2-ink)' }}>
+              <div className="p-3.5">
+                <p
+                  className="v2-display text-sm mb-0.5"
+                  style={{ color: 'var(--v2-ink)', fontWeight: 700 }}
+                >
                   {event.label}
                 </p>
                 <p className="text-xs leading-snug" style={{ color: 'var(--v2-ink-soft)' }}>

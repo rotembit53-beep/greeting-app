@@ -6,6 +6,7 @@ import { GreetingContent, MediaItem, TemplateId } from '@/lib/v2/types';
 import { PREMIUM_PRICE_ILS, maxImagesFor } from '@/lib/v2/plan';
 import MediaUploader from './MediaUploader';
 import MusicPicker from './MusicPicker';
+import StyleGallery from '@/components/v2/style/StyleGallery';
 
 type Tab = 'text' | 'images' | 'music' | 'design';
 
@@ -272,47 +273,13 @@ export default function Editor({
           <p className="v2-hint mb-4">
             כל סגנון משנה את כל החוויה — לא רק את הצבעים
           </p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {TEMPLATE_LIST.map((t) => {
-              const locked = t.premium && !premium;
-              const selected = state.templateId === t.id;
-              return (
-                <button
-                  key={t.id}
-                  type="button"
-                  onClick={() => (locked ? onPremiumClick() : onChange({ templateId: t.id }))}
-                  className="rounded-2xl overflow-hidden text-start transition-transform hover:-translate-y-1"
-                  style={{
-                    border: selected
-                      ? '2.5px solid var(--v2-accent)'
-                      : '1.5px solid var(--v2-surface-border)',
-                    boxShadow: selected ? '0 0 0 4px var(--v2-accent-soft)' : 'none',
-                    opacity: locked ? 0.65 : 1,
-                  }}
-                >
-                  <div
-                    className="h-20 flex items-center justify-center text-3xl relative"
-                    style={{ background: t.preview.gradient }}
-                  >
-                    {t.preview.emoji}
-                    {locked && (
-                      <span
-                        className="absolute bottom-1.5 text-[9px] font-bold px-2 py-0.5 rounded-full"
-                        style={{ background: 'rgba(0,0,0,0.65)', color: '#fff' }}
-                      >
-                        PREMIUM
-                      </span>
-                    )}
-                  </div>
-                  <div className="p-2.5" style={{ background: 'var(--v2-surface)' }}>
-                    <p className="font-bold text-xs" style={{ color: 'var(--v2-ink)' }}>
-                      {t.label}
-                    </p>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+          <StyleGallery
+            value={state.templateId}
+            onSelect={(templateId) => onChange({ templateId })}
+            lockedIds={TEMPLATE_LIST.filter((t) => t.premium && !premium).map((t) => t.id)}
+            onLockedClick={onPremiumClick}
+            showDevice={false}
+          />
 
           {!premium && (
             <button
