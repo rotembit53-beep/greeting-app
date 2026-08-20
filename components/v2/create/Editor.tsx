@@ -284,7 +284,6 @@ export default function Editor({
             onSelect={(templateId) => onChange({ templateId })}
             lockedIds={TEMPLATE_LIST.filter((t) => t.premium && !premium).map((t) => t.id)}
             onLockedClick={onPremiumClick}
-            showDevice={false}
           />
 
           {!premium && (

@@ -242,28 +242,27 @@
   align-items: center;
   justify-content: center;
   gap: 0.4rem;
-  border-radius: 1rem;
-  border: 1px solid var(--v2-hairline);
-  background: var(--v2-surface);
+  border-radius: 0.9rem;
+  border: 0;
+  background: rgb(var(--v2-shadow-rgb) / 0.04);
   padding: 1.1rem 0.85rem;
   cursor: pointer;
-  box-shadow: var(--v2-shadow-ambient);
+  box-shadow: none;
   transition: transform var(--v2-dur-s) var(--v2-ease-out),
-    border-color var(--v2-dur-s) var(--v2-ease-out),
-    box-shadow var(--v2-dur-m) var(--v2-ease-out);
+    background var(--v2-dur-s) var(--v2-ease-out),
+    color var(--v2-dur-s) var(--v2-ease-out);
   text-align: center;
   -webkit-tap-highlight-color: transparent;
 }
 
 .v2-choice:hover {
   transform: translateY(-4px);
-  border-color: var(--v2-hairline-strong);
-  box-shadow: var(--v2-shadow-raised);
+  background: rgb(var(--v2-shadow-rgb) / 0.07);
 }
 
 .v2-choice[data-selected='true'] {
-  border-color: var(--v2-accent);
-  box-shadow: inset 0 0 0 1px var(--v2-accent), var(--v2-shadow-raised);
+  background: var(--v2-accent-soft);
+  box-shadow: inset 0 0 0 1px var(--v2-accent);
 }
 
 /* ---------- Scroll & motion ---------- */
@@ -395,35 +394,14 @@
 /* Floating artifact, not a flat card. */
 .v2-panel{
   position:relative;
-  background:linear-gradient(176deg, var(--v2-surface) 0%, var(--v2-surface-2) 100%);
-  border:1px solid var(--v2-surface-border);
-  border-radius:1rem;
-  box-shadow: var(--v2-shadow-raised);
+  background:transparent;
+  border:0;
+  border-radius:0;
+  box-shadow:none;
 }
-/* Raking light down the top edge — soft-light so it tints rather than
- * washes, which is what separates a lit surface from a white overlay. */
-.v2-panel::after{
-  content:'';
-  position:absolute;
-  inset:0;
-  border-radius:inherit;
-  pointer-events:none;
-  background:linear-gradient(172deg, rgba(255,255,255,.8) 0%, transparent 34%);
-  mix-blend-mode:soft-light;
-}
-/* Matte finish on the panel itself, so it doesn't read flatter than the
- * ground it sits on. */
-.v2-panel::before{
-  content:'';
-  position:absolute;
-  inset:0;
-  border-radius:inherit;
-  pointer-events:none;
-  background-image: var(--v2-grain-paper);
-  background-size: 160px 160px;
-  opacity:.10;
-  mix-blend-mode:multiply;
-}
+/* Raking light and matte finish were card-surface treatments; with the card
+ * gone there is no surface to light, so both overlays are dropped rather
+ * than left floating over transparent ground. */
 
 /* Display face — the product's serif, already loaded by the root layout. */
 .v2-display{
@@ -500,257 +478,241 @@
 
 .sa-shell { isolation: isolate; }
 
-/* ---------- Premium style card ---------- */
 
-.style-card {
+/* ==========================================================================
+   Full canvas — a style shown at the size it will actually be experienced.
+   Replaces the old .style-card grid and the phone mockup that framed the
+   preview: both rendered a full-screen design as a small boxed thumbnail.
+   ========================================================================== */
+
+.style-stage {
+  /* Break out of the parent's max-width container so the canvas is truly
+   * edge to edge, without having to unwind the page's layout above it. */
   position: relative;
-  display: flex;
-  flex-direction: column;
-  border-radius: 1.1rem;
-  overflow: hidden;
-  cursor: pointer;
-  text-align: start;
-  border: 1px solid var(--v2-surface-border);
-  background: linear-gradient(176deg, var(--v2-surface) 0%, var(--v2-surface-2, var(--v2-surface)) 100%);
-  box-shadow: var(--v2-shadow-raised);
-  transition: transform var(--v2-dur-m) var(--v2-ease-out),
-              box-shadow var(--v2-dur-l) var(--v2-ease-out),
-              border-color var(--v2-dur-m) var(--v2-ease-out);
-  -webkit-tap-highlight-color: transparent;
-  /* The gallery renders every template's animated art at once — most of it
-   * off-screen. `content-visibility` lets the browser skip style/layout/paint
-   * for cards outside the viewport entirely, which is where the real cost of
-   * ~20 simultaneously-animating cards was going. `contain-intrinsic-size` is
-   * a placeholder height so scrollbar/position doesn't jump before a card is
-   * ever measured. */
-  content-visibility: auto;
-  /* Height only — this is a grid item and stretches to its column's width
-   * regardless; a `contain-intrinsic-size` shorthand would also pin an
-   * intrinsic *width* (0 unless given), which fights that stretch. */
-  contain-intrinsic-height: 380px;
+  width: 100vw;
+  margin-inline: calc(50% - 50vw);
 }
 
-/* Belt-and-suspenders for browsers without `content-visibility` support:
- * StyleGallery toggles `data-inview` via IntersectionObserver, and off-screen
- * cards get their looping art animations paused outright rather than ticking
- * on the compositor for no visible benefit. */
-.style-card:not([data-inview='true']) .sa-float,
-.style-card:not([data-inview='true']) .sa-drift,
-.style-card:not([data-inview='true']) .sa-twinkle {
-  animation-play-state: paused;
-}
-
-/* Matte stock over the whole card — the single thing that most separates
- * "printed piece" from "div with a background-color". Sits above the art
- * window on purpose so the illustration is on the same paper as the text. */
-.style-card::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-  border-radius: inherit;
-  background-image: var(--v2-grain-paper);
-  background-size: 160px 160px;
-  opacity: .085;
-  mix-blend-mode: multiply;
-}
-
-/* A deliberate lift, not a pop: -4px over 550ms on a long-tail curve, with
- * the ambient shadow expanding underneath as if the card rose off the table
- * toward a fixed light. Border warms to gold rather than switching colour. */
-.style-card:hover,
-.style-card:focus-visible {
-  transform: translateY(-4px);
-  box-shadow: var(--v2-shadow-lifted);
-  border-color: rgb(var(--v2-shadow-rgb) / 0.16);
-}
-
-.style-card:focus-visible {
-  outline: 1px solid var(--v2-gold, var(--v2-accent));
-  outline-offset: 3px;
-}
-
-.style-card[data-selected='true'] {
-  border-color: var(--v2-gold, var(--v2-accent));
-  /* Inset keeps the selected ring on the card's own edge instead of adding
-   * a second outer contour that fights the ambient shadow. */
-  box-shadow: inset 0 0 0 1px var(--v2-gold, var(--v2-accent)),
-              var(--v2-shadow-lifted);
-}
-
-/* The art window. Elements inside may break its edges by design. */
-.style-card .art-window {
+.style-canvas {
   position: relative;
-  aspect-ratio: 4 / 3;
-  overflow: hidden;
-  border-bottom: 1px solid var(--v2-surface-border);
-}
-
-.style-card .art-window::after { /* raking light across the art */
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(168deg, rgba(255,255,255,.20) 0%, transparent 40%);
-  mix-blend-mode: soft-light;
-}
-
-/* Borderless, softly tinted. A stroked pill at this size reads as a UI
- * control; the tint alone reads as a printed label. */
-.style-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: .3rem;
-  font-size: .69rem;
-  font-weight: 500;
-  letter-spacing: .014em;
-  padding: .3rem .62rem;
-  border-radius: 999px;
-  background: rgb(var(--v2-shadow-rgb) / 0.05);
-  color: var(--v2-ink-soft);
-  border: 0;
-  white-space: nowrap;
-}
-
-.style-check {
-  position: absolute;
-  top: .75rem;
-  inset-inline-end: .75rem;
-  width: 1.6rem;
-  height: 1.6rem;
-  border-radius: 999px;
+  width: 100%;
+  /* Tall enough to read as a screen, capped so the picker below stays in
+   * view on short laptops instead of being pushed under the fold. */
+  min-height: min(78vh, 46rem);
   display: grid;
   place-items: center;
-  background: var(--v2-gold, var(--v2-accent));
-  color: #2B2029;
-  font-size: .78rem;
-  font-weight: 700;
-  /* Tint-matched to the gold it sits on, not a black drop. */
-  box-shadow: 0 4px 12px -4px rgb(var(--v2-shadow-rgb) / 0.35);
-  transform: scale(0);
-  transition: transform var(--v2-dur-m) var(--v2-ease-out);
-  z-index: 4;
-}
-.style-card[data-selected='true'] .style-check { transform: scale(1); }
-
-/* Solid warm ink instead of a blurred translucent panel — glassmorphism is
- * the single most template-looking effect in the set, and an opaque chip
- * also stays legible over every one of the 21 art backgrounds. */
-.premium-pill {
-  position: absolute;
-  top: .75rem;
-  inset-inline-start: .75rem;
-  z-index: 4;
-  font-size: .58rem;
-  font-weight: 600;
-  letter-spacing: .16em;
-  padding: .3rem .55rem;
-  border-radius: 999px;
-  background: #2B2029;
-  color: var(--v2-gold-lit, #E3C489);
-  border: 0;
-  box-shadow: 0 4px 12px -4px rgb(var(--v2-shadow-rgb) / 0.4);
+  overflow: hidden;
+  isolation: isolate;
 }
 
-/* ---------- Live preview entrance ---------- */
-
-@keyframes gp-in {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.gp-root .gp-in {
-  opacity: 0;
-  animation: gp-in var(--v2-dur-l) var(--v2-ease-out) forwards;
-}
-
-/* The style's art behind the whole preview card, matching the page-wide
- * backdrop on the real greeting. Absolute so it covers the full scroll
- * height of the card, faded so the sample copy stays readable. */
-.gp-art {
+/* Art runs the full bleed; only the copy is constrained. */
+.style-canvas-art {
   position: absolute;
   inset: 0;
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
-  opacity: 0.24;
 }
 
-/* The greeting inside the phone is a printed card too — same stock, at the
- * scale it would actually be seen at through the glass. */
-.gp-root::after {
-  content: '';
+.style-canvas-copy {
+  position: relative;
+  z-index: 1;
+  /* The readable measure. Full-bleed art, but never full-bleed prose — a
+   * line of Hebrew run across a wide viewport loses the reader on the
+   * return sweep no matter how well it's set. */
+  width: min(46rem, 90vw);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.1rem;
+  padding: clamp(2.5rem, 7vw, 5rem) 0;
+}
+
+.style-canvas-kicker {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: var(--v2-tracking-eyebrow);
+}
+
+.style-canvas-cta {
+  align-self: flex-start;
+  margin-top: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.012em;
+  padding: 0.95rem 1.9rem;
+  border-radius: 999px;
+}
+
+/* ---------- Compact picker ---------- */
+
+.style-picker {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  padding: 1.1rem 0 0.35rem;
+}
+.style-picker::-webkit-scrollbar { display: none; }
+
+.style-picker-track {
+  display: flex;
+  gap: 0.5rem;
+  width: max-content;
+  /* Breathing room at both ends so the first and last pill aren't welded
+   * to the viewport edge when the row is scrolled to either extreme. */
+  padding-inline: max(1.25rem, calc(50vw - 36rem));
+}
+
+.style-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+  font-size: 0.88rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  padding: 0.6rem 1.05rem;
+  border-radius: 999px;
+  border: 1px solid var(--v2-hairline);
+  background: var(--v2-surface);
+  color: var(--v2-ink-soft);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--v2-dur-s) var(--v2-ease-out),
+              border-color var(--v2-dur-s) var(--v2-ease-out),
+              color var(--v2-dur-s) var(--v2-ease-out),
+              box-shadow var(--v2-dur-m) var(--v2-ease-out);
+}
+
+.style-pill:hover {
+  transform: translateY(-2px);
+  color: var(--v2-ink);
+  border-color: var(--v2-hairline-strong);
+  box-shadow: var(--v2-shadow-ambient);
+}
+
+.style-pill[data-selected='true'] {
+  color: var(--v2-ink);
+  border-color: var(--v2-gold, var(--v2-accent));
+  box-shadow: inset 0 0 0 1px var(--v2-gold, var(--v2-accent));
+}
+
+.style-pill:focus-visible {
+  outline: 1px solid var(--v2-gold, var(--v2-accent));
+  outline-offset: 3px;
+}
+
+.style-pill-lock { font-size: 0.72rem; opacity: 0.7; }
+
+.style-picker-pitch {
+  margin: 0.55rem auto 0;
+  width: min(46rem, 90vw);
+  text-align: center;
+  font-size: 0.92rem;
+  line-height: 1.7;
+  color: var(--v2-ink-soft);
+}
+
+/* ---------- Event tiles ----------
+ * Borderless. The event's own colour is the surface rather than a swatch
+ * boxed inside a bordered card, and selection is carried by the wash coming
+ * up to full strength instead of by a ring around a container. */
+
+.event-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  padding: 1.15rem 1.1rem 1.2rem;
+  border: 0;
+  border-radius: 1rem;
+  overflow: hidden;
+  cursor: pointer;
+  text-align: start;
+  background: transparent;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--v2-dur-s) var(--v2-ease-out);
+}
+
+.event-tile-wash {
   position: absolute;
   inset: 0;
-  z-index: 3;
-  pointer-events: none;
-  background-image: var(--v2-grain-paper);
-  background-size: 120px 120px;
-  opacity: .07;
-  mix-blend-mode: multiply;
+  z-index: 0;
+  opacity: 0.16;
+  transition: opacity var(--v2-dur-m) var(--v2-ease-out);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .gp-root .gp-in { opacity: 1; animation: none; transform: none; }
+.event-tile:hover { transform: translateY(-4px); }
+.event-tile:hover .event-tile-wash { opacity: 0.28; }
+.event-tile[data-selected='true'] .event-tile-wash { opacity: 0.5; }
+
+.event-tile:focus-visible {
+  outline: 1px solid var(--v2-gold, var(--v2-accent));
+  outline-offset: 3px;
 }
 
-/* ---------- Device preview: scrollable screen, invisible scrollbar ---------- */
-
-.dp-scroll {
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-  touch-action: pan-y;
-  scrollbar-width: none;
-}
-.dp-scroll::-webkit-scrollbar { display: none; }
-
-/* ---------- Style gallery: device stays in view while cards scroll ----------
- * Desktop: the device sits sticky in its own column, so it stays in view the
- * whole time you're browsing cards — that never conflicts with anything
- * else on screen, so it's left exactly as is.
- * Mobile: the device is phone-shaped and ~640px tall, so pinning it sticky
- * above a single-column card list used to make it dominate most of the
- * actual screen and never let go while scrolling — read as "the animation
- * covers everything", and forced the browser to keep repainting a scaled,
- * continuously-animating sticky element on every scroll frame, which is
- * what made scrolling feel laggy on-device. It now just sits in normal flow
- * instead: still the first thing you see, but it scrolls away like
- * everything else once you move on to the card list — `.style-gallery-hint`
- * below says as much, once, right under it. */
-
-.style-gallery {
-  display: grid;
-  grid-template-areas: "device" "cards";
-  gap: 2.25rem;
-}
-.style-gallery-cards { grid-area: cards; }
-.style-gallery-device {
-  grid-area: device;
-  position: sticky;
-  top: 1.25rem;
-  align-self: start;
-  z-index: 2;
+.event-tile-emoji {
+  position: relative;
+  z-index: 1;
+  font-size: 1.75rem;
+  line-height: 1.2;
+  margin-bottom: 0.35rem;
 }
 
-@media (max-width: 1023.98px) {
-  .style-gallery-device {
-    position: static;
-    z-index: auto;
-  }
+.event-tile-label {
+  position: relative;
+  z-index: 1;
+  font-weight: 700;
+  font-size: 0.95rem;
 }
 
-/* Only makes sense where the device doesn't stay in view on its own. */
-.style-gallery-hint { display: none; }
-@media (max-width: 1023.98px) {
-  .style-gallery-hint { display: block; }
+.event-tile-hint {
+  position: relative;
+  z-index: 1;
+  font-size: 0.78rem;
+  line-height: 1.5;
 }
 
-@media (min-width: 1024px) {
-  .style-gallery {
-    grid-template-columns: 1fr auto;
-    grid-template-areas: "cards device";
-    align-items: start;
-    gap: 3.5rem;
-  }
+/* Soft inline tag — replaces the bordered chip the occasion list used to
+ * borrow from .v2-panel, which is now borderless. */
+.v2-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.87rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  background: rgb(var(--v2-shadow-rgb) / 0.05);
+  color: var(--v2-ink-soft);
+}
+
+/* Full-bleed closing band. Was a rounded, bordered card floating in a
+ * container; now it spans the viewport like the rest of the canvas. */
+.v2-band {
+  position: relative;
+  width: 100vw;
+  margin-inline: calc(50% - 50vw);
+  padding: clamp(3.5rem, 9vw, 6.5rem) 1.25rem;
+  text-align: center;
+}
+
+/* Full-bleed section: media and art span the viewport, while any prose
+ * inside opts back into a readable measure with .v2-measure. */
+.v2-bleed {
+  width: 100vw;
+  margin-inline: calc(50% - 50vw);
+  padding-inline: clamp(1rem, 4vw, 3rem);
+}
+
+.v2-measure {
+  width: 100%;
+  max-width: 46rem;
+  margin-inline: auto;
 }

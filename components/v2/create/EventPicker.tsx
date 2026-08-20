@@ -57,26 +57,28 @@ export default function EventPicker({ value, onSelect }: Props) {
               onClick={() => onSelect(event.id)}
               aria-pressed={selected}
               data-selected={selected}
-              className="style-card active:scale-[.98]"
+              className="event-tile active:scale-[.98]"
             >
-              <span className="style-check" aria-hidden="true">✓</span>
-              <div
-                className="h-20 flex items-center justify-center text-4xl art-window"
-                style={{ background: event.gradient, aspectRatio: 'auto' }}
-              >
+              {/* The event's colour is the tile itself now — it used to be a
+               * small swatch window inside a bordered card, which is exactly
+               * the boxed-thumbnail pattern this pass removes. */}
+              <span
+                className="event-tile-wash"
+                aria-hidden="true"
+                style={{ background: event.gradient }}
+              />
+              <span className="event-tile-emoji" aria-hidden="true">
                 {event.emoji}
-              </div>
-              <div className="p-3.5">
-                <p
-                  className="v2-display text-sm mb-0.5"
-                  style={{ color: 'var(--v2-ink)', fontWeight: 700 }}
-                >
-                  {event.label}
-                </p>
-                <p className="text-xs leading-snug" style={{ color: 'var(--v2-ink-soft)' }}>
-                  {event.hint}
-                </p>
-              </div>
+              </span>
+              <span
+                className="v2-display event-tile-label"
+                style={{ color: 'var(--v2-ink)' }}
+              >
+                {event.label}
+              </span>
+              <span className="event-tile-hint" style={{ color: 'var(--v2-ink-soft)' }}>
+                {event.hint}
+              </span>
             </button>
           );
         })}

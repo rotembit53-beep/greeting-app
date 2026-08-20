@@ -156,18 +156,16 @@ export function MessagesScene({ template, content }: SceneProps) {
           <div
             key={i}
             data-reveal
-            className="rounded-2xl px-5 py-4"
+            className="py-3"
             style={{
-              background: 'var(--v2-surface)',
-              border: '1.5px solid var(--v2-surface-border)',
               color: 'var(--v2-ink)',
-              fontWeight: 600,
-              fontSize: 'clamp(1rem, 4vw, 1.15rem)',
-              lineHeight: 1.6,
-              // Alternating inset gives the stack a rhythm instead of
-              // reading as a plain list.
-              marginInlineStart: i % 2 === 0 ? 0 : 'clamp(0px, 6vw, 2.5rem)',
-              marginInlineEnd: i % 2 === 0 ? 'clamp(0px, 6vw, 2.5rem)' : 0,
+              fontWeight: 500,
+              fontSize: 'clamp(1.05rem, 4vw, 1.3rem)',
+              lineHeight: 1.7,
+              // No bubble: an accent rule on the reading edge carries the
+              // line instead of a bordered card around it.
+              borderInlineStart: '2px solid var(--v2-accent)',
+              paddingInlineStart: '1.15rem',
             }}
           >
             <span style={{ color: 'var(--v2-accent)', marginInlineEnd: '0.5rem' }}>✦</span>
@@ -277,10 +275,10 @@ export function MemoriesScene({
   const presentation = template.photoPresentation;
 
   return (
-    <section ref={ref} className="v2-container pb-16 sm:pb-24">
+    <section ref={ref} className="v2-bleed pb-16 sm:pb-24">
       <p
         data-reveal
-        className={template.type.display === 'serif' ? 'v2-serif' : ''}
+        className={`v2-measure ${template.type.display === 'serif' ? 'v2-serif' : ''}`}
         style={{
           fontSize: 'clamp(1.3rem, 5.5vw, 1.9rem)',
           fontWeight: template.type.display === 'serif' ? 500 : 800,
@@ -327,7 +325,7 @@ export function MemoriesScene({
           {media.map((item) => (
             <figure key={item.id} data-reveal className="m-0">
               <div
-                className="overflow-hidden rounded-2xl"
+                className="overflow-hidden"
                 style={{ boxShadow: '0 22px 56px -26px var(--v2-glow)' }}
               >
                 <MediaFrame
@@ -364,11 +362,8 @@ export function MemoriesScene({
               }}
             >
               <div
-                className="overflow-hidden rounded-3xl"
-                style={{
-                  border: '1.5px solid var(--v2-surface-border)',
-                  boxShadow: '0 30px 70px -30px var(--v2-glow)',
-                }}
+                className="overflow-hidden"
+                style={{ boxShadow: '0 30px 70px -30px var(--v2-glow)' }}
               >
                 <MediaFrame item={item} style={{ maxHeight: '68vh', objectFit: 'cover' }} />
               </div>

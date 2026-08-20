@@ -192,8 +192,7 @@ export default function Landing() {
             <span
               key={e.id}
               data-anim
-              className="v2-panel text-sm font-semibold px-4 py-2.5"
-              style={{ borderRadius: '999px' }}
+              className="v2-tag"
             >
               {e.emoji} {e.label}
             </span>
@@ -201,15 +200,15 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ---------------- Final CTA ---------------- */}
-      <section className="v2-container py-16 sm:py-24 text-center">
+      {/* ---------------- Final CTA ----------------
+       * A full-bleed band rather than a bordered card floating inside a
+       * container — the closing note spans the canvas like everything else. */}
+      <section>
         <div
           data-anim
-          className="rounded-3xl px-6 py-12 sm:px-12"
+          className="v2-band"
           style={{
             background: 'linear-gradient(150deg, #3A0F2E 0%, #26091F 62%, #1A0615 100%)',
-            boxShadow: '0 34px 74px -38px rgba(58,15,46,0.85)',
-            border: '1px solid rgba(201,162,39,0.34)',
           }}
         >
           <h2
