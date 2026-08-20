@@ -9,6 +9,7 @@ import { track } from '@/lib/v2/analytics';
 import { hasGift } from '@/lib/v2/gifts';
 import TemplateSurface from '@/components/v2/TemplateSurface';
 import Decor from '@/components/v2/Decor';
+import StyleArt from '@/components/v2/style/StyleArt';
 import Gate from './Gate';
 import MusicPlayer from './MusicPlayer';
 import GiftScene from './GiftScene';
@@ -97,6 +98,23 @@ export default function GreetingExperience({ greeting, preview = false }: Props)
 
   return (
     <TemplateSurface template={template} className="v2-shell">
+      {/* The template's own art direction, across the whole page rather than
+       * boxed into a thumbnail. Until now StyleArt only ever rendered inside
+       * gallery cards and the phone preview, so the greeting a recipient
+       * actually opened was a flat gradient plus falling particles — none of
+       * the composition that defines the style. Fixed so it stays put while
+       * the scenes scroll over it, and faded via CSS so running text keeps
+       * its contrast. `background: transparent` because TemplateSurface
+       * already paints pageBg underneath; without it the art would repaint
+       * the gradient at viewport scale and band against the page. */}
+      <div className="v2-art-backdrop" aria-hidden="true">
+        <StyleArt
+          template={template}
+          active={opened}
+          style={{ background: 'transparent' }}
+        />
+      </div>
+
       <Decor template={template} active={opened} />
 
       {!opened && (

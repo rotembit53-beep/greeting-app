@@ -286,6 +286,30 @@
   }
 }
 
+/* ---------- Per-template art, page-wide ----------
+ * The style's composition as an ambient backdrop for the whole greeting,
+ * not a thumbnail. Fixed (so it holds still while scenes scroll over it),
+ * inert, and faded enough that body copy keeps its contrast — the art is
+ * atmosphere here, not the subject. Dark grounds need a touch more presence
+ * because their art is mostly light-on-dark and loses more when faded. */
+.v2-art-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: var(--v2-art-strength, 0.22);
+}
+/* Dark grounds take a little more: their art is light-on-dark and loses
+ * more to fading than dark-on-light art does. */
+.v2-scope[data-dark='true'] { --v2-art-strength: 0.28; }
+
+@media (prefers-reduced-motion: reduce) {
+  /* Keep the composition, drop it back further — with its motion frozen it
+   * reads as a static pattern behind the text rather than atmosphere. */
+  .v2-art-backdrop { opacity: 0.15; }
+}
+
 /* ---------- Decorative layers ---------- */
 
 .v2-decor-layer {
@@ -639,6 +663,18 @@
 .gp-root .gp-in {
   opacity: 0;
   animation: gp-in var(--v2-dur-l) var(--v2-ease-out) forwards;
+}
+
+/* The style's art behind the whole preview card, matching the page-wide
+ * backdrop on the real greeting. Absolute so it covers the full scroll
+ * height of the card, faded so the sample copy stays readable. */
+.gp-art {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 0.24;
 }
 
 /* The greeting inside the phone is a printed card too — same stock, at the

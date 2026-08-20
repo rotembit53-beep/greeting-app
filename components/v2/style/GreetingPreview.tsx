@@ -329,10 +329,10 @@ export default function GreetingPreview({ template, animationKey }: Props) {
       );
       break;
 
-    /* Celebration: art fills the frame, type sits on top of it.
-     * Bounded to its own height (not gp-root's, which grows with `extra`
-     * below) — otherwise the confetti/balloons would stretch to cover the
-     * whole scrollable card instead of just the hero.
+    /* Celebration: type sits directly on the art.
+     * The art itself is no longer rendered here — it's the page-wide
+     * backdrop below, same as every other layout now — so this case is
+     * just the type treatment that leans on it.
      *
      * The CTA lives inside the same centered flex column as the text
      * (not as a trailing sibling after it) — `alignSelf` only means
@@ -347,9 +347,6 @@ export default function GreetingPreview({ template, animationKey }: Props) {
     default:
       inner = (
         <div style={{ position: 'relative', minHeight: '19rem', display: 'flex', flexDirection: 'column' }}>
-          <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
-            <StyleArt template={template} active />
-          </div>
           <div
             style={{
               position: 'relative',
@@ -408,8 +405,17 @@ export default function GreetingPreview({ template, animationKey }: Props) {
         overflow: 'hidden',
       }}
     >
-      {inner}
-      {extra}
+      {/* The style's art across the whole card, mirroring what the real
+       * greeting page now does — previously only the 'celebration' layout
+       * showed any art behind its type and every other layout was a plain
+       * gradient. Absolute (not fixed) so it spans this scrollable card
+       * rather than the browser viewport. */}
+      <div className="gp-art" aria-hidden="true">
+        <StyleArt template={template} active style={{ background: 'transparent' }} />
+      </div>
+
+      <div style={{ position: 'relative', zIndex: 1 }}>{inner}</div>
+      <div style={{ position: 'relative', zIndex: 1 }}>{extra}</div>
     </div>
   );
 }

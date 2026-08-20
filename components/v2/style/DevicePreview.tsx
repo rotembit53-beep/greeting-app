@@ -157,7 +157,17 @@ export default function DevicePreview({ template, previewKey }: Props) {
               trigger: el,
               scroller,
               start: 'top 92%',
-              toggleActions: 'play none none reverse',
+              // Never reverse. The autoplay below loops down AND back up
+              // forever, so the previous `reverse` made every element
+              // animate out on each upward pass and back in on the next
+              // downward one — the photo and message rows visibly jumped on
+              // a loop. Left re-playable rather than `once: true` on
+              // purpose: `once` self-destructs the trigger, so a single
+              // mis-evaluated first pass (the scroller starts life inside a
+              // `content-visibility` subtree, which can measure oddly) would
+              // strand the element at autoAlpha 0 permanently. Replaying an
+              // already-finished tween is a visual no-op.
+              toggleActions: 'play none none none',
             },
           }
         );
