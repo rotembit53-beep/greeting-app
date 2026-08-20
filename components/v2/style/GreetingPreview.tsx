@@ -175,36 +175,33 @@ export default function GreetingPreview({ template, animationKey }: Props) {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '.5rem' }}>
         {extraKicker('מה שכתבתם', '.68s')}
-        {spec.sample.messages.map((m, i) => {
-          const anchorEnd = i % 2 === 1; // odd bubbles pin to the far (inline-end) side instead
-          return (
-            <div
-              key={i}
-              data-gp-reveal
-              data-gp-reveal-dir={anchorEnd ? 'left' : 'right'}
-              style={{
-                alignSelf: anchorEnd ? 'flex-end' : 'flex-start',
-                maxWidth: '82%',
-                fontSize: '.72rem',
-                fontWeight: 600,
-                lineHeight: 1.55,
-                padding: '.65rem .9rem',
-                borderRadius: '.85rem',
-                background: p.surface,
-                color: p.ink,
-                // The accent leads from whichever side the bubble is
-                // pinned to — makes the alternation read as a deliberate
-                // rhythm rather than an accidental, barely-there offset.
-                borderInlineStart: anchorEnd ? `1px solid ${p.surfaceBorder}` : `2.5px solid ${p.accent}`,
-                borderInlineEnd: anchorEnd ? `2.5px solid ${p.accent}` : `1px solid ${p.surfaceBorder}`,
-                borderBlock: `1px solid ${p.surfaceBorder}`,
-                boxShadow: `0 10px 22px -16px ${p.glow}`,
-              }}
-            >
-              {m}
-            </div>
-          );
-        })}
+        {spec.sample.messages.map((m, i) => (
+          <div
+            key={i}
+            data-gp-reveal
+            data-gp-reveal-dir="up"
+            style={{
+              textAlign: 'start',
+              fontSize: '.72rem',
+              fontWeight: 600,
+              lineHeight: 1.55,
+              padding: '.65rem .9rem',
+              borderRadius: '.85rem',
+              background: p.surface,
+              color: p.ink,
+              // Same accent stripe on the same (start/right) side for
+              // every line — one consistent, orderly stack, not a
+              // zig-zag; the previous alternating-side layout read as
+              // disorganized rather than deliberate.
+              borderInlineStart: `2.5px solid ${p.accent}`,
+              borderInlineEnd: `1px solid ${p.surfaceBorder}`,
+              borderBlock: `1px solid ${p.surfaceBorder}`,
+              boxShadow: `0 10px 22px -16px ${p.glow}`,
+            }}
+          >
+            {m}
+          </div>
+        ))}
       </div>
 
       <div
