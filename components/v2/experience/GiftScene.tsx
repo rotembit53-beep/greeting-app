@@ -253,14 +253,12 @@ export default function GiftScene({ template, gift, recipientName }: Props) {
             {recipientName}, יש לך גם מתנה!
           </h2>
 
+          {/* Open composition, not a bordered card floating in the scene:
+            * the gift is the whole moment here, so it gets the width and an
+            * accent rule to sit on instead of a box drawn around it. */}
           <div
-            className="rounded-3xl px-6 py-8 mx-auto"
-            style={{
-              maxWidth: '26rem',
-              background: 'var(--v2-surface)',
-              border: `2px solid ${accent}`,
-              boxShadow: `0 26px 60px -30px ${template.palette.glow}`,
-            }}
+            className="gift-block mx-auto"
+            style={{ borderTop: `2px solid ${accent}` }}
           >
             <div className="text-5xl mb-3">{gift.emoji || meta.emoji}</div>
 
@@ -291,15 +289,18 @@ export default function GiftScene({ template, gift, recipientName }: Props) {
               <img
                 src={gift.imageUrl}
                 alt={gift.title}
-                className="w-full rounded-2xl my-4"
-                style={{ border: '1px solid var(--v2-surface-border)' }}
+                className="w-full my-4"
+                style={{ borderRadius: '0.5rem' }}
               />
             ) : null}
 
             {gift.code ? (
               <div
-                className="rounded-2xl px-4 py-3 my-4"
-                style={{ background: 'var(--v2-accent-soft)' }}
+                className="px-4 py-3 my-4"
+                style={{
+                  background: 'var(--v2-accent-soft)',
+                  borderInlineStart: `2px solid ${accent}`,
+                }}
               >
                 <p className="text-xs mb-1" style={{ color: 'var(--v2-ink-soft)' }}>
                   קוד מימוש

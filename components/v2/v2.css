@@ -480,68 +480,22 @@
 
 
 /* ==========================================================================
-   Full canvas — a style shown at the size it will actually be experienced.
-   Replaces the old .style-card grid and the phone mockup that framed the
-   preview: both rendered a full-screen design as a small boxed thumbnail.
+   Style showcase — the phone, centred, with a compact picker under it.
+   The 21-card grid that used to sit beside the phone is gone; the phone
+   itself stays, because a greeting really is received on one.
    ========================================================================== */
 
-.style-stage {
-  /* Break out of the parent's max-width container so the canvas is truly
-   * edge to edge, without having to unwind the page's layout above it. */
-  position: relative;
-  width: 100vw;
-  margin-inline: calc(50% - 50vw);
-}
-
-.style-canvas {
-  position: relative;
-  width: 100%;
-  /* Tall enough to read as a screen, capped so the picker below stays in
-   * view on short laptops instead of being pushed under the fold. */
-  min-height: min(78vh, 46rem);
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-  isolation: isolate;
-}
-
-/* Art runs the full bleed; only the copy is constrained. */
-.style-canvas-art {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.style-canvas-copy {
-  position: relative;
-  z-index: 1;
-  /* The readable measure. Full-bleed art, but never full-bleed prose — a
-   * line of Hebrew run across a wide viewport loses the reader on the
-   * return sweep no matter how well it's set. */
-  width: min(46rem, 90vw);
+.style-showcase {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 1.1rem;
-  padding: clamp(2.5rem, 7vw, 5rem) 0;
+  align-items: center;
 }
 
-.style-canvas-kicker {
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: var(--v2-tracking-eyebrow);
-}
-
-.style-canvas-cta {
-  align-self: flex-start;
-  margin-top: 0.5rem;
-  font-size: 0.95rem;
-  font-weight: 600;
-  letter-spacing: 0.012em;
-  padding: 0.95rem 1.9rem;
-  border-radius: 999px;
+.style-showcase-device {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
 /* ---------- Compact picker ---------- */
@@ -715,4 +669,66 @@
   width: 100%;
   max-width: 46rem;
   margin-inline: auto;
+}
+
+/* ---------- Live preview entrance ---------- */
+
+@keyframes gp-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.gp-root .gp-in {
+  opacity: 0;
+  animation: gp-in var(--v2-dur-l) var(--v2-ease-out) forwards;
+}
+
+/* The style's art behind the whole preview card, matching the page-wide
+ * backdrop on the real greeting. Absolute so it covers the full scroll
+ * height of the card, faded so the sample copy stays readable. */
+.gp-art {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 0.24;
+}
+
+/* The greeting inside the phone is a printed card too — same stock, at the
+ * scale it would actually be seen at through the glass. */
+.gp-root::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background-image: var(--v2-grain-paper);
+  background-size: 120px 120px;
+  opacity: .07;
+  mix-blend-mode: multiply;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gp-root .gp-in { opacity: 1; animation: none; transform: none; }
+}
+
+/* ---------- Device preview: scrollable screen, invisible scrollbar ---------- */
+
+.dp-scroll {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  scrollbar-width: none;
+}
+.dp-scroll::-webkit-scrollbar { display: none; }
+
+/* Gift: an open block rather than a bordered card. Wider than the old
+ * 26rem card so the gift reads as the moment it is, with the copy inside
+ * still held to a comfortable measure. */
+.gift-block {
+  width: 100%;
+  max-width: 34rem;
+  padding: 2rem 0 0.5rem;
+  text-align: center;
 }

@@ -492,10 +492,10 @@ export function SurpriseScene({ template, content }: SceneProps) {
       ) : (
         <div
           ref={revealRef}
-          className="rounded-3xl px-6 py-8"
+          className="px-6 py-8"
           style={{
             background: 'var(--v2-accent-soft)',
-            border: '1.5px solid var(--v2-accent)',
+            borderInlineStart: '2px solid var(--v2-accent)',
           }}
         >
           <p

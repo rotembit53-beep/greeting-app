@@ -140,13 +140,10 @@ export default function GreetingExperience({ greeting, preview = false }: Props)
 
       <div ref={contentRef} className="relative z-10">
         {cover ? (
-          <div className="v2-container pt-10">
+          <div className="v2-bleed pt-10">
             <div
-              className="overflow-hidden rounded-3xl"
-              style={{
-                border: '1.5px solid var(--v2-surface-border)',
-                boxShadow: '0 26px 64px -30px var(--v2-glow)',
-              }}
+              className="overflow-hidden"
+              style={{ boxShadow: '0 26px 64px -30px var(--v2-glow)' }}
             >
               {cover.type === 'video' ? (
                 <video src={cover.url} controls playsInline className="w-full block" />

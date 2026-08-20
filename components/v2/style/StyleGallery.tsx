@@ -6,17 +6,18 @@ import { useGSAP } from '@gsap/react';
 import { TEMPLATE_LIST, getTemplate } from '@/lib/v2/templates';
 import { styleArt } from '@/lib/v2/styleArt';
 import { TemplateId } from '@/lib/v2/types';
-import StyleCanvas from './StyleCanvas';
+import DevicePreview from './DevicePreview';
 
 gsap.registerPlugin(useGSAP);
 
 /**
- * The style chooser: one full-screen live canvas plus a compact picker.
+ * The style chooser: the phone showcase plus a compact picker.
  *
- * Replaces the previous 21-card grid bound to a phone mockup. Both of those
- * showed each design as a small framed thumbnail; a greeting is a full-screen
- * experience, so the chooser now shows it at that size and the picker is
- * reduced to a single scrollable row of names.
+ * The phone stays — it's what sells the product, and a greeting really is
+ * received on one. What changed is everything around and inside it: the
+ * 21-card grid that used to sit beside it is now a single scrollable row of
+ * names, and the design inside the phone runs full-bleed instead of being
+ * broken into little cards.
  */
 
 interface Props {
@@ -26,11 +27,8 @@ interface Props {
   /** Templates the current plan can't use — shown, but marked. */
   lockedIds?: TemplateId[];
   onLockedClick?: () => void;
-  /**
-   * The landing shows the full-screen canvas; the editor already renders its
-   * own live preview beside the form, so there it's picker-only.
-   */
-  showCanvas?: boolean;
+  /** The landing shows the phone; the editor is picker-only. */
+  showDevice?: boolean;
 }
 
 export default function StyleGallery({
@@ -38,7 +36,7 @@ export default function StyleGallery({
   onSelect,
   lockedIds = [],
   onLockedClick,
-  showCanvas = true,
+  showDevice = true,
 }: Props) {
   const rootRef = useRef<HTMLDivElement>(null);
   const [internal, setInternal] = useState<TemplateId>(TEMPLATE_LIST[0].id);
@@ -81,22 +79,27 @@ export default function StyleGallery({
     </div>
   );
 
-  if (!showCanvas) {
-    // Editor: picker only, plus the one-line pitch for the current style so
-    // the choice still explains itself without a card to carry the copy.
+  const pitch = <p className="style-picker-pitch">{styleArt(shown.id).pitch}</p>;
+
+  if (!showDevice) {
     return (
       <div ref={rootRef}>
         {picker}
-        <p className="style-picker-pitch">{styleArt(shown.id).pitch}</p>
+        {pitch}
       </div>
     );
   }
 
   return (
-    <div ref={rootRef} className="style-stage">
-      <StyleCanvas template={shown} canvasKey={shown.id} />
+    <div ref={rootRef} className="style-showcase">
+      <div className="style-showcase-device">
+        <DevicePreview template={shown} previewKey={shown.id} />
+      </div>
+      <p className="text-center text-sm" style={{ color: 'var(--v2-ink-soft)' }} aria-live="polite">
+        תצוגה חיה — <strong style={{ color: 'var(--v2-ink)' }}>{shown.label}</strong>
+      </p>
       {picker}
-      <p className="style-picker-pitch">{styleArt(shown.id).pitch}</p>
+      {pitch}
     </div>
   );
 }
