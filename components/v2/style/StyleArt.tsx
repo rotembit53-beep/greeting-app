@@ -246,7 +246,7 @@ function DepthBokeh({
             filter: `blur(${b.size * 0.32}px)`,
             animationDelay: `${b.d}s`,
             transform: `translateZ(${active ? b.z * 0.4 : b.z}px)`,
-            transition: 'transform .8s cubic-bezier(.2,.8,.3,1)',
+            transition: 'transform .8s cubic-bezier(0.16, 1, 0.3, 1)',
           }}
         />
       ))}
@@ -315,7 +315,7 @@ export default function StyleArt({ template, active = false, className = '', sty
     transform: active
       ? `translateY(${-n}px) translateZ(${n * 2.6}px) scale(1.03)`
       : 'translateZ(0px)',
-    transition: 'transform .55s cubic-bezier(.2,.8,.3,1)',
+    transition: 'transform .6s cubic-bezier(0.16, 1, 0.3, 1)',
   });
 
   let art: React.ReactNode = null;
@@ -453,7 +453,7 @@ export default function StyleArt({ template, active = false, className = '', sty
               color: '#1a1a1a',
               letterSpacing: '-.06em',
               transform: `rotate(-7deg) ${active ? 'scale(1.06)' : 'scale(1)'}`,
-              transition: 'transform .5s cubic-bezier(.2,.8,.3,1)',
+              transition: 'transform .5s cubic-bezier(0.16, 1, 0.3, 1)',
               fontFamily: 'inherit',
             }}
           >
@@ -472,7 +472,7 @@ export default function StyleArt({ template, active = false, className = '', sty
               padding: '5px 11px',
               borderRadius: 999,
               transform: `rotate(-12deg) translateY(${active ? -5 : 0}px)`,
-              transition: 'transform .5s ease',
+              transition: 'transform .5s cubic-bezier(0.16, 1, 0.3, 1)',
             }}
           >
             לא רציני
@@ -489,7 +489,7 @@ export default function StyleArt({ template, active = false, className = '', sty
               padding: '5px 11px',
               borderRadius: 999,
               transform: `rotate(9deg) translateY(${active ? 5 : 0}px)`,
-              transition: 'transform .5s ease',
+              transition: 'transform .5s cubic-bezier(0.16, 1, 0.3, 1)',
             }}
           >
             אזהרה
@@ -523,7 +523,7 @@ export default function StyleArt({ template, active = false, className = '', sty
               fontSize: 'clamp(1.6rem, 5vw, 2.4rem)',
               color: '#1f1d1a',
               opacity: active ? 0.9 : 0.62,
-              transition: 'opacity .5s ease, transform .5s ease',
+              transition: 'opacity .5s cubic-bezier(0.16, 1, 0.3, 1), transform .5s cubic-bezier(0.16, 1, 0.3, 1)',
               transform: active ? 'translateY(-3px)' : 'none',
             }}
           >
@@ -551,7 +551,7 @@ export default function StyleArt({ template, active = false, className = '', sty
                 }55, transparent)`,
                 filter: 'blur(14px)',
                 transform: `rotate(${i % 2 === 0 ? 14 : -14}deg) translateY(${active ? -10 : 0}px)`,
-                transition: 'transform .6s ease',
+                transition: 'transform .6s cubic-bezier(0.16, 1, 0.3, 1)',
               }}
             />
           ))}
@@ -632,7 +632,7 @@ export default function StyleArt({ template, active = false, className = '', sty
               width: '190%',
               aspectRatio: '1',
               transform: `translate(-50%,-50%) ${active ? 'rotate(8deg)' : 'rotate(0deg)'}`,
-              transition: 'transform 1.1s cubic-bezier(.2,.8,.3,1)',
+              transition: 'transform 1.1s cubic-bezier(0.16, 1, 0.3, 1)',
               background:
                 'repeating-conic-gradient(from 0deg, rgba(193,68,14,.30) 0deg 9deg, transparent 9deg 18deg)',
               borderRadius: '999px',
@@ -695,7 +695,11 @@ export default function StyleArt({ template, active = false, className = '', sty
                 width: 58,
                 height: 58,
                 borderRadius: '999px',
-                background: '#141a38',
+                // Carves the crescent by overlaying the ground colour, so it
+                // has to track the midnight palette's pageBg in this region
+                // (top-right, near the radial's centre stop) — a mismatch
+                // shows up as a visible disc rather than a moon.
+                background: '#283460',
               }}
             />
           </div>
@@ -722,7 +726,7 @@ export default function StyleArt({ template, active = false, className = '', sty
               width: active ? '78%' : '64%',
               height: 12,
               background: '#ff5252',
-              transition: 'width .5s cubic-bezier(.2,.8,.3,1)',
+              transition: 'width .5s cubic-bezier(0.16, 1, 0.3, 1)',
             }}
           />
           <div
@@ -734,7 +738,7 @@ export default function StyleArt({ template, active = false, className = '', sty
               height: 46,
               border: '4px solid #ff5252',
               transform: `rotate(${active ? 24 : 12}deg)`,
-              transition: 'transform .5s ease',
+              transition: 'transform .5s cubic-bezier(0.16, 1, 0.3, 1)',
             }}
           />
           <div
@@ -748,7 +752,7 @@ export default function StyleArt({ template, active = false, className = '', sty
               letterSpacing: '-.06em',
               color: '#f5f5f5',
               transform: active ? 'translateY(-4px)' : 'none',
-              transition: 'transform .5s ease',
+              transition: 'transform .5s cubic-bezier(0.16, 1, 0.3, 1)',
             }}
           >
             BOLD
@@ -781,7 +785,7 @@ export default function StyleArt({ template, active = false, className = '', sty
                 background: `linear-gradient(180deg, transparent 0%, ${b.c} 42%, transparent 92%)`,
                 filter: 'blur(20px)',
                 transform: `rotate(${b.r}deg) translateY(${active ? -12 : 0}px)`,
-                transition: 'transform .7s ease',
+                transition: 'transform .7s cubic-bezier(0.16, 1, 0.3, 1)',
                 animationDelay: b.d,
               }}
             />
@@ -866,7 +870,7 @@ export default function StyleArt({ template, active = false, className = '', sty
                 background: 'rgba(255,255,255,.32)',
                 filter: 'blur(3px)',
                 transform: `translateY(${active ? -4 - i * 2 : 0}px)`,
-                transition: 'transform .6s ease',
+                transition: 'transform .6s cubic-bezier(0.16, 1, 0.3, 1)',
               }}
             />
           ))}
@@ -892,7 +896,7 @@ export default function StyleArt({ template, active = false, className = '', sty
               background:
                 'linear-gradient(108deg, transparent 34%, rgba(255,255,255,.16) 44%, rgba(255,255,255,.05) 50%, transparent 58%)',
               transform: `translateX(${active ? '6%' : '0%'})`,
-              transition: 'transform .7s ease',
+              transition: 'transform .7s cubic-bezier(0.16, 1, 0.3, 1)',
             }}
           />
           {/* venetian blind bars */}
@@ -919,7 +923,7 @@ export default function StyleArt({ template, active = false, className = '', sty
               background: '#e02b3c',
               boxShadow: '0 0 26px 6px rgba(224,43,60,.5)',
               transform: active ? 'scale(1.15)' : 'scale(1)',
-              transition: 'transform .5s ease',
+              transition: 'transform .5s cubic-bezier(0.16, 1, 0.3, 1)',
             }}
           />
           <div
@@ -959,7 +963,7 @@ export default function StyleArt({ template, active = false, className = '', sty
                 opacity: 0.9,
                 animationDelay: b.d,
                 transform: active ? 'scale(1.06)' : 'scale(1)',
-                transition: 'transform .55s ease',
+                transition: 'transform .55s cubic-bezier(0.16, 1, 0.3, 1)',
               }}
             />
           ))}
@@ -1003,7 +1007,7 @@ export default function StyleArt({ template, active = false, className = '', sty
               width: 44,
               height: 44,
               transform: `translate(-50%,-50%) rotate(45deg) scale(${active ? 1.12 : 1})`,
-              transition: 'transform .55s ease',
+              transition: 'transform .55s cubic-bezier(0.16, 1, 0.3, 1)',
               border: '1px solid #8a7c66',
               opacity: 0.6,
             }}
@@ -1074,7 +1078,7 @@ export default function StyleArt({ template, active = false, className = '', sty
                 height: '150%',
                 background: i % 2 === 0 ? 'rgba(255,122,26,.22)' : 'rgba(255,255,255,.07)',
                 transform: `rotate(-18deg) translateX(${active ? 6 : 0}px)`,
-                transition: 'transform .5s ease',
+                transition: 'transform .5s cubic-bezier(0.16, 1, 0.3, 1)',
               }}
             />
           ))}
@@ -1121,7 +1125,7 @@ export default function StyleArt({ template, active = false, className = '', sty
               insetInlineStart: '50%',
               top: '50%',
               transform: `translate(-50%,-50%) scale(${active ? 1.1 : 1})`,
-              transition: 'transform .5s ease',
+              transition: 'transform .5s cubic-bezier(0.16, 1, 0.3, 1)',
               color: '#c2a35e',
               fontSize: 44,
               filter: 'drop-shadow(0 6px 14px rgba(0,0,0,.4))',
@@ -1216,7 +1220,7 @@ export default function StyleArt({ template, active = false, className = '', sty
               top: '10%',
               fontSize: 26,
               transform: `rotate(${active ? 18 : 8}deg)`,
-              transition: 'transform .5s ease',
+              transition: 'transform .5s cubic-bezier(0.16, 1, 0.3, 1)',
             }}
           >
             ✈️
@@ -1229,14 +1233,19 @@ export default function StyleArt({ template, active = false, className = '', sty
       art = null;
   }
 
-  const bokehColors = template.decor.palette.length
-    ? template.decor.palette
-    : [p.accent, p.glow];
+  /* The bokeh is atmosphere thrown by the template's OWN particles, so a
+   * template that has no particles gets none. Falling back to ink/accent
+   * here (as this used to) put out-of-focus grey blobs on exactly the seven
+   * precision styles — minimal, bold, blueprint, noir, marble, military,
+   * world — whose whole art direction is hard edges and empty space. */
+  const bokehColors = template.decor.palette;
 
   return (
     <div className={`sa-shell ${className}`} style={shell} aria-hidden="true">
       {art}
-      <DepthBokeh seed={`${id}-bokeh`} colors={bokehColors} active={active} />
+      {bokehColors.length > 0 && (
+        <DepthBokeh seed={`${id}-bokeh`} colors={bokehColors} active={active} />
+      )}
     </div>
   );
 }

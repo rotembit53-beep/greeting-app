@@ -8,21 +8,96 @@
 
 .v2-scope {
   /* Filled in per-template at runtime via inline custom properties. */
-  --v2-ink: #1f1d1a;
-  --v2-ink-soft: #7c766c;
+  --v2-ink: #2A2622;
+  --v2-ink-soft: #6E665E;
   --v2-accent: #e8365d;
-  --v2-accent-soft: rgba(232, 54, 93, 0.12);
+  --v2-accent-soft: rgba(232, 54, 93, 0.10);
   --v2-surface: #ffffff;
-  --v2-surface-border: rgba(0, 0, 0, 0.08);
+  --v2-surface-border: rgba(42, 38, 34, 0.07);
   --v2-glow: rgba(232, 54, 93, 0.3);
 
+  /* ---- Motion -----------------------------------------------------------
+   * One ease vocabulary for the whole product. `--v2-ease-out` is the
+   * decelerate curve every state change uses (hover lift, entrance, swap):
+   * a long tail that settles rather than stops. `--v2-ease-soft` is for
+   * anything that also has to start gently (scale, cross-fade).
+   * NOTE: the infinite ambient loops (sa-float/drift/twinkle) deliberately
+   * keep `ease-in-out` — an asymmetric decelerate curve on a looping yoyo
+   * visibly jerks at the wrap point, which is the opposite of the intent. */
+  --v2-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --v2-ease-soft: cubic-bezier(0.32, 0.72, 0, 1);
+  --v2-dur-s: 0.34s;
+  --v2-dur-m: 0.55s;
+  --v2-dur-l: 0.85s;
+
+  /* ---- Light & shadow ---------------------------------------------------
+   * Shadows are tinted warm umber, never black — physical card stock casts a
+   * shadow that carries the colour of the surface it sits on. Held as an rgb
+   * triplet so each layer can pick its own alpha via `rgb(var(--x) / a)`, and
+   * so a dark template can retint the whole system with one override. */
+  --v2-shadow-rgb: 46 32 24;
+  --v2-shadow-ambient:
+    0 1px 1px rgb(var(--v2-shadow-rgb) / 0.03),
+    0 4px 10px -6px rgb(var(--v2-shadow-rgb) / 0.06);
+  --v2-shadow-raised:
+    0 1px 1px rgb(var(--v2-shadow-rgb) / 0.035),
+    0 6px 14px -8px rgb(var(--v2-shadow-rgb) / 0.07),
+    0 18px 36px -22px rgb(var(--v2-shadow-rgb) / 0.14);
+  --v2-shadow-lifted:
+    0 1px 1px rgb(var(--v2-shadow-rgb) / 0.04),
+    0 10px 22px -10px rgb(var(--v2-shadow-rgb) / 0.10),
+    0 34px 60px -30px rgb(var(--v2-shadow-rgb) / 0.20);
+
+  /* Hairlines. Dynamic opacity over the surface underneath, so the rule
+   * reads as an edge catching light rather than a drawn-on stroke. */
+  --v2-hairline: rgb(var(--v2-shadow-rgb) / 0.07);
+  --v2-hairline-strong: rgb(var(--v2-shadow-rgb) / 0.13);
+
+  /* ---- Typography -------------------------------------------------------
+   * Hebrew takes slightly positive tracking at text sizes (the script has no
+   * ascender/descender rhythm to carry the eye) and slightly negative at
+   * display sizes, where the counters would otherwise open up. */
+  --v2-tracking-display: -0.018em;
+  --v2-tracking-body: 0.006em;
+  --v2-tracking-eyebrow: 0.26em;
+  --v2-leading-body: 1.75;
+  --v2-leading-display: 1.14;
+
   color: var(--v2-ink);
+  font-family: var(--font-v2-sans), var(--font-heebo), 'Segoe UI', sans-serif;
+  letter-spacing: var(--v2-tracking-body);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
-/* Templates that ask for a display serif get it here; the rest inherit Heebo. */
+/* Dark templates: the ground is already dark, so a warm umber shadow would
+ * read as a smudge. Retint to the deep end of the same hue family and let
+ * ambient light do the separating instead. */
+.v2-scope[data-dark='true'],
+.v2-dark {
+  --v2-shadow-rgb: 8 5 14;
+  --v2-hairline: rgb(255 255 255 / 0.08);
+  --v2-hairline-strong: rgb(255 255 255 / 0.14);
+}
+
+/* Templates that ask for a display serif get it here; the rest inherit the
+ * V2 sans. Frank Ruhl Libre is a genuine Hebrew text serif — the fallbacks
+ * exist only for the paint before the webfont lands. */
 .v2-scope .v2-serif {
-  font-family: var(--font-v2-display), Georgia, 'Times New Roman', serif;
+  font-family: var(--font-v2-display), 'Frank Ruhl Libre', 'David Libre', Georgia, serif;
+  letter-spacing: var(--v2-tracking-display);
+}
+
+/* ---- Micro-texture ------------------------------------------------------
+ * Two grains, both inline SVG turbulence so there is no extra request and
+ * nothing to cache-bust. `--v2-grain-paper` is the fine matte stock used on
+ * light surfaces; `--v2-grain-canvas` is coarser and looser, for large
+ * fields where a fine grain would disappear. Applied via ::after overlays
+ * with `pointer-events:none`, never as a background on an interactive box. */
+.v2-scope {
+  --v2-grain-paper: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23p)' opacity='0.55'/%3E%3C/svg%3E");
+  --v2-grain-canvas: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='c'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.62' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23c)' opacity='0.5'/%3E%3C/svg%3E");
 }
 
 /* ---------- Layout helpers ---------- */
@@ -62,85 +137,100 @@
   justify-content: center;
   gap: 0.5rem;
   border-radius: 999px;
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 0.97rem;
+  letter-spacing: 0.012em;
   line-height: 1;
-  padding: 1rem 1.75rem;
+  padding: 1.05rem 1.9rem;
   border: 1px solid transparent;
   cursor: pointer;
-  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease,
-    border-color 0.18s ease, opacity 0.18s ease;
+  transition: transform var(--v2-dur-s) var(--v2-ease-out),
+    box-shadow var(--v2-dur-m) var(--v2-ease-out),
+    background var(--v2-dur-s) var(--v2-ease-out),
+    border-color var(--v2-dur-s) var(--v2-ease-out),
+    opacity var(--v2-dur-s) var(--v2-ease-out);
   -webkit-tap-highlight-color: transparent;
   text-align: center;
 }
 
 .v2-btn:active {
-  transform: scale(0.97);
+  transform: translateY(0) scale(0.985);
 }
 
 .v2-btn:disabled {
-  opacity: 0.5;
+  opacity: 0.45;
   cursor: not-allowed;
 }
 
 .v2-btn-primary {
   background: var(--v2-accent);
   color: var(--v2-on-accent, #fff);
-  box-shadow: 0 10px 30px -8px var(--v2-glow);
+  /* Ambient tint-matched pool under the button, not a neon halo: the accent
+   * colour at low alpha doing the work a real light source would. */
+  box-shadow: var(--v2-shadow-raised), 0 12px 28px -16px var(--v2-glow);
 }
 
 .v2-btn-primary:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 18px 40px -10px var(--v2-glow);
+  box-shadow: var(--v2-shadow-lifted), 0 20px 40px -18px var(--v2-glow);
 }
 
 .v2-btn-ghost {
   background: transparent;
   color: var(--v2-ink);
-  border-color: var(--v2-surface-border);
+  border-color: var(--v2-hairline-strong);
 }
 
 .v2-btn-ghost:hover:not(:disabled) {
   background: var(--v2-accent-soft);
-  border-color: var(--v2-accent);
+  border-color: var(--v2-hairline-strong);
+  transform: translateY(-2px);
+  box-shadow: var(--v2-shadow-ambient);
 }
 
 /* ---------- Inputs ---------- */
 
 .v2-field {
   width: 100%;
-  border-radius: 1rem;
-  border: 1.5px solid var(--v2-surface-border);
+  border-radius: 0.85rem;
+  border: 1px solid var(--v2-hairline-strong);
   background: var(--v2-surface);
   color: var(--v2-ink);
-  padding: 0.95rem 1.1rem;
+  padding: 1rem 1.15rem;
+  font-family: inherit;
   font-size: 1rem;
-  line-height: 1.5;
-  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+  line-height: 1.6;
+  letter-spacing: var(--v2-tracking-body);
+  box-shadow: inset 0 1px 2px rgb(var(--v2-shadow-rgb) / 0.04);
+  transition: border-color var(--v2-dur-s) var(--v2-ease-out),
+    box-shadow var(--v2-dur-s) var(--v2-ease-out);
 }
 
 .v2-field::placeholder {
   color: var(--v2-ink-soft);
-  opacity: 0.75;
+  opacity: 0.6;
 }
 
 .v2-field:focus {
   outline: none;
   border-color: var(--v2-accent);
-  box-shadow: 0 0 0 4px var(--v2-accent-soft);
+  box-shadow: 0 0 0 3px var(--v2-accent-soft);
 }
 
 .v2-label {
   display: block;
-  font-weight: 700;
-  font-size: 0.95rem;
-  margin-bottom: 0.5rem;
+  font-weight: 600;
+  font-size: 0.92rem;
+  letter-spacing: 0.01em;
+  margin-bottom: 0.55rem;
   color: var(--v2-ink);
 }
 
 .v2-hint {
   font-size: 0.85rem;
+  line-height: 1.7;
   color: var(--v2-ink-soft);
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.8rem;
 }
 
 /* ---------- Choice chips / cards ---------- */
@@ -151,25 +241,29 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.35rem;
-  border-radius: 1.15rem;
-  border: 1.5px solid var(--v2-surface-border);
+  gap: 0.4rem;
+  border-radius: 1rem;
+  border: 1px solid var(--v2-hairline);
   background: var(--v2-surface);
-  padding: 1rem 0.75rem;
+  padding: 1.1rem 0.85rem;
   cursor: pointer;
-  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+  box-shadow: var(--v2-shadow-ambient);
+  transition: transform var(--v2-dur-s) var(--v2-ease-out),
+    border-color var(--v2-dur-s) var(--v2-ease-out),
+    box-shadow var(--v2-dur-m) var(--v2-ease-out);
   text-align: center;
   -webkit-tap-highlight-color: transparent;
 }
 
 .v2-choice:hover {
-  transform: translateY(-3px);
-  border-color: var(--v2-accent);
+  transform: translateY(-4px);
+  border-color: var(--v2-hairline-strong);
+  box-shadow: var(--v2-shadow-raised);
 }
 
 .v2-choice[data-selected='true'] {
   border-color: var(--v2-accent);
-  box-shadow: 0 0 0 3px var(--v2-accent-soft), 0 12px 28px -14px var(--v2-glow);
+  box-shadow: inset 0 0 0 1px var(--v2-accent), var(--v2-shadow-raised);
 }
 
 /* ---------- Scroll & motion ---------- */
@@ -230,36 +324,46 @@
    ========================================================================== */
 
 .v2-studio{
-  --v2-ink:#241A22;
-  --v2-ink-soft:#7A6A72;
+  /* Aged parchment ground, warm plum ink, single gold accent. Tone-on-tone:
+   * every surface is a shade of the same warm neutral, so the gold is the
+   * only saturated thing on the page and reads as precious rather than loud. */
+  --v2-ink:#2B2029;
+  --v2-ink-soft:#736069;
   --v2-ink-faint:#A2929A;
   --v2-accent:#3A0F2E;
-  --v2-accent-soft:rgba(58, 15, 46, 0.09);
-  --v2-gold:#C9A227;
-  --v2-gold-lit:#EBD08A;
+  --v2-accent-soft:rgba(58, 15, 46, 0.07);
+  --v2-gold:#B8912C;
+  --v2-gold-lit:#E8CE93;
+  --v2-gold-deep:#7A5C15;
   --v2-surface:#FFFCF6;
-  --v2-surface-2:#FBF4E9;
-  --v2-surface-border:#D9C9B3;
-  --v2-glow:rgba(201, 162, 39, 0.34);
+  --v2-surface-2:#FAF3E7;
+  --v2-surface-border:rgba(58, 40, 30, 0.10);
+  --v2-glow:rgba(176, 141, 58, 0.26);
   --v2-on-accent:#F6ECDC;
+  --v2-shadow-rgb: 58 40 30;
 
   color:var(--v2-ink);
   background:
-    radial-gradient(120% 80% at 68% -10%, #F7F1E7 0%, transparent 58%),
-    radial-gradient(90% 70% at 12% 108%, #E2D5C3 0%, transparent 60%),
-    #EFE6D9;
+    radial-gradient(120% 80% at 68% -10%, #F8F2E9 0%, transparent 58%),
+    radial-gradient(90% 70% at 12% 108%, #E4D8C7 0%, transparent 60%),
+    #EFE7DB;
   position:relative;
 }
 
-/* Paper grain: the surface the UI sits on. */
+/* Paper grain: the surface the UI sits on. Two passes at different scales —
+ * a coarse canvas weave under a fine cotton grain — because a single
+ * uniform noise layer is exactly what reads as a CSS effect rather than
+ * as stock. `background-attachment: fixed` keeps the grain still while the
+ * page scrolls over it, the way ink sits on paper. */
 .v2-studio::before{
   content:'';
   position:absolute;
   inset:0;
   pointer-events:none;
   z-index:0;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='0.42'/%3E%3C/svg%3E");
-  opacity:.2;
+  background-image: var(--v2-grain-paper), var(--v2-grain-canvas);
+  background-size: 160px 160px, 220px 220px;
+  opacity:.19;
   mix-blend-mode:multiply;
 }
 .v2-studio > *{position:relative;z-index:1;}
@@ -269,35 +373,56 @@
   position:relative;
   background:linear-gradient(176deg, var(--v2-surface) 0%, var(--v2-surface-2) 100%);
   border:1px solid var(--v2-surface-border);
-  border-radius:1.15rem;
-  box-shadow:0 18px 40px -22px rgba(58,40,30,.5), 0 3px 10px rgba(58,40,30,.08);
+  border-radius:1rem;
+  box-shadow: var(--v2-shadow-raised);
 }
+/* Raking light down the top edge — soft-light so it tints rather than
+ * washes, which is what separates a lit surface from a white overlay. */
 .v2-panel::after{
   content:'';
   position:absolute;
   inset:0;
   border-radius:inherit;
   pointer-events:none;
-  background:linear-gradient(172deg, rgba(255,255,255,.85) 0%, transparent 34%);
+  background:linear-gradient(172deg, rgba(255,255,255,.8) 0%, transparent 34%);
   mix-blend-mode:soft-light;
+}
+/* Matte finish on the panel itself, so it doesn't read flatter than the
+ * ground it sits on. */
+.v2-panel::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  pointer-events:none;
+  background-image: var(--v2-grain-paper);
+  background-size: 160px 160px;
+  opacity:.10;
+  mix-blend-mode:multiply;
 }
 
 /* Display face — the product's serif, already loaded by the root layout. */
-.v2-display{font-family:var(--font-v2-display), Georgia, 'Times New Roman', serif;}
+.v2-display{
+  font-family:var(--font-v2-display), 'Frank Ruhl Libre', 'David Libre', Georgia, serif;
+  letter-spacing:var(--v2-tracking-display);
+  line-height:var(--v2-leading-display);
+}
 
 /* Masthead logo */
 .v2-logo{
-  font-family:var(--font-v2-display), Georgia, serif;
+  font-family:var(--font-v2-display), 'Frank Ruhl Libre', Georgia, serif;
   font-weight:700;
   font-size:clamp(3rem, 11vw, 6.6rem);
   line-height:.94;
-  letter-spacing:-.022em;
+  letter-spacing:-.026em;
   margin:0;
   color:var(--v2-ink);
   direction:ltr;
 }
+/* Gold foil. Struck metal has a dark band where the surface turns away from
+ * the light — that mid-stop is what stops this reading as a yellow gradient. */
 .v2-logo .gi{
-  background:linear-gradient(168deg, var(--v2-gold) 8%, #9A7A18 52%, var(--v2-gold-lit) 96%);
+  background:linear-gradient(166deg, var(--v2-gold) 8%, var(--v2-gold-lit) 30%, var(--v2-gold-deep) 60%, var(--v2-gold) 84%);
   -webkit-background-clip:text;
   background-clip:text;
   color:transparent;
@@ -305,22 +430,23 @@
 
 .v2-gold-rule{
   width:clamp(4rem, 10vw, 7rem);
-  height:2px;
-  margin:1.5rem auto 1.3rem;
+  height:1px;
+  margin:1.6rem auto 1.4rem;
   background:linear-gradient(90deg, transparent, var(--v2-gold), transparent);
+  opacity:.75;
 }
 
 .v2-eyebrow{
-  font-size:.72rem;
-  letter-spacing:.32em;
+  font-size:.7rem;
+  letter-spacing:var(--v2-tracking-eyebrow);
   text-transform:uppercase;
   color:var(--v2-ink-faint);
-  font-weight:600;
+  font-weight:500;
 }
 
 /* Gold-foil half of the wordmark, at nav scale. */
 .v2-logo-gi{
-  background:linear-gradient(168deg, var(--v2-gold) 8%, #9A7A18 52%, var(--v2-gold-lit) 96%);
+  background:linear-gradient(166deg, var(--v2-gold) 8%, var(--v2-gold-lit) 30%, var(--v2-gold-deep) 60%, var(--v2-gold) 84%);
   -webkit-background-clip:text;
   background-clip:text;
   color:transparent;
@@ -356,16 +482,16 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  border-radius: 1.35rem;
+  border-radius: 1.1rem;
   overflow: hidden;
   cursor: pointer;
   text-align: start;
   border: 1px solid var(--v2-surface-border);
   background: linear-gradient(176deg, var(--v2-surface) 0%, var(--v2-surface-2, var(--v2-surface)) 100%);
-  box-shadow: 0 14px 34px -22px rgba(40, 26, 20, .55), 0 2px 6px rgba(40, 26, 20, .06);
-  transition: transform .45s cubic-bezier(.2, .8, .3, 1),
-              box-shadow .45s cubic-bezier(.2, .8, .3, 1),
-              border-color .3s ease;
+  box-shadow: var(--v2-shadow-raised);
+  transition: transform var(--v2-dur-m) var(--v2-ease-out),
+              box-shadow var(--v2-dur-l) var(--v2-ease-out),
+              border-color var(--v2-dur-m) var(--v2-ease-out);
   -webkit-tap-highlight-color: transparent;
   /* The gallery renders every template's animated art at once — most of it
    * off-screen. `content-visibility` lets the browser skip style/layout/paint
@@ -390,19 +516,43 @@
   animation-play-state: paused;
 }
 
-.style-card:hover,
-.style-card:focus-visible {
-  transform: translateY(-6px);
-  box-shadow: 0 34px 64px -30px rgba(40, 26, 20, .6), 0 6px 16px rgba(40, 26, 20, .1);
-  border-color: var(--v2-gold, var(--v2-accent));
+/* Matte stock over the whole card — the single thing that most separates
+ * "printed piece" from "div with a background-color". Sits above the art
+ * window on purpose so the illustration is on the same paper as the text. */
+.style-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--v2-grain-paper);
+  background-size: 160px 160px;
+  opacity: .085;
+  mix-blend-mode: multiply;
 }
 
-.style-card:focus-visible { outline: 2px solid var(--v2-gold, var(--v2-accent)); outline-offset: 3px; }
+/* A deliberate lift, not a pop: -4px over 550ms on a long-tail curve, with
+ * the ambient shadow expanding underneath as if the card rose off the table
+ * toward a fixed light. Border warms to gold rather than switching colour. */
+.style-card:hover,
+.style-card:focus-visible {
+  transform: translateY(-4px);
+  box-shadow: var(--v2-shadow-lifted);
+  border-color: rgb(var(--v2-shadow-rgb) / 0.16);
+}
+
+.style-card:focus-visible {
+  outline: 1px solid var(--v2-gold, var(--v2-accent));
+  outline-offset: 3px;
+}
 
 .style-card[data-selected='true'] {
   border-color: var(--v2-gold, var(--v2-accent));
-  box-shadow: 0 0 0 2px var(--v2-gold, var(--v2-accent)),
-              0 30px 60px -28px rgba(40, 26, 20, .6);
+  /* Inset keeps the selected ring on the card's own edge instead of adding
+   * a second outer contour that fights the ambient shadow. */
+  box-shadow: inset 0 0 0 1px var(--v2-gold, var(--v2-accent)),
+              var(--v2-shadow-lifted);
 }
 
 /* The art window. Elements inside may break its edges by design. */
@@ -418,58 +568,65 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(168deg, rgba(255,255,255,.22) 0%, transparent 40%);
+  background: linear-gradient(168deg, rgba(255,255,255,.20) 0%, transparent 40%);
   mix-blend-mode: soft-light;
 }
 
+/* Borderless, softly tinted. A stroked pill at this size reads as a UI
+ * control; the tint alone reads as a printed label. */
 .style-tag {
   display: inline-flex;
   align-items: center;
-  gap: .28rem;
-  font-size: .68rem;
-  font-weight: 600;
-  padding: .26rem .55rem;
+  gap: .3rem;
+  font-size: .69rem;
+  font-weight: 500;
+  letter-spacing: .014em;
+  padding: .3rem .62rem;
   border-radius: 999px;
-  background: var(--v2-accent-soft);
+  background: rgb(var(--v2-shadow-rgb) / 0.05);
   color: var(--v2-ink-soft);
-  border: 1px solid var(--v2-surface-border);
+  border: 0;
   white-space: nowrap;
 }
 
 .style-check {
   position: absolute;
-  top: .7rem;
-  inset-inline-end: .7rem;
-  width: 1.65rem;
-  height: 1.65rem;
+  top: .75rem;
+  inset-inline-end: .75rem;
+  width: 1.6rem;
+  height: 1.6rem;
   border-radius: 999px;
   display: grid;
   place-items: center;
   background: var(--v2-gold, var(--v2-accent));
-  color: #241A22;
-  font-size: .8rem;
-  font-weight: 800;
-  box-shadow: 0 6px 16px -6px rgba(0,0,0,.5);
+  color: #2B2029;
+  font-size: .78rem;
+  font-weight: 700;
+  /* Tint-matched to the gold it sits on, not a black drop. */
+  box-shadow: 0 4px 12px -4px rgb(var(--v2-shadow-rgb) / 0.35);
   transform: scale(0);
-  transition: transform .35s cubic-bezier(.2,1.4,.4,1);
-  z-index: 3;
+  transition: transform var(--v2-dur-m) var(--v2-ease-out);
+  z-index: 4;
 }
 .style-card[data-selected='true'] .style-check { transform: scale(1); }
 
+/* Solid warm ink instead of a blurred translucent panel — glassmorphism is
+ * the single most template-looking effect in the set, and an opaque chip
+ * also stays legible over every one of the 21 art backgrounds. */
 .premium-pill {
   position: absolute;
-  top: .7rem;
-  inset-inline-start: .7rem;
-  z-index: 3;
+  top: .75rem;
+  inset-inline-start: .75rem;
+  z-index: 4;
   font-size: .58rem;
-  font-weight: 800;
-  letter-spacing: .12em;
-  padding: .28rem .5rem;
+  font-weight: 600;
+  letter-spacing: .16em;
+  padding: .3rem .55rem;
   border-radius: 999px;
-  background: rgba(20, 14, 10, .72);
-  color: #EBD08A;
-  border: 1px solid rgba(235, 208, 138, .4);
-  backdrop-filter: blur(4px);
+  background: #2B2029;
+  color: var(--v2-gold-lit, #E3C489);
+  border: 0;
+  box-shadow: 0 4px 12px -4px rgb(var(--v2-shadow-rgb) / 0.4);
 }
 
 /* ---------- Live preview entrance ---------- */
@@ -481,7 +638,21 @@
 
 .gp-root .gp-in {
   opacity: 0;
-  animation: gp-in .6s cubic-bezier(.2, .8, .3, 1) forwards;
+  animation: gp-in var(--v2-dur-l) var(--v2-ease-out) forwards;
+}
+
+/* The greeting inside the phone is a printed card too — same stock, at the
+ * scale it would actually be seen at through the glass. */
+.gp-root::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background-image: var(--v2-grain-paper);
+  background-size: 120px 120px;
+  opacity: .07;
+  mix-blend-mode: multiply;
 }
 
 @media (prefers-reduced-motion: reduce) {

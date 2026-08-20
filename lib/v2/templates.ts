@@ -84,15 +84,18 @@ export const TEMPLATES: Record<TemplateId, TemplateDef> = {
       gradient: 'linear-gradient(145deg, #ffb03a 0%, #ff5f6d 55%, #c9366f 100%)',
       emoji: '🎂',
     },
+    /* Warm cream ground with dusty rose, not candy pink. The accent is
+     * pulled down in chroma so the confetti (which carries the saturation
+     * in this template) is the only vivid thing on the card. */
     palette: {
-      pageBg: 'radial-gradient(circle at 15% 0%, #fff3e0 0%, #ffe6e9 45%, #ffd9e4 100%)',
-      ink: '#40161f',
-      inkSoft: '#7d5560',
-      accent: '#e8365d',
-      accentSoft: '#ffe1e8',
-      surface: '#fffdfb',
-      surfaceBorder: '#ffd0da',
-      glow: 'rgba(255, 140, 90, 0.35)',
+      pageBg: 'radial-gradient(circle at 15% 0%, #FFF6EA 0%, #FBEAE4 46%, #F6DCDF 100%)',
+      ink: '#3E2028',
+      inkSoft: '#7E6068',
+      accent: '#C9506A',
+      accentSoft: 'rgba(201, 80, 106, 0.09)',
+      surface: '#FFFCF8',
+      surfaceBorder: 'rgba(62, 32, 40, 0.09)',
+      glow: 'rgba(212, 138, 108, 0.26)',
     },
     dark: false,
     type: {
@@ -141,15 +144,19 @@ export const TEMPLATES: Record<TemplateId, TemplateDef> = {
       gradient: 'linear-gradient(145deg, #f76b8a 0%, #a4508b 60%, #5f0a87 100%)',
       emoji: '❤️',
     },
+    /* Rich plum rather than a near-black ground: the darkest stop still
+     * carries hue, so the card reads as deep-dyed stock under low light
+     * instead of an unlit screen. Accent pulled off fluorescent pink to a
+     * dusty rose that sits on the same tonal ladder as the ground. */
     palette: {
-      pageBg: 'radial-gradient(circle at 75% 5%, #3a0f2e 0%, #26091f 55%, #170614 100%)',
-      ink: '#fdeef4',
-      inkSoft: '#d3a8bd',
-      accent: '#ff8fab',
-      accentSoft: 'rgba(255, 143, 171, 0.16)',
-      surface: 'rgba(255, 255, 255, 0.05)',
-      surfaceBorder: 'rgba(255, 143, 171, 0.28)',
-      glow: 'rgba(255, 105, 145, 0.4)',
+      pageBg: 'radial-gradient(circle at 72% 4%, #4A1B3D 0%, #341229 52%, #26101F 100%)',
+      ink: '#F6E7EE',
+      inkSoft: '#C4A2B3',
+      accent: '#E39BB0',
+      accentSoft: 'rgba(227, 155, 176, 0.13)',
+      surface: 'rgba(255, 255, 255, 0.055)',
+      surfaceBorder: 'rgba(227, 155, 176, 0.20)',
+      glow: 'rgba(198, 120, 150, 0.30)',
     },
     dark: true,
     type: {
@@ -289,14 +296,17 @@ export const TEMPLATES: Record<TemplateId, TemplateDef> = {
       emoji: '🤍',
     },
     palette: {
-      pageBg: '#f6f4ef',
-      ink: '#1f1d1a',
-      inkSoft: '#7c766c',
-      accent: '#1f1d1a',
-      accentSoft: 'rgba(31, 29, 26, 0.06)',
-      surface: '#fffefb',
-      surfaceBorder: '#e3ded3',
-      glow: 'rgba(31, 29, 26, 0.08)',
+      /* Warm cotton. Ink is a refined charcoal, never #000 — pure black on
+       * a warm ground is the tell that a palette was picked rather than
+       * mixed. Everything here is one hue at four values. */
+      pageBg: '#F5F3EC',
+      ink: '#33302A',
+      inkSoft: '#7B756A',
+      accent: '#33302A',
+      accentSoft: 'rgba(51, 48, 42, 0.05)',
+      surface: '#FEFDF9',
+      surfaceBorder: 'rgba(51, 48, 42, 0.09)',
+      glow: 'rgba(51, 48, 42, 0.07)',
     },
     dark: false,
     type: {
@@ -391,14 +401,17 @@ export const TEMPLATES: Record<TemplateId, TemplateDef> = {
       emoji: '🌿',
     },
     palette: {
-      pageBg: 'radial-gradient(circle at 22% 0%, #f4f6ee 0%, #e6ece0 45%, #d9e2d2 100%)',
-      ink: '#2b3527',
-      inkSoft: '#6a7a63',
-      accent: '#4f6b45',
-      accentSoft: 'rgba(79, 107, 69, 0.12)',
-      surface: '#fdfefb',
-      surfaceBorder: '#c9d6c0',
-      glow: 'rgba(120, 150, 105, 0.32)',
+      /* Sage on warm paper. The ground is greyed toward the warm neutral
+       * rather than tinted green, so the leaf art supplies the only real
+       * chroma and the card stays tone-on-tone. */
+      pageBg: 'radial-gradient(circle at 22% 0%, #F5F5EE 0%, #E8EBE0 45%, #DBE0D2 100%)',
+      ink: '#2E3729',
+      inkSoft: '#6E7A67',
+      accent: '#586E4C',
+      accentSoft: 'rgba(88, 110, 76, 0.09)',
+      surface: '#FDFDF8',
+      surfaceBorder: 'rgba(46, 55, 41, 0.10)',
+      glow: 'rgba(120, 150, 105, 0.24)',
     },
     dark: false,
     type: {
@@ -440,14 +453,16 @@ export const TEMPLATES: Record<TemplateId, TemplateDef> = {
       emoji: '📻',
     },
     palette: {
-      pageBg: 'linear-gradient(165deg, #f9e6c4 0%, #f0c893 45%, #e0a367 100%)',
-      ink: '#3d2314',
-      inkSoft: '#7d5a3c',
-      accent: '#c1440e',
-      accentSoft: 'rgba(193, 68, 14, 0.14)',
-      surface: '#fff6e6',
-      surfaceBorder: '#d8ab73',
-      glow: 'rgba(224, 122, 63, 0.42)',
+      /* Aged parchment through to faded sienna — a 70s print that has sat
+       * in a drawer, rather than the saturated orange of a fresh one. */
+      pageBg: 'linear-gradient(165deg, #F7E8CC 0%, #EDCFA4 45%, #DCAE7E 100%)',
+      ink: '#3F2A1B',
+      inkSoft: '#82634A',
+      accent: '#AE4A1C',
+      accentSoft: 'rgba(174, 74, 28, 0.10)',
+      surface: '#FFF7E9',
+      surfaceBorder: 'rgba(63, 42, 27, 0.13)',
+      glow: 'rgba(196, 118, 68, 0.30)',
     },
     dark: false,
     type: {
@@ -489,14 +504,17 @@ export const TEMPLATES: Record<TemplateId, TemplateDef> = {
       emoji: '🌙',
     },
     palette: {
-      pageBg: 'radial-gradient(circle at 70% 8%, #26305e 0%, #171d3d 50%, #0b0e22 100%)',
-      ink: '#eaf0ff',
-      inkSoft: '#9aa6cc',
-      accent: '#8ea7e9',
-      accentSoft: 'rgba(142, 167, 233, 0.16)',
-      surface: 'rgba(255, 255, 255, 0.06)',
-      surfaceBorder: 'rgba(142, 167, 233, 0.32)',
-      glow: 'rgba(120, 145, 220, 0.45)',
+      /* Deep midnight navy, never pitch black — the darkest stop keeps
+       * enough blue to read as night air rather than an off pixel, and the
+       * glow is ambient (broad, low alpha) instead of specular. */
+      pageBg: 'radial-gradient(circle at 70% 8%, #2A3566 0%, #1C2348 50%, #141A34 100%)',
+      ink: '#E6ECFB',
+      inkSoft: '#98A3C6',
+      accent: '#93A9E3',
+      accentSoft: 'rgba(147, 169, 227, 0.13)',
+      surface: 'rgba(255, 255, 255, 0.055)',
+      surfaceBorder: 'rgba(147, 169, 227, 0.22)',
+      glow: 'rgba(120, 145, 220, 0.32)',
     },
     dark: true,
     type: {

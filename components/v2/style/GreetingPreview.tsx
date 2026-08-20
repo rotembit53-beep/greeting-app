@@ -4,6 +4,7 @@ import { CSSProperties } from 'react';
 import { TemplateDef } from '@/lib/v2/templates';
 import { styleArt } from '@/lib/v2/styleArt';
 import StyleArt from './StyleArt';
+import { onAccentFor } from '@/components/v2/TemplateSurface';
 
 /**
  * The greeting as it will actually look, composed for the screen.
@@ -83,7 +84,7 @@ export default function GreetingPreview({ template, animationKey }: Props) {
         padding: '.5rem 1.05rem',
         borderRadius: 999,
         background: p.accent,
-        color: template.id === 'funny' ? '#ffe75e' : '#fff',
+        color: onAccentFor(template),
         boxShadow: `0 8px 22px -10px ${p.glow}`,
         animationDelay: '.45s',
       }}
@@ -378,7 +379,7 @@ export default function GreetingPreview({ template, animationKey }: Props) {
                 padding: '.5rem 1.05rem',
                 borderRadius: 999,
                 background: p.accent,
-                color: template.id === 'funny' ? '#ffe75e' : '#fff',
+                color: onAccentFor(template),
                 boxShadow: `0 8px 22px -10px ${p.glow}`,
                 textShadow: 'none',
                 animationDelay: '.45s',
