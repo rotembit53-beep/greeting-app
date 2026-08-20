@@ -194,6 +194,12 @@ export default function StyleGallery({
             >
               תצוגה חיה — <strong style={{ color: 'var(--v2-ink)' }}>{shown.label}</strong>
             </p>
+            {/* Mobile only — the device sits still up here instead of
+             * following the scroll (that's what used to cover the card
+             * list), so on a phone it needs to say so once, up front. */}
+            <p className="style-gallery-hint text-center text-xs mt-1" style={{ color: 'var(--v2-ink-soft)' }}>
+              בחרו סגנון למטה — התצוגה כאן למעלה תתעדכן בהתאם
+            </p>
           </div>
         )}
       </div>

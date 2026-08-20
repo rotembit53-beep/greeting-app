@@ -499,10 +499,18 @@
 .dp-scroll::-webkit-scrollbar { display: none; }
 
 /* ---------- Style gallery: device stays in view while cards scroll ----------
- * On mobile the device is the grid's first row and sticks near the top, so
- * scrolling through the (long) card list never scrolls it out of view — no
- * need to scroll back up to see how a style looks. Desktop keeps the device
- * as a second column instead, same sticky behaviour. */
+ * Desktop: the device sits sticky in its own column, so it stays in view the
+ * whole time you're browsing cards — that never conflicts with anything
+ * else on screen, so it's left exactly as is.
+ * Mobile: the device is phone-shaped and ~640px tall, so pinning it sticky
+ * above a single-column card list used to make it dominate most of the
+ * actual screen and never let go while scrolling — read as "the animation
+ * covers everything", and forced the browser to keep repainting a scaled,
+ * continuously-animating sticky element on every scroll frame, which is
+ * what made scrolling feel laggy on-device. It now just sits in normal flow
+ * instead: still the first thing you see, but it scrolls away like
+ * everything else once you move on to the card list — `.style-gallery-hint`
+ * below says as much, once, right under it. */
 
 .style-gallery {
   display: grid;
@@ -518,20 +526,17 @@
   z-index: 2;
 }
 
-/* On a real phone the live preview is itself phone-shaped (~640px tall) —
- * pinning it sticky above a single-column card list means it dominates most
- * of the actual screen and never lets go while you scroll, which reads as
- * "the animation covers everything" and (worse) forces the browser to keep
- * repainting a scaled, continuously-animating sticky element on every scroll
- * frame, which is what made scrolling feel laggy on-device. Below the
- * desktop breakpoint the preview just sits in normal flow instead: still
- * the first thing you see, but it scrolls away like everything else once
- * you move on to the card list. */
 @media (max-width: 1023.98px) {
   .style-gallery-device {
     position: static;
     z-index: auto;
   }
+}
+
+/* Only makes sense where the device doesn't stay in view on its own. */
+.style-gallery-hint { display: none; }
+@media (max-width: 1023.98px) {
+  .style-gallery-hint { display: block; }
 }
 
 @media (min-width: 1024px) {
