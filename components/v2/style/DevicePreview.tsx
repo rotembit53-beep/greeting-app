@@ -3,10 +3,16 @@
 import { useRef, useState } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { CustomEase } from 'gsap/CustomEase';
 import { TemplateDef } from '@/lib/v2/templates';
 import GreetingPreview from './GreetingPreview';
 
-gsap.registerPlugin(useGSAP);
+gsap.registerPlugin(useGSAP, ScrollTrigger, CustomEase);
+
+// One ease vocabulary for this preview, defined once. `caseOut` is a soft,
+// slightly overshoot-free deceleration used for every 3D settle below.
+if (!CustomEase.get('caseOut')) CustomEase.create('caseOut', '0.25, 1, 0.5, 1');
 
 /**
  * The device. Treated as a real object on the page: machined frame, glass
@@ -35,6 +41,15 @@ export default function DevicePreview({ template, previewKey }: Props) {
       const device = deviceRef.current;
       if (!device || reduce) return;
 
+      // Both the float and the pointer-tilt are desktop flourishes — a real
+      // phone has no pointer to tilt with, and keeping an infinite
+      // compositor animation running on the device while the page itself is
+      // being scrolled is exactly the kind of thing that reads as "laggy"
+      // on weaker hardware for no visible benefit (nobody's watching it
+      // bob while they're mid-scroll).
+      const fine = window.matchMedia('(pointer: fine)');
+      if (!fine.matches) return;
+
       gsap.to(device, {
         y: -12,
         duration: 4.2,
@@ -42,10 +57,6 @@ export default function DevicePreview({ template, previewKey }: Props) {
         repeat: -1,
         yoyo: true,
       });
-
-      // Tilt only where there's a real pointer — touch would fight scrolling.
-      const fine = window.matchMedia('(pointer: fine)');
-      if (!fine.matches) return;
 
       const wrap = wrapRef.current;
       if (!wrap) return;
@@ -75,7 +86,9 @@ export default function DevicePreview({ template, previewKey }: Props) {
     { scope: wrapRef }
   );
 
-  // Cross-fade the screen whenever the style changes.
+  // Swap the screen in with a real 3D turn (perspective + rotateY), not just
+  // a cross-fade — the phone reads as a physical object showing a new card,
+  // not a <div> changing its background.
   useGSAP(
     () => {
       const el = screenRef.current;
@@ -83,16 +96,21 @@ export default function DevicePreview({ template, previewKey }: Props) {
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
       gsap.fromTo(
         el,
-        { autoAlpha: 0, scale: 1.04 },
-        { autoAlpha: 1, scale: 1, duration: 0.65, ease: 'power2.out' }
+        { autoAlpha: 0, rotateY: -13, rotateX: 5, scale: 1.05, transformPerspective: 900 },
+        { autoAlpha: 1, rotateY: 0, rotateX: 0, scale: 1, duration: 0.85, ease: 'caseOut' }
       );
     },
     { dependencies: [previewKey], scope: wrapRef }
   );
 
   // A new style may render taller or shorter than the last one — jump the
-  // scroll position back to the top and re-check whether there's now
-  // anything to scroll to.
+  // scroll position back to the top, re-check whether there's now anything
+  // to scroll to, reveal the "rest of the card" (memory photo, message
+  // bubbles, sign-off) with a 3D card-in as it scrolls into view, and — the
+  // showcase piece — automatically scroll through the whole design once so
+  // a visitor who never touches the phone still sees the full template. The
+  // instant a real person scrolls or touches it, autoplay steps aside for
+  // good until the style changes again.
   useGSAP(
     () => {
       const scroller = scrollRef.current;
@@ -107,7 +125,70 @@ export default function DevicePreview({ template, previewKey }: Props) {
         );
       };
       scroller.addEventListener('scroll', onScroll, { passive: true });
-      return () => scroller.removeEventListener('scroll', onScroll);
+
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      if (reduced) {
+        gsap.set('[data-gp-reveal]', { autoAlpha: 1, x: 0, y: 0, rotateX: 0, rotateY: 0 });
+        return () => scroller.removeEventListener('scroll', onScroll);
+      }
+
+      // Scroll-triggered 3D reveal for everything below the hero.
+      scroller.querySelectorAll<HTMLElement>('[data-gp-reveal]').forEach((el) => {
+        const dir = el.dataset.gpRevealDir;
+        const from =
+          dir === 'left'
+            ? { x: -30, rotateY: -20 }
+            : dir === 'right'
+              ? { x: 30, rotateY: 20 }
+              : { y: 30, rotateX: 12 };
+        gsap.fromTo(
+          el,
+          { autoAlpha: 0, transformPerspective: 700, ...from },
+          {
+            autoAlpha: 1,
+            x: 0,
+            y: 0,
+            rotateX: 0,
+            rotateY: 0,
+            duration: 0.75,
+            ease: 'caseOut',
+            scrollTrigger: {
+              trigger: el,
+              scroller,
+              start: 'top 92%',
+              toggleActions: 'play none none reverse',
+            },
+          }
+        );
+      });
+
+      // Autoplay: down through the whole card, hold, back up, hold, repeat —
+      // a slow, deliberate demo pace, never a scrub.
+      const max = scroller.scrollHeight - scroller.clientHeight;
+      const autoplay = gsap.timeline({ repeat: -1, paused: true });
+      if (max > 24) {
+        const downDuration = gsap.utils.clamp(2.4, 6, max / 90);
+        autoplay
+          .to(scroller, { scrollTop: max, duration: downDuration, ease: 'sine.inOut' }, 1.1)
+          .to(scroller, { scrollTop: 0, duration: downDuration, ease: 'sine.inOut' }, '+=1.3');
+        autoplay.play();
+      }
+
+      // kill() is idempotent — safe to call again from cleanup even after a
+      // real scroll/touch already stopped it.
+      const stopAutoplay = () => autoplay.kill();
+      scroller.addEventListener('pointerdown', stopAutoplay, { passive: true });
+      scroller.addEventListener('wheel', stopAutoplay, { passive: true });
+      scroller.addEventListener('touchstart', stopAutoplay, { passive: true });
+
+      return () => {
+        scroller.removeEventListener('scroll', onScroll);
+        scroller.removeEventListener('pointerdown', stopAutoplay);
+        scroller.removeEventListener('wheel', stopAutoplay);
+        scroller.removeEventListener('touchstart', stopAutoplay);
+        autoplay.kill();
+      };
     },
     { dependencies: [previewKey], scope: wrapRef }
   );

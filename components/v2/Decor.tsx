@@ -57,8 +57,11 @@ export default function Decor({ template, active = true }: DecorProps) {
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
       // Fewer particles on phones — same look, far less work per frame.
+      // Capped outright regardless of a template's configured density: past
+      // ~55 concurrently-tweened particles the per-frame cost stopped buying
+      // any visible extra "fullness" and just cost main-thread time.
       const isNarrow = window.matchMedia('(max-width: 640px)').matches;
-      const count = Math.round(density * (isNarrow ? 0.55 : 1));
+      const count = Math.min(55, Math.round(density * (isNarrow ? 0.5 : 0.85)));
 
       const nodes: HTMLElement[] = [];
 
@@ -99,6 +102,8 @@ export default function Decor({ template, active = true }: DecorProps) {
           },
         });
 
+        // One-shot fade-in only (no repeat) — cheap, completes once and
+        // drops out of GSAP's active tween list.
         gsap.to(el, {
           opacity: gsap.utils.random(0.45, 0.95),
           duration: 1.4,

@@ -367,6 +367,27 @@
               box-shadow .45s cubic-bezier(.2, .8, .3, 1),
               border-color .3s ease;
   -webkit-tap-highlight-color: transparent;
+  /* The gallery renders every template's animated art at once — most of it
+   * off-screen. `content-visibility` lets the browser skip style/layout/paint
+   * for cards outside the viewport entirely, which is where the real cost of
+   * ~20 simultaneously-animating cards was going. `contain-intrinsic-size` is
+   * a placeholder height so scrollbar/position doesn't jump before a card is
+   * ever measured. */
+  content-visibility: auto;
+  /* Height only — this is a grid item and stretches to its column's width
+   * regardless; a `contain-intrinsic-size` shorthand would also pin an
+   * intrinsic *width* (0 unless given), which fights that stretch. */
+  contain-intrinsic-height: 380px;
+}
+
+/* Belt-and-suspenders for browsers without `content-visibility` support:
+ * StyleGallery toggles `data-inview` via IntersectionObserver, and off-screen
+ * cards get their looping art animations paused outright rather than ticking
+ * on the compositor for no visible benefit. */
+.style-card:not([data-inview='true']) .sa-float,
+.style-card:not([data-inview='true']) .sa-drift,
+.style-card:not([data-inview='true']) .sa-twinkle {
+  animation-play-state: paused;
 }
 
 .style-card:hover,
@@ -495,6 +516,22 @@
   top: 1.25rem;
   align-self: start;
   z-index: 2;
+}
+
+/* On a real phone the live preview is itself phone-shaped (~640px tall) —
+ * pinning it sticky above a single-column card list means it dominates most
+ * of the actual screen and never lets go while you scroll, which reads as
+ * "the animation covers everything" and (worse) forces the browser to keep
+ * repainting a scaled, continuously-animating sticky element on every scroll
+ * frame, which is what made scrolling feel laggy on-device. Below the
+ * desktop breakpoint the preview just sits in normal flow instead: still
+ * the first thing you see, but it scrolls away like everything else once
+ * you move on to the card list. */
+@media (max-width: 1023.98px) {
+  .style-gallery-device {
+    position: static;
+    z-index: auto;
+  }
 }
 
 @media (min-width: 1024px) {

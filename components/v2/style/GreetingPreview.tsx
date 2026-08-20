@@ -113,14 +113,39 @@ export default function GreetingPreview({ template, animationKey }: Props) {
   /* ---- extra beats below the hero, so there's a real "rest of the card"
    * to scroll to — matches the real product's Reveal -> Memories -> Messages
    * -> Closing beats, and gives every layout (even the short editorial
-   * ones) enough height to actually need the scroll. */
+   * ones) enough height to actually need the scroll.
+   *
+   * Every block below shares one right-anchored rhythm (kicker style,
+   * gap, and a consistent side-inset) so the section reads as a single
+   * composed unit instead of a pile of unrelated pieces — the messages in
+   * particular used to sit at nearly full width with only a token margin,
+   * which read as a mistake rather than an alternating "notes" layout. */
+  const extraKicker = (label: string, delay: string) => (
+    <span
+      className="gp-in"
+      style={{
+        display: 'inline-block',
+        fontSize: '.54rem',
+        fontWeight: 700,
+        letterSpacing: '.22em',
+        color: p.accent,
+        opacity: 0.85,
+        animationDelay: delay,
+      }}
+    >
+      {label}
+    </span>
+  );
+
   const extra = (
     <div
       className="gp-in"
-      style={{ display: 'flex', flexDirection: 'column', gap: '.6rem', marginTop: '1.6rem', animationDelay: '.6s' }}
+      style={{ display: 'flex', flexDirection: 'column', gap: '.85rem', marginTop: '1.85rem', animationDelay: '.6s' }}
     >
       <figure
         className="m-0"
+        data-gp-reveal
+        data-gp-reveal-dir="up"
         style={{
           position: 'relative',
           borderRadius: '.85rem',
@@ -128,7 +153,6 @@ export default function GreetingPreview({ template, animationKey }: Props) {
           aspectRatio: '4 / 3',
           border: `1px solid ${p.surfaceBorder}`,
           boxShadow: `0 16px 34px -20px ${p.glow}`,
-          marginBottom: '.3rem',
         }}
       >
         <StyleArt template={template} />
@@ -149,43 +173,71 @@ export default function GreetingPreview({ template, animationKey }: Props) {
         </figcaption>
       </figure>
 
-      {spec.sample.messages.map((m, i) => (
-        <div
-          key={i}
-          style={{
-            fontSize: '.72rem',
-            fontWeight: 600,
-            lineHeight: 1.5,
-            padding: '.65rem .85rem',
-            borderRadius: '.9rem',
-            background: p.surface,
-            border: `1px solid ${p.surfaceBorder}`,
-            color: p.ink,
-            marginInlineStart: i % 2 === 0 ? 0 : 'clamp(0px, 8vw, 1.6rem)',
-            marginInlineEnd: i % 2 === 0 ? 'clamp(0px, 8vw, 1.6rem)' : 0,
-          }}
-        >
-          <span style={{ color: p.accent, marginInlineEnd: '.4rem' }}>✦</span>
-          {m}
-        </div>
-      ))}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '.5rem' }}>
+        {extraKicker('מה שכתבתם', '.68s')}
+        {spec.sample.messages.map((m, i) => {
+          const anchorEnd = i % 2 === 1; // odd bubbles pin to the far (inline-end) side instead
+          return (
+            <div
+              key={i}
+              data-gp-reveal
+              data-gp-reveal-dir={anchorEnd ? 'left' : 'right'}
+              style={{
+                alignSelf: anchorEnd ? 'flex-end' : 'flex-start',
+                maxWidth: '82%',
+                fontSize: '.72rem',
+                fontWeight: 600,
+                lineHeight: 1.55,
+                padding: '.65rem .9rem',
+                borderRadius: '.85rem',
+                background: p.surface,
+                color: p.ink,
+                // The accent leads from whichever side the bubble is
+                // pinned to — makes the alternation read as a deliberate
+                // rhythm rather than an accidental, barely-there offset.
+                borderInlineStart: anchorEnd ? `1px solid ${p.surfaceBorder}` : `2.5px solid ${p.accent}`,
+                borderInlineEnd: anchorEnd ? `2.5px solid ${p.accent}` : `1px solid ${p.surfaceBorder}`,
+                borderBlock: `1px solid ${p.surfaceBorder}`,
+                boxShadow: `0 10px 22px -16px ${p.glow}`,
+              }}
+            >
+              {m}
+            </div>
+          );
+        })}
+      </div>
 
       <div
+        data-gp-reveal
+        data-gp-reveal-dir="up"
         style={{
           textAlign: 'center',
-          marginTop: '1rem',
-          paddingTop: '1.1rem',
+          marginTop: '.35rem',
+          paddingTop: '1.15rem',
           borderTop: `1px solid ${p.surfaceBorder}`,
         }}
       >
+        <span
+          aria-hidden="true"
+          style={{
+            display: 'block',
+            fontSize: '1.1rem',
+            lineHeight: 1,
+            color: p.accent,
+            opacity: 0.6,
+            marginBottom: '.4rem',
+          }}
+        >
+          ✦
+        </span>
         <p
           className={serif ? 'v2-serif' : ''}
           style={{
-            fontSize: '.78rem',
+            fontSize: '.86rem',
             lineHeight: 1.6,
             color: p.ink,
-            opacity: 0.85,
-            fontWeight: serif ? 500 : 600,
+            opacity: 0.9,
+            fontWeight: serif ? 500 : 700,
             margin: 0,
           }}
         >
@@ -282,7 +334,17 @@ export default function GreetingPreview({ template, animationKey }: Props) {
     /* Celebration: art fills the frame, type sits on top of it.
      * Bounded to its own height (not gp-root's, which grows with `extra`
      * below) — otherwise the confetti/balloons would stretch to cover the
-     * whole scrollable card instead of just the hero. */
+     * whole scrollable card instead of just the hero.
+     *
+     * The CTA lives inside the same centered flex column as the text
+     * (not as a trailing sibling after it) — `alignSelf` only means
+     * anything on a flex item, and the shared `cta` was previously
+     * dropped into a plain (non-flex) wrapper here, so its intended
+     * `alignSelf: center` silently did nothing and left it sitting wherever
+     * inline RTL flow put it, with a large accidental gap above it from
+     * the text block's own vertical centering. Grouping it in means it
+     * centers as ONE unit with the text, and its own `alignSelf` here
+     * lines it up on the same right edge as everything else. */
     case 'celebration':
     default:
       inner = (
@@ -297,7 +359,7 @@ export default function GreetingPreview({ template, animationKey }: Props) {
               margin: 'auto 0',
               display: 'flex',
               flexDirection: 'column',
-              gap: '.55rem',
+              gap: '.6rem',
               textShadow: template.dark ? '0 2px 18px rgba(0,0,0,.55)' : '0 1px 12px rgba(255,255,255,.45)',
             }}
           >
@@ -309,8 +371,25 @@ export default function GreetingPreview({ template, animationKey }: Props) {
               {spec.sample.title}
             </h3>
             {body}
+            <span
+              className="gp-in"
+              style={{
+                alignSelf: 'flex-start',
+                marginTop: '.15rem',
+                fontSize: '.68rem',
+                fontWeight: 700,
+                padding: '.5rem 1.05rem',
+                borderRadius: 999,
+                background: p.accent,
+                color: template.id === 'funny' ? '#ffe75e' : '#fff',
+                boxShadow: `0 8px 22px -10px ${p.glow}`,
+                textShadow: 'none',
+                animationDelay: '.45s',
+              }}
+            >
+              {spec.sample.cta}
+            </span>
           </div>
-          <div style={{ position: 'relative', zIndex: 1 }}>{cta}</div>
         </div>
       );
   }

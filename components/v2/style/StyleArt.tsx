@@ -199,6 +199,61 @@ function Confetti({ seed, colors, count }: { seed: string; colors: string[]; cou
   );
 }
 
+/** A few soft, out-of-focus lights at varying depth — the one enhancement
+ * applied to every style alike. Tinted by that style's own accent/glow, so
+ * it reads as atmosphere rather than a bolted-on generic effect. Depth comes
+ * from `translateZ` inside the shell's `perspective`: farther orbs sit
+ * smaller and dimmer, nearer ones loom larger, and `active` pulls all of
+ * them closer to the glass for a parallax "pop". */
+function DepthBokeh({
+  seed,
+  colors,
+  active,
+}: {
+  seed: string;
+  colors: string[];
+  active: boolean;
+}) {
+  const orbs = useMemo(() => {
+    const rnd = seeded(seed);
+    return Array.from({ length: 4 }, (_, i) => ({
+      x: 8 + rnd() * 84,
+      y: 8 + rnd() * 84,
+      size: 26 + rnd() * 46,
+      z: -80 - rnd() * 160,
+      c: colors[i % colors.length],
+      o: 0.18 + rnd() * 0.22,
+      d: rnd() * 3,
+    }));
+  }, [seed, colors]);
+
+  return (
+    <>
+      {orbs.map((b, i) => (
+        <span
+          key={i}
+          className="sa-float"
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            left: `${b.x}%`,
+            top: `${b.y}%`,
+            width: b.size,
+            height: b.size,
+            borderRadius: '999px',
+            background: b.c,
+            opacity: b.o,
+            filter: `blur(${b.size * 0.32}px)`,
+            animationDelay: `${b.d}s`,
+            transform: `translateZ(${active ? b.z * 0.4 : b.z}px)`,
+            transition: 'transform .8s cubic-bezier(.2,.8,.3,1)',
+          }}
+        />
+      ))}
+    </>
+  );
+}
+
 function Starfield({ seed, count, color }: { seed: string; count: number; color: string }) {
   const stars = useMemo(() => {
     const rnd = seeded(seed);
@@ -249,11 +304,17 @@ export default function StyleArt({ template, active = false, className = '', sty
     height: '100%',
     overflow: 'hidden',
     background: p.pageBg,
+    perspective: '640px',
     ...style,
   };
 
+  // translateZ (not just translateY/scale) — with `perspective` on the shell
+  // above, layers with a bigger `n` genuinely loom closer on hover/active
+  // instead of just sliding and scaling in 2D.
   const lift = (n: number): CSSProperties => ({
-    transform: active ? `translateY(${-n}px) scale(1.03)` : 'none',
+    transform: active
+      ? `translateY(${-n}px) translateZ(${n * 2.6}px) scale(1.03)`
+      : 'translateZ(0px)',
     transition: 'transform .55s cubic-bezier(.2,.8,.3,1)',
   });
 
@@ -1168,9 +1229,14 @@ export default function StyleArt({ template, active = false, className = '', sty
       art = null;
   }
 
+  const bokehColors = template.decor.palette.length
+    ? template.decor.palette
+    : [p.accent, p.glow];
+
   return (
     <div className={`sa-shell ${className}`} style={shell} aria-hidden="true">
       {art}
+      <DepthBokeh seed={`${id}-bokeh`} colors={bokehColors} active={active} />
     </div>
   );
 }

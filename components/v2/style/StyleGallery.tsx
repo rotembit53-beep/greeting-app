@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -76,6 +76,29 @@ export default function StyleGallery({
     },
     { scope: rootRef }
   );
+
+  // Every card's art (confetti, starfields, floating balloons…) keeps
+  // animating on the compositor even when the card is scrolled out of view.
+  // With ~20 templates rendered at once that adds up fast — pause a card's
+  // ambient motion the moment it leaves the viewport and resume it the
+  // moment it re-enters, instead of letting all of them run permanently.
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    const cards = root.querySelectorAll<HTMLElement>('[data-style-card]');
+    if (!cards.length) return;
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          (entry.target as HTMLElement).dataset.inview = entry.isIntersecting ? 'true' : 'false';
+        }
+      },
+      { rootMargin: '200px 0px' }
+    );
+    cards.forEach((c) => io.observe(c));
+    return () => io.disconnect();
+  }, []);
 
   return (
     <div ref={rootRef}>
