@@ -5,6 +5,7 @@ import Link from 'next/link';
 import gsap from 'gsap';
 import { getTemplate } from '@/lib/v2/templates';
 import { PublicGreetingV2 } from '@/lib/v2/types';
+import { visibleContent } from '@/lib/v2/content';
 import { track } from '@/lib/v2/analytics';
 import { hasGift } from '@/lib/v2/gifts';
 import TemplateSurface from '@/components/v2/TemplateSurface';
@@ -94,7 +95,9 @@ export default function GreetingExperience({ greeting, preview = false }: Props)
     return () => window.removeEventListener('scroll', onScroll);
   }, [opened, preview, greeting.id, greeting.slug]);
 
-  const sceneProps = { template, content: greeting.content };
+  /* Everything the sender switched off in the editor is stripped here, once,
+   * so no scene has to know about the toggles. */
+  const sceneProps = { template, content: visibleContent(greeting.content) };
 
   return (
     <TemplateSurface template={template} className="v2-shell">

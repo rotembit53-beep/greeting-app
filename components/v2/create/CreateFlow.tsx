@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
 import { DEFAULT_TEMPLATE, getTemplate } from '@/lib/v2/templates';
 import { defaultTrackForMood, trackUrl } from '@/lib/v2/music';
 import { track } from '@/lib/v2/analytics';
@@ -22,10 +21,48 @@ import Editor, { EditorState } from './Editor';
 import SharePanel from './SharePanel';
 import GiftStep from './GiftStep';
 import Stepper, { FlowStage } from './Stepper';
+import HomeLink from '@/components/v2/HomeLink';
 
 type Stage = FlowStage;
 
 const DRAFT_KEY = 'interagift-v2-draft';
+
+/**
+ * Bumped whenever the saved shape gains something a restore path depends on.
+ * Drafts written by an older version still restore their answers — only the
+ * editor half, which is the part that can actually be malformed, is gated on
+ * a version match.
+ */
+const DRAFT_VERSION = 2;
+
+interface SavedDraft {
+  v?: number;
+  /** `null` while the step hasn't been answered yet — state is written as-is. */
+  eventType?: EventType | null;
+  details?: Partial<DetailsValue>;
+  draftId?: string;
+  /** The AI's output plus every edit made on top of it. */
+  editor?: EditorState | null;
+  gift?: Gift | null;
+  stage?: FlowStage;
+}
+
+/**
+ * A restored editor is only worth resuming if the AI content came back
+ * intact — the editor renders straight off `content`, so a half-written or
+ * hand-mangled draft would take the whole flow down instead of just starting
+ * clean.
+ */
+function isUsableEditor(value: unknown): value is EditorState {
+  if (!value || typeof value !== 'object') return false;
+  const editor = value as Partial<EditorState>;
+  return (
+    typeof editor.templateId === 'string' &&
+    Boolean(editor.content) &&
+    typeof editor.content === 'object' &&
+    Array.isArray(editor.media)
+  );
+}
 
 const ERROR_MESSAGES: Record<string, string> = {
   AI_UNAVAILABLE: 'השירות עמוס כרגע — נסו שוב בעוד רגע',
@@ -68,6 +105,14 @@ export default function CreateFlow() {
   // yet, so every draft is on the free plan and the gates simply prompt.
   const premium = false;
 
+  /* Gate on the restore having run at least once. Without it the save effect
+   * fires on the very first commit — with the empty initial state, since it
+   * closes over the same render as the restore beside it — and overwrites the
+   * draft it was about to read. That was survivable when a draft held only
+   * the answers; now that it holds the generated greeting, the same race
+   * would throw away the AI call. */
+  const [hydrated, setHydrated] = useState(false);
+
   useEffect(() => {
     track('started_creating');
   }, []);
@@ -80,7 +125,7 @@ export default function CreateFlow() {
     try {
       const saved = localStorage.getItem(DRAFT_KEY);
       if (!saved) return;
-      const parsed = JSON.parse(saved);
+      const parsed = JSON.parse(saved) as SavedDraft;
       /* eslint-disable react-hooks/set-state-in-effect --
          These run once on mount and React batches them into a single
          re-render, so there is no cascade. The rule's suggested fix (a lazy
@@ -89,23 +134,64 @@ export default function CreateFlow() {
       if (parsed?.eventType) setEventType(parsed.eventType);
       if (parsed?.details) setDetails({ ...emptyDetails, ...parsed.details });
       if (parsed?.draftId) setDraftId(parsed.draftId);
+
+      /* The generated greeting costs an AI call and several seconds of the
+       * user's attention, so leaving the page must not throw it away. It is
+       * restored together with the step it was left on: dropping someone
+       * back on the event picker while their finished text sits in storage
+       * would just make them generate it a second time. Going back to an
+       * earlier step is still one click away in the stepper, and running
+       * generation again replaces this wholesale. */
+      if (
+        parsed?.v === DRAFT_VERSION &&
+        parsed.eventType &&
+        isUsableEditor(parsed.editor)
+      ) {
+        setEditor(parsed.editor);
+        setGenerated(parsed.editor.content);
+        if (parsed.gift) setGift(parsed.gift);
+        // Resume where they actually were. Someone who stepped back to the
+        // event picker before leaving meant to start over, and shoving them
+        // forward into the old editor would undo that decision for them.
+        // (The stepper won't jump forward either — it only makes completed
+        // steps clickable — so from there the flow runs again and the next
+        // generation replaces what's held here.)
+        if (parsed.stage === 'editor' || parsed.stage === 'gift') {
+          setStage(parsed.stage);
+        }
+      }
       /* eslint-enable react-hooks/set-state-in-effect */
     } catch {
       // Corrupt draft — start clean.
+    } finally {
+      // Even a corrupt draft counts as restored: saving has to start
+      // eventually, or nothing the user does from here would be kept.
+      setHydrated(true);
     }
   }, []);
 
   useEffect(() => {
-    if (stage === 'share') return;
+    if (!hydrated || stage === 'share') return;
     try {
       localStorage.setItem(
         DRAFT_KEY,
-        JSON.stringify({ eventType, details, draftId })
+        JSON.stringify({
+          v: DRAFT_VERSION,
+          eventType,
+          details,
+          draftId,
+          editor,
+          gift,
+          /* `generating` and `preview` are transient views of the editor
+           * step — recording them verbatim would resume a reload into a
+           * spinner that never resolves, or into a full-screen preview. */
+          stage: stage === 'generating' || stage === 'preview' ? 'editor' : stage,
+        } satisfies SavedDraft)
       );
     } catch {
       // Storage full / disabled — the flow still works, just not resumable.
     }
-  }, [eventType, details, stage, draftId]);
+  }, [hydrated, eventType, details, stage, draftId, editor, gift]);
 
   /** Jumps back to an earlier, already-completed step. Never skips ahead —
    * the Stepper only makes past steps clickable in the first place, but this
@@ -312,23 +398,27 @@ export default function CreateFlow() {
   return (
     <div className="v2-scope v2-studio v2-shell">
       <header className="v2-container pt-6 pb-3 flex flex-col gap-4">
-        <div className="flex items-center justify-between">
-          <Link
-            href="/"
-            className="v2-display"
-            style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--v2-ink)', direction: 'ltr' }}
-          >
-            Intera<span className="v2-logo-gi">gift</span>
-          </Link>
-          {details.recipientName && stage !== 'event' && stage !== 'share' && (
-            <span
-              className="text-xs font-semibold px-3 py-1.5 rounded-full hidden sm:inline-block"
-              style={{ background: 'var(--v2-surface)', border: '1px solid var(--v2-surface-border)', color: 'var(--v2-ink-soft)' }}
-            >
-              {eventType ? `${EVENT_BY_ID[eventType]?.emoji} ` : ''}
-              עבור {details.recipientName}
-            </span>
-          )}
+        {/* Three tracks rather than a flex row: the wordmark is centred on the
+          * line itself, so it stays put whether or not the "עבור X" chip is
+          * showing — a flexbox `justify-between` would shift it every time
+          * the chip appears. */}
+        <div
+          className="grid items-center gap-2"
+          style={{ gridTemplateColumns: '1fr auto 1fr' }}
+        >
+          <span aria-hidden="true" />
+          <HomeLink />
+          <span className="justify-self-end">
+            {details.recipientName && stage !== 'event' && stage !== 'share' && (
+              <span
+                className="text-xs font-semibold px-3 py-1.5 rounded-full hidden sm:inline-block"
+                style={{ background: 'var(--v2-surface)', border: '1px solid var(--v2-surface-border)', color: 'var(--v2-ink-soft)' }}
+              >
+                {eventType ? `${EVENT_BY_ID[eventType]?.emoji} ` : ''}
+                עבור {details.recipientName}
+              </span>
+            )}
+          </span>
         </div>
 
         <Stepper stage={stage} onGoTo={goToStage} />

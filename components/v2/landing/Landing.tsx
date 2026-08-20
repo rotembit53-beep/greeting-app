@@ -176,24 +176,49 @@ export default function Landing() {
         </h2>
         <p
           data-anim
-          className="text-center mb-10"
-          style={{ color: 'var(--v2-ink-soft)', fontSize: '1.05rem' }}
+          className="text-center mb-10 sm:mb-14 mx-auto"
+          style={{ color: 'var(--v2-ink-soft)', fontSize: '1.05rem', maxWidth: '42ch' }}
         >
-          בחרו סגנון — והברכה בטלפון משתנה מולכם
+          לחצו על סגנון והברכה בטלפון מתחלפת מולכם — צבעים, טיפוגרפיה,
+          אנימציות ומוזיקה, הכול משתנה יחד.
         </p>
 
-        <StyleGallery />
+        <div data-anim>
+          <StyleGallery />
+        </div>
       </section>
 
-      {/* ---------------- Occasions ---------------- */}
-      <section className="v2-container-wide py-12">
-        <div className="flex flex-wrap justify-center gap-2.5">
+      {/* ---------------- Occasions ----------------
+       * Was a bare wall of grey pills sitting under the style board with no
+       * heading — same shape, same size, so the two rows blurred into one
+       * unexplained mass. It gets its own framing now, and the tags read as
+       * a quiet index rather than as a second set of controls. */}
+      <section className="v2-container py-16 sm:py-20 text-center">
+        <p data-anim className="v2-eyebrow mb-4">
+          לכל רגע
+        </p>
+        <h2
+          data-anim
+          className="v2-display mb-3"
+          style={{
+            fontSize: 'clamp(1.6rem, 5vw, 2.3rem)',
+            color: 'var(--v2-ink)',
+            fontWeight: 700,
+            letterSpacing: '-0.01em',
+          }}
+        >
+          מתאים לכל אירוע
+        </h2>
+        <p
+          data-anim
+          className="mb-9 mx-auto"
+          style={{ color: 'var(--v2-ink-soft)', fontSize: '1rem', maxWidth: '40ch' }}
+        >
+          בוחרים אירוע, וה-AI מתאים אליו את הטקסט, הסגנון והמוזיקה.
+        </p>
+        <div data-anim className="flex flex-wrap justify-center gap-2 gap-y-2.5">
           {EVENTS.filter((e) => e.id !== 'other').map((e) => (
-            <span
-              key={e.id}
-              data-anim
-              className="v2-tag"
-            >
+            <span key={e.id} className="v2-tag">
               {e.emoji} {e.label}
             </span>
           ))}

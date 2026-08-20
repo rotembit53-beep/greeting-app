@@ -2,11 +2,17 @@
 
 import { useState } from 'react';
 import { TEMPLATE_LIST, getTemplate } from '@/lib/v2/templates';
-import { GreetingContent, MediaItem, TemplateId } from '@/lib/v2/types';
+import {
+  GreetingContent,
+  MediaItem,
+  OptionalPart,
+  TemplateId,
+} from '@/lib/v2/types';
 import { PREMIUM_PRICE_ILS, maxImagesFor } from '@/lib/v2/plan';
 import MediaUploader from './MediaUploader';
 import MusicPicker from './MusicPicker';
 import StyleGallery from '@/components/v2/style/StyleGallery';
+import PartToggle from './PartToggle';
 
 type Tab = 'text' | 'images' | 'music' | 'design';
 
@@ -64,6 +70,36 @@ export default function Editor({
       messages: (content.messages ?? []).map((m, i) => (i === index ? text : m)),
     });
 
+  /* Which parts make it into the greeting. Stored as the list of parts left
+   * OUT, so anything written before this existed — and anything the AI adds
+   * later — is included by default. */
+  const hiddenParts = content.hiddenParts ?? [];
+  const includes = (part: OptionalPart) => !hiddenParts.includes(part);
+  const setIncluded = (part: OptionalPart, included: boolean) =>
+    patchContent({
+      hiddenParts: included
+        ? hiddenParts.filter((p) => p !== part)
+        : [...hiddenParts, part],
+    });
+
+  const setSectionIncluded = (index: number, included: boolean) =>
+    patchContent({
+      sections: content.sections.map((section, i) =>
+        i === index ? { ...section, hidden: !included } : section
+      ),
+    });
+
+  const includedCount =
+    1 + // the title always ships
+    content.sections.filter((section) => !section.hidden).length +
+    (['intro', 'messages', 'closing', 'surprise'] as OptionalPart[]).filter(
+      (part) =>
+        includes(part) &&
+        (part === 'messages'
+          ? (content.messages ?? []).length > 0
+          : Boolean(content[part]))
+    ).length;
+
   return (
     <div>
       <h1
@@ -112,12 +148,24 @@ export default function Editor({
         ))}
       </div>
 
-      {/* ---------------- Text ---------------- */}
+      {/* ---------------- Text ----------------
+        * Every block is opt-out. The AI writes the full set, and a sender who
+        * only wants a title and one paragraph unchecks the rest instead of
+        * emptying fields — which would have failed validation anyway, since
+        * intro and closing are required strings in the schema. */}
       {tab === 'text' && (
         <div className="flex flex-col gap-5">
+          <p className="ed-parts-note">
+            סמנו מה ייכלל בברכה — מה שלא מסומן פשוט לא יופיע, והטקסט נשמר למקרה
+            שתתחרטו.{' '}
+            <strong style={{ color: 'var(--v2-ink)' }}>
+              {includedCount === 1 ? 'חלק אחד ייכלל' : `${includedCount} חלקים ייכללו`}
+            </strong>
+          </p>
+
           <div>
             <label className="v2-label" htmlFor="v2-ed-title">
-              כותרת
+              כותרת <span className="ed-part-required">תמיד נכללת</span>
             </label>
             <input
               id="v2-ed-title"
@@ -129,41 +177,52 @@ export default function Editor({
             />
           </div>
 
-          <div>
-            <label className="v2-label" htmlFor="v2-ed-intro">
-              פתיחה
-            </label>
+          <PartToggle
+            id="v2-ed-inc-intro"
+            label="פתיחה"
+            included={includes('intro')}
+            onToggle={(on) => setIncluded('intro', on)}
+          >
             <textarea
               id="v2-ed-intro"
               className="v2-field resize-none"
               dir="rtl"
               rows={3}
               value={content.intro}
+              disabled={!includes('intro')}
               onChange={(e) => patchContent({ intro: e.target.value })}
               maxLength={400}
             />
-          </div>
+          </PartToggle>
 
           {content.sections.map((section, i) => (
-            <div key={i}>
-              <label className="v2-label" htmlFor={`v2-ed-sec-${i}`}>
-                {section.heading || `פסקה ${i + 1}`}
-              </label>
+            <PartToggle
+              key={i}
+              id={`v2-ed-inc-sec-${i}`}
+              label={section.heading || `פסקה ${i + 1}`}
+              included={!section.hidden}
+              onToggle={(on) => setSectionIncluded(i, on)}
+            >
               <textarea
                 id={`v2-ed-sec-${i}`}
                 className="v2-field resize-none"
                 dir="rtl"
                 rows={4}
                 value={section.body}
+                disabled={Boolean(section.hidden)}
                 onChange={(e) => patchSection(i, e.target.value)}
                 maxLength={600}
               />
-            </div>
+            </PartToggle>
           ))}
 
           {(content.messages ?? []).length > 0 && (
-            <div>
-              <span className="v2-label">משפטים קצרים</span>
+            <PartToggle
+              id="v2-ed-inc-messages"
+              label="משפטים קצרים"
+              included={includes('messages')}
+              onToggle={(on) => setIncluded('messages', on)}
+            >
               <div className="flex flex-col gap-2">
                 {(content.messages ?? []).map((message, i) => (
                   <input
@@ -171,44 +230,51 @@ export default function Editor({
                     className="v2-field"
                     dir="rtl"
                     value={message}
+                    disabled={!includes('messages')}
                     onChange={(e) => patchMessage(i, e.target.value)}
                     maxLength={180}
                   />
                 ))}
               </div>
-            </div>
+            </PartToggle>
           )}
 
-          <div>
-            <label className="v2-label" htmlFor="v2-ed-closing">
-              סיום
-            </label>
+          <PartToggle
+            id="v2-ed-inc-closing"
+            label="סיום"
+            included={includes('closing')}
+            onToggle={(on) => setIncluded('closing', on)}
+          >
             <textarea
               id="v2-ed-closing"
               className="v2-field resize-none"
               dir="rtl"
               rows={3}
               value={content.closing}
+              disabled={!includes('closing')}
               onChange={(e) => patchContent({ closing: e.target.value })}
               maxLength={300}
             />
-          </div>
+          </PartToggle>
 
-          <div>
-            <label className="v2-label" htmlFor="v2-ed-surprise">
-              🎁 ההפתעה הנוספת
-            </label>
-            <p className="v2-hint">מוסתר מאחורי כפתור &quot;יש עוד משהו…&quot;</p>
+          <PartToggle
+            id="v2-ed-inc-surprise"
+            label="🎁 ההפתעה הנוספת"
+            hint={'מוסתר מאחורי כפתור "יש עוד משהו…"'}
+            included={includes('surprise')}
+            onToggle={(on) => setIncluded('surprise', on)}
+          >
             <textarea
               id="v2-ed-surprise"
               className="v2-field resize-none"
               dir="rtl"
               rows={3}
               value={content.surprise ?? ''}
+              disabled={!includes('surprise')}
               onChange={(e) => patchContent({ surprise: e.target.value })}
               maxLength={400}
             />
-          </div>
+          </PartToggle>
         </div>
       )}
 

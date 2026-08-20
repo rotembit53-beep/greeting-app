@@ -92,18 +92,20 @@ export function RevealScene({ template, content }: SceneProps) {
         {content.title}
       </h1>
 
-      <p
-        data-reveal
-        style={{
-          fontSize: `calc(${t.bodySize} * 1.12)`,
-          lineHeight: t.bodyLeading,
-          color: 'var(--v2-ink)',
-          opacity: 0.92,
-          marginBottom: '3rem',
-        }}
-      >
-        {content.intro}
-      </p>
+      {content.intro ? (
+        <p
+          data-reveal
+          style={{
+            fontSize: `calc(${t.bodySize} * 1.12)`,
+            lineHeight: t.bodyLeading,
+            color: 'var(--v2-ink)',
+            opacity: 0.92,
+            marginBottom: '3rem',
+          }}
+        >
+          {content.intro}
+        </p>
+      ) : null}
 
       <div className="flex flex-col gap-10">
         {content.sections.map((section, i) => (
@@ -527,6 +529,10 @@ export function ClosingScene({
   const ref = useRef<HTMLElement>(null);
   useSceneReveal(ref, template);
 
+  // The closing line is optional, and with no sign-off either there is
+  // nothing left to close on — better no scene than a lone accent rule.
+  if (!content.closing && !senderName) return null;
+
   return (
     <section ref={ref} className="v2-container pb-24 sm:pb-32 text-center">
       <div
@@ -534,18 +540,20 @@ export function ClosingScene({
         className="mx-auto mb-8"
         style={{ width: 56, height: 2, background: 'var(--v2-accent)', opacity: 0.6 }}
       />
-      <p
-        data-reveal
-        className={template.type.display === 'serif' ? 'v2-serif' : ''}
-        style={{
-          fontSize: 'clamp(1.25rem, 5.2vw, 1.7rem)',
-          lineHeight: 1.75,
-          color: 'var(--v2-ink)',
-          fontWeight: template.type.display === 'serif' ? 500 : 700,
-        }}
-      >
-        {content.closing}
-      </p>
+      {content.closing ? (
+        <p
+          data-reveal
+          className={template.type.display === 'serif' ? 'v2-serif' : ''}
+          style={{
+            fontSize: 'clamp(1.25rem, 5.2vw, 1.7rem)',
+            lineHeight: 1.75,
+            color: 'var(--v2-ink)',
+            fontWeight: template.type.display === 'serif' ? 500 : 700,
+          }}
+        >
+          {content.closing}
+        </p>
+      ) : null}
 
       {senderName ? (
         <p

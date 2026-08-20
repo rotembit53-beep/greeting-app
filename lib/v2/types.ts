@@ -274,6 +274,17 @@ export type MusicMood = (typeof MUSIC_MOODS)[number];
  * reinterpret the same content differently.
  * ------------------------------------------------------------------ */
 
+/**
+ * The parts of a greeting the sender may leave out.
+ *
+ * The title is deliberately absent: a greeting with no hero line has nothing
+ * to open on. Individual body sections are opted out on the section itself
+ * (`sections[i].hidden`), since they're generated per-greeting and have no
+ * fixed identity to name here.
+ */
+export const OPTIONAL_PARTS = ['intro', 'messages', 'closing', 'surprise'] as const;
+export type OptionalPart = (typeof OPTIONAL_PARTS)[number];
+
 export const GreetingContentSchema = z.object({
   /** Big hero line, e.g. "יום הולדת שמח נועה". Short. */
   title: z.string().min(1).max(80),
@@ -289,6 +300,8 @@ export const GreetingContentSchema = z.object({
           .enum(['memory', 'quality', 'wish', 'joke', 'story'])
           .optional()
           .default('wish'),
+        /** Kept in the draft, left out of the experience. */
+        hidden: z.boolean().optional().default(false),
       })
     )
     .min(1)
@@ -299,6 +312,12 @@ export const GreetingContentSchema = z.object({
   closing: z.string().min(1).max(300),
   /** Hidden extra revealed behind the "יש עוד משהו…" button. */
   surprise: z.string().max(400).optional().default(''),
+  /**
+   * Parts the sender switched off. Stored rather than deleted: unchecking a
+   * part in the editor must be undoable, and the recipient never sees the
+   * difference either way — the renderer filters on this.
+   */
+  hiddenParts: z.array(z.enum(OPTIONAL_PARTS)).optional().default([]),
   tone: z.string().max(40).optional().default(''),
   animation: z.string().max(40).optional().default(''),
   template: z.enum(TEMPLATE_IDS).optional(),

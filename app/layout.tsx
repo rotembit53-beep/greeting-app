@@ -31,6 +31,12 @@ const sans = Assistant({
 });
 
 export const metadata: Metadata = {
+  /* Only set when a canonical domain is configured. Left undefined otherwise
+   * so Next resolves the OG image against the current deployment rather than
+   * baking a wrong absolute host into every page. */
+  metadataBase: process.env.NEXT_PUBLIC_SITE_URL
+    ? new URL(process.env.NEXT_PUBLIC_SITE_URL)
+    : undefined,
   title: 'Interagift — הפתעה שאי אפשר לשכוח',
   description:
     'צרו ברכה אינטראקטיבית ומותאמת אישית תוך פחות מדקה — עם AI, תמונות, מוזיקה ואנימציות. שלחו בלינק אחד בוואטסאפ.',
@@ -39,6 +45,11 @@ export const metadata: Metadata = {
     description:
       'צרו ברכה אינטראקטיבית ומותאמת אישית תוך פחות מדקה, ושלחו אותה בלינק אחד.',
     type: 'website',
+    images: [{ url: '/og.jpg', width: 1200, height: 630, alt: 'Interagift' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    images: ['/og.jpg'],
   },
 };
 

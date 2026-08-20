@@ -399,7 +399,9 @@ export default function GreetingPreview({ template, animationKey }: Props) {
         minHeight: '100%',
         background: p.pageBg,
         color: p.ink,
-        padding: '1.6rem 1.15rem 1.35rem',
+        /* Top padding clears the device's dynamic island (which ends at
+         * ~1.85rem) — at 1.6rem the greeting's first line ran under it. */
+        padding: '2.5rem 1.15rem 1.35rem',
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',

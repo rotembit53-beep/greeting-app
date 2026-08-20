@@ -480,95 +480,255 @@
 
 
 /* ==========================================================================
-   Style showcase — the phone, centred, with a compact picker under it.
-   The 21-card grid that used to sit beside the phone is gone; the phone
-   itself stays, because a greeting really is received on one.
+   Style chooser — the phone beside a board where every style is visible.
+
+   The old version buried 21 styles in one horizontally-scrolling strip of
+   identical white pills that clipped at both viewport edges. Nothing said it
+   scrolled, and the styles were invisible until clicked. Here the gradient
+   is the swatch: the board shows all of them at once, the phone plays the
+   selected one, and the brief between them says what you're looking at.
    ========================================================================== */
 
-.style-showcase {
-  display: flex;
-  flex-direction: column;
+.style-chooser {
+  display: grid;
+  gap: clamp(1.75rem, 4vw, 3rem);
   align-items: center;
+}
+
+/* Phone on the start side (the right, in RTL), board on the other — the
+ * dead column of empty parchment under the old centred phone becomes the
+ * place the chooser actually lives. */
+@media (min-width: 62rem) {
+  .style-chooser {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
 }
 
 .style-showcase-device {
   position: relative;
-  width: 100%;
   display: flex;
   justify-content: center;
 }
 
-/* ---------- Compact picker ---------- */
-
-.style-picker {
-  position: relative;
-  z-index: 2;
-  width: 100%;
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-  padding: 1.1rem 0 0.35rem;
-}
-.style-picker::-webkit-scrollbar { display: none; }
-
-.style-picker-track {
+.style-chooser-side {
   display: flex;
-  gap: 0.5rem;
-  width: max-content;
-  /* Breathing room at both ends so the first and last pill aren't welded
-   * to the viewport edge when the row is scrolled to either extreme. */
-  padding-inline: max(1.25rem, calc(50vw - 36rem));
+  flex-direction: column;
+  gap: clamp(1.25rem, 2.5vw, 1.9rem);
+  min-width: 0;
 }
 
-.style-pill {
-  display: inline-flex;
+/* ---------- Brief: what the phone is currently playing ---------- */
+
+.style-brief {
+  text-align: center;
+}
+@media (min-width: 62rem) {
+  .style-brief { text-align: start; }
+}
+
+.style-brief-name {
+  display: flex;
   align-items: center;
-  gap: 0.4rem;
-  white-space: nowrap;
-  font-size: 0.88rem;
-  font-weight: 500;
-  letter-spacing: 0.01em;
-  padding: 0.6rem 1.05rem;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-top: 0.55rem;
+  font-family: var(--font-v2-display), 'Frank Ruhl Libre', Georgia, serif;
+  font-size: clamp(1.6rem, 4.4vw, 2.2rem);
+  font-weight: 700;
+  letter-spacing: var(--v2-tracking-display);
+  line-height: 1.2;
+  color: var(--v2-ink);
+}
+@media (min-width: 62rem) {
+  .style-brief-name { justify-content: flex-start; }
+}
+
+.style-brief-badge {
+  font-family: var(--font-v2-sans), sans-serif;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  padding: 0.3rem 0.6rem;
   border-radius: 999px;
-  border: 1px solid var(--v2-hairline);
-  background: var(--v2-surface);
+  color: var(--v2-gold-deep, var(--v2-accent));
+  background: rgb(184 145 44 / 0.14);
+}
+
+.style-brief-pitch {
+  margin-top: 0.6rem;
+  max-width: 34ch;
+  margin-inline: auto;
+  font-size: 1rem;
+  line-height: 1.75;
   color: var(--v2-ink-soft);
+}
+@media (min-width: 62rem) {
+  .style-brief-pitch { margin-inline: 0; }
+}
+
+.style-brief-tags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem 1.1rem;
+  margin-top: 0.9rem;
+  padding: 0;
+  list-style: none;
+  font-size: 0.82rem;
+  letter-spacing: 0.02em;
+  color: var(--v2-ink-faint, var(--v2-ink-soft));
+}
+@media (min-width: 62rem) {
+  .style-brief-tags { justify-content: flex-start; }
+}
+
+/* ---------- The board ---------- */
+
+.style-board-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.7rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--v2-hairline);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--v2-ink-faint, var(--v2-ink-soft));
+}
+.style-board-head span {
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+/* Flex, not grid, below the split: 21 never divides evenly into whatever
+ * column count a phone width produces, and a grid strands the remainder
+ * against one edge as an orphan. Wrapping flex centres the short last row
+ * instead, which reads as a deliberate ending at every width. */
+.style-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: clamp(0.7rem, 1.6vw, 1.1rem) 0.6rem;
+}
+
+/* Beside the phone the count is ours to choose, so 21 lands as a clean
+ * 7 × 3 block — no remainder, no centring needed. */
+@media (min-width: 62rem) {
+  .style-swatches {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+}
+
+/* Borderless by design: the style's own gradient is the surface, so the
+ * board reads as a row of paint chips rather than 21 identical cards. */
+.style-swatch {
+  display: flex;
+  flex: 0 0 clamp(4rem, 17vw, 4.9rem);
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0;
+  border: 0;
+  background: none;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+}
+@media (min-width: 62rem) {
+  .style-swatch { flex: none; }
+}
+
+.style-swatch-chip {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 1rem;
+  font-size: 1.15rem;
+  box-shadow: var(--v2-shadow-ambient), inset 0 0 0 1px rgb(255 255 255 / 0.18);
   transition: transform var(--v2-dur-s) var(--v2-ease-out),
-              border-color var(--v2-dur-s) var(--v2-ease-out),
-              color var(--v2-dur-s) var(--v2-ease-out),
               box-shadow var(--v2-dur-m) var(--v2-ease-out);
 }
 
-.style-pill:hover {
-  transform: translateY(-2px);
-  color: var(--v2-ink);
-  border-color: var(--v2-hairline-strong);
-  box-shadow: var(--v2-shadow-ambient);
+.style-swatch-emoji {
+  /* The chip is a colour field; the emoji is a label on top of it, so it
+   * needs its own shadow to survive both a pale and a near-black gradient. */
+  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.45));
 }
 
-.style-pill[data-selected='true'] {
-  color: var(--v2-ink);
-  border-color: var(--v2-gold, var(--v2-accent));
-  box-shadow: inset 0 0 0 1px var(--v2-gold, var(--v2-accent));
+.style-swatch-lock {
+  position: absolute;
+  inset-block-start: 0.22rem;
+  inset-inline-end: 0.22rem;
+  font-size: 0.6rem;
+  line-height: 1;
+  padding: 0.2rem;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.85);
 }
 
-.style-pill:focus-visible {
-  outline: 1px solid var(--v2-gold, var(--v2-accent));
+.style-swatch-label {
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.012em;
+  line-height: 1.25;
+  text-align: center;
+  color: var(--v2-ink-soft);
+  transition: color var(--v2-dur-s) var(--v2-ease-out);
+}
+
+.style-swatch:hover .style-swatch-chip {
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: var(--v2-shadow-raised), inset 0 0 0 1px rgb(255 255 255 / 0.24);
+}
+.style-swatch:hover .style-swatch-label { color: var(--v2-ink); }
+
+/* Selection: the chip lifts out of the grid and takes a gold ring held off
+ * the edge, so it stays legible over a pale gradient as well as a dark one. */
+.style-swatch[data-selected='true'] .style-swatch-chip {
+  transform: translateY(-3px) scale(1.06);
+  box-shadow: var(--v2-shadow-lifted),
+              0 0 0 2px var(--v2-surface, #fff),
+              0 0 0 4px var(--v2-gold, var(--v2-accent));
+}
+.style-swatch[data-selected='true'] .style-swatch-label {
+  color: var(--v2-ink);
+  font-weight: 700;
+}
+
+.style-swatch[data-locked='true'] .style-swatch-chip { opacity: 0.55; }
+
+.style-swatch:focus-visible { outline: none; }
+.style-swatch:focus-visible .style-swatch-chip {
+  outline: 2px solid var(--v2-gold, var(--v2-accent));
   outline-offset: 3px;
 }
 
-.style-pill-lock { font-size: 0.72rem; opacity: 0.7; }
+@media (prefers-reduced-motion: reduce) {
+  .style-swatch-chip,
+  .style-swatch:hover .style-swatch-chip,
+  .style-swatch[data-selected='true'] .style-swatch-chip {
+    transform: none;
+  }
+}
 
-.style-picker-pitch {
-  margin: 0.55rem auto 0;
-  width: min(46rem, 90vw);
-  text-align: center;
-  font-size: 0.92rem;
-  line-height: 1.7;
-  color: var(--v2-ink-soft);
+/* Picker-only (the editor's design tab): no phone to sit beside, so the
+ * brief stays stacked above a full-width board at every viewport — the
+ * two-column split above is for the landing showcase only. */
+.style-chooser-compact {
+  gap: 1.4rem;
+}
+@media (min-width: 62rem) {
+  .style-chooser-compact { grid-template-columns: minmax(0, 1fr); }
+  .style-chooser-compact .style-brief { text-align: center; }
+  .style-chooser-compact .style-brief-name { justify-content: center; }
+  .style-chooser-compact .style-brief-pitch { margin-inline: auto; }
+  .style-chooser-compact .style-brief-tags { justify-content: center; }
 }
 
 /* ---------- Event tiles ----------
@@ -731,4 +891,219 @@
   max-width: 34rem;
   padding: 2rem 0 0.5rem;
   text-align: center;
+}
+
+/* ==========================================================================
+   Home link — the create flow's wordmark, which is also the way back.
+   The affordance is carried entirely by motion (see HomeLink.tsx): nothing
+   here is written for the user to read, so the resting state is a plain
+   wordmark and every hover cue is reversible.
+   ========================================================================== */
+
+.v2-scope .v2-home-link {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.28rem;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.v2-scope .v2-home-mark {
+  display: inline-block;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--v2-ink);
+  /* GSAP owns this element's transform during the hover beat. */
+  will-change: transform;
+  transition: color var(--v2-dur-m) var(--v2-ease-out);
+}
+
+/* The ink half warms toward the gold on hover — a colour the mark can't
+ * reach on its own, so the change reads as a response, not a style. */
+.v2-home-link:hover .v2-home-mark,
+.v2-home-link:focus-visible .v2-home-mark {
+  color: var(--v2-gold-deep, var(--v2-accent));
+}
+
+/* Foil on the second half. Same gradient as .v2-logo-gi, but sized wider
+ * than the text so its position can travel — that travel is the sweep. */
+.v2-home-foil {
+  background-image: linear-gradient(
+    100deg,
+    var(--v2-gold) 0%,
+    var(--v2-gold-lit) 18%,
+    var(--v2-gold-deep) 38%,
+    var(--v2-gold) 58%,
+    var(--v2-gold-lit) 78%,
+    var(--v2-gold) 100%
+  );
+  background-size: 260% 100%;
+  background-position: 0% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Drawn out from the centre on hover, gone again on the way out. */
+.v2-home-rule {
+  width: 2.6rem;
+  height: 1.5px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, var(--v2-gold), transparent);
+  transform: scaleX(0);
+  will-change: transform;
+}
+
+.v2-home-link:active .v2-home-mark {
+  transform: scale(0.97);
+}
+
+.v2-home-link:focus-visible {
+  outline: 1px solid var(--v2-gold, var(--v2-accent));
+  outline-offset: 5px;
+  border-radius: 0.4rem;
+}
+
+/* No timeline runs under reduced motion, so the rule and the warm-up are
+ * handed to CSS instead — the affordance stays, the movement doesn't. */
+@media (prefers-reduced-motion: reduce) {
+  .v2-home-rule { transition: transform var(--v2-dur-s) linear; }
+  .v2-home-link:hover .v2-home-rule,
+  .v2-home-link:focus-visible .v2-home-rule { transform: scaleX(1); }
+  .v2-home-link:active .v2-home-mark { transform: none; }
+}
+
+/* ==========================================================================
+   Editor: switchable text parts.
+   The AI writes the full greeting; these controls decide how much of it the
+   recipient sees. Off is a visible state, not a disappearance — the text
+   stays on screen, dimmed, so turning it back on is obviously possible.
+   ========================================================================== */
+
+.ed-parts-note {
+  font-size: 0.88rem;
+  line-height: 1.7;
+  color: var(--v2-ink-soft);
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--v2-hairline);
+}
+
+.ed-part-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.4rem;
+}
+
+.ed-part-hint { margin-top: -0.15rem; }
+
+.ed-part-off {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  padding: 0.22rem 0.55rem;
+  border-radius: 999px;
+  color: var(--v2-ink-faint, var(--v2-ink-soft));
+  background: rgb(var(--v2-shadow-rgb) / 0.06);
+}
+
+.ed-part-required {
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: var(--v2-ink-faint, var(--v2-ink-soft));
+}
+
+.ed-part-body {
+  transition: opacity var(--v2-dur-m) var(--v2-ease-out),
+              filter var(--v2-dur-m) var(--v2-ease-out);
+}
+
+.ed-part[data-off='true'] .ed-part-body {
+  opacity: 0.42;
+  filter: saturate(0.5);
+}
+
+/* ---------- Checkbox ----------
+ * The native input stays in the DOM (focus, keyboard, form semantics) and is
+ * merely made invisible — never `display: none`, which would take it out of
+ * the tab order along with everything else it carries. */
+
+.v2-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.v2-check input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+}
+
+.v2-check-box {
+  position: relative;
+  flex: none;
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 0.4rem;
+  border: 1.5px solid var(--v2-hairline-strong);
+  background: var(--v2-surface);
+  transition: background var(--v2-dur-s) var(--v2-ease-out),
+              border-color var(--v2-dur-s) var(--v2-ease-out);
+}
+
+/* The tick is drawn, not typed: a glyph would inherit the Hebrew face and
+ * sit off-centre in a box this small. */
+.v2-check-box::after {
+  content: '';
+  position: absolute;
+  inset-inline-start: 0.34rem;
+  top: 0.13rem;
+  width: 0.28rem;
+  height: 0.58rem;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg) scale(0.6);
+  opacity: 0;
+  transition: opacity var(--v2-dur-s) var(--v2-ease-out),
+              transform var(--v2-dur-s) var(--v2-ease-out);
+}
+
+.v2-check input:checked + .v2-check-box {
+  background: var(--v2-accent);
+  border-color: var(--v2-accent);
+}
+
+.v2-check input:checked + .v2-check-box::after {
+  opacity: 1;
+  transform: rotate(45deg) scale(1);
+}
+
+.v2-check input:focus-visible + .v2-check-box {
+  outline: 2px solid var(--v2-gold, var(--v2-accent));
+  outline-offset: 2px;
+}
+
+.v2-check-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--v2-ink);
+}
+
+.ed-part[data-off='true'] .v2-check-label {
+  color: var(--v2-ink-soft);
+  font-weight: 500;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v2-check-box::after { transition: none; }
 }
