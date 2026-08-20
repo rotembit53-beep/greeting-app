@@ -53,4 +53,10 @@ next-env.d.ts
 .open-next/
 .wrangler/
 .dev.vars
-cloudflare-env.d.ts
+# cloudflare-env.d.ts is intentionally committed, not ignored — it declares
+# the CloudflareEnv/D1Database/R2Bucket types `next build`'s type-check
+# needs, and Cloudflare's CI does a fresh clone with no way to regenerate it
+# (that requires an authenticated `wrangler types`, which the build step
+# doesn't have). Regenerate with `npm run cf-typegen` after changing any
+# binding in wrangler.toml, and commit the result — it holds no secret
+# values, only type declarations.
