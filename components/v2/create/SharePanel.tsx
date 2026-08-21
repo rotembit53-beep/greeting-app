@@ -13,9 +13,17 @@ interface Props {
   greetingId?: string;
 }
 
-/** The WhatsApp message is the product's main distribution channel. */
+/**
+ * The WhatsApp message is the product's main distribution channel.
+ *
+ * No emoji here: wa.me's own redirect (wa.me → api.whatsapp.com) corrupts
+ * emoji in the `text` param into replacement characters before the page
+ * ever renders — reproducible with plain "Hello 🎉 World", unrelated to this
+ * app or the Hebrew text. Verified by inspecting the redirect's Location
+ * header, which already contains %EF%BF%BD in place of the emoji bytes.
+ */
 function whatsappText(recipientName: string, url: string): string {
-  return `🎁 ${recipientName}, הכנתי לך הפתעה מיוחדת…\n\nפתח/י כאן ❤️\n${url}`;
+  return `${recipientName}, הכנתי לך הפתעה מיוחדת…\n\nפתח/י כאן\n${url}`;
 }
 
 export default function SharePanel({ slug, recipientName, greetingId }: Props) {
