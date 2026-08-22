@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { DEFAULT_TEMPLATE, getTemplate } from '@/lib/v2/templates';
 import { defaultTrackForMood, trackUrl } from '@/lib/v2/music';
 import { track } from '@/lib/v2/analytics';
-import { Gift } from '@/lib/v2/gifts';
+import { Gift, hasGift } from '@/lib/v2/gifts';
 import {
   EVENT_BY_ID,
   EventType,
@@ -26,6 +27,34 @@ import HomeLink from '@/components/v2/HomeLink';
 type Stage = FlowStage;
 
 const DRAFT_KEY = 'interagift-v2-draft';
+
+/** Shown when the stepper is used to jump to a step whose own data (text,
+ * published link…) doesn't exist yet — a way forward instead of a dead end. */
+function EmptyStepPrompt({
+  title,
+  body,
+  actionLabel,
+  onAction,
+}: {
+  title: string;
+  body: string;
+  actionLabel: string;
+  onAction: () => void;
+}) {
+  return (
+    <div className="text-center py-12">
+      <h2 className="font-extrabold text-xl mb-2" style={{ color: 'var(--v2-ink)' }}>
+        {title}
+      </h2>
+      <p className="mb-7" style={{ color: 'var(--v2-ink-soft)' }}>
+        {body}
+      </p>
+      <button type="button" onClick={onAction} className="v2-btn v2-btn-primary">
+        {actionLabel}
+      </button>
+    </div>
+  );
+}
 
 /**
  * Bumped whenever the saved shape gains something a restore path depends on.
@@ -90,6 +119,9 @@ export default function CreateFlow() {
   const [generated, setGenerated] = useState<GreetingContent | null>(null);
   const [editor, setEditor] = useState<EditorState | null>(null);
   const [gift, setGift] = useState<Gift | null>(null);
+  /** "No gift" is a real answer, not an unanswered step — tracked separately
+   * so the stepper can tick step 4 off for someone who chose to skip it. */
+  const [giftSkipped, setGiftSkipped] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [published, setPublished] = useState<{ slug: string; id?: string } | null>(null);
 
@@ -193,13 +225,10 @@ export default function CreateFlow() {
     }
   }, [hydrated, eventType, details, stage, draftId, editor, gift]);
 
-  /** Jumps back to an earlier, already-completed step. Never skips ahead —
-   * the Stepper only makes past steps clickable in the first place, but this
-   * guard makes that a real invariant rather than trusting the caller. */
+  /** Jumps to any step, forward or back. A step whose own data isn't ready
+   * yet (no generated text, no published link) renders its own empty-state
+   * prompt rather than being blocked here. */
   const goToStage = (target: FlowStage) => {
-    const reachedEditor = Boolean(editor);
-    if (target === 'editor' && !reachedEditor) return;
-    if (target === 'gift' && !reachedEditor) return;
     setGenError(null);
     setStage(target);
   };
@@ -395,6 +424,18 @@ export default function CreateFlow() {
 
   const canContinueFromDetails = details.recipientName.trim().length > 0;
 
+  /* Real answers, not "the cursor went past here" — and not "a choice was
+   * started", either. Picking a gift *type* writes a stub gift straight
+   * away, so the gift step only counts once that stub carries something the
+   * recipient can actually redeem (or the sender chose to send none). */
+  const completedSteps: Partial<Record<FlowStage, boolean>> = {
+    event: Boolean(eventType),
+    details: canContinueFromDetails,
+    editor: Boolean(editor),
+    gift: hasGift(gift) || giftSkipped,
+    share: Boolean(published),
+  };
+
   return (
     <div className="v2-scope v2-studio v2-shell">
       <header className="v2-container pt-6 pb-3 flex flex-col gap-4">
@@ -421,7 +462,7 @@ export default function CreateFlow() {
           </span>
         </div>
 
-        <Stepper stage={stage} onGoTo={goToStage} />
+        <Stepper stage={stage} onGoTo={goToStage} completed={completedSteps} />
       </header>
 
       <main className="v2-container py-8 pb-24">
@@ -435,6 +476,12 @@ export default function CreateFlow() {
                 setStage('details');
               }}
             />
+
+            <div className="flex mt-10">
+              <Link href="/" className="v2-btn v2-btn-ghost">
+                חזרה לדף הבית
+              </Link>
+            </div>
           </>
         )}
 
@@ -466,12 +513,39 @@ export default function CreateFlow() {
                     return;
                   }
                   track('completed_details');
+                  // Already generated once — going back here was just to
+                  // review or tweak an answer, not to throw away the AI
+                  // text. Resume the existing draft; regenerating is a
+                  // separate, explicit choice below.
+                  if (editor) {
+                    setStage('editor');
+                    return;
+                  }
                   void runGeneration();
                 }}
               >
-                ✨ צור לי את ההפתעה
+                {editor ? 'המשך לטקסט הקיים →' : '✨ צור לי את ההפתעה'}
               </button>
             </div>
+
+            {editor && (
+              <div className="flex justify-center mt-4">
+                <button
+                  type="button"
+                  className="v2-btn v2-btn-ghost text-sm"
+                  onClick={() => {
+                    if (!canContinueFromDetails) {
+                      setFormError('צריך לפחות שם — למי ההפתעה?');
+                      return;
+                    }
+                    track('completed_details');
+                    void runGeneration();
+                  }}
+                >
+                  🔄 לא, תכתבו לי טקסט חדש עם AI
+                </button>
+              </div>
+            )}
           </>
         )}
 
@@ -499,24 +573,55 @@ export default function CreateFlow() {
               state={editor}
               premium={premium}
               onChange={(patch) => setEditor((s) => (s ? { ...s, ...patch } : s))}
+              onBack={() => setStage('details')}
               onPreview={() => setStage('preview')}
               onPublish={() => setStage('gift')}
+              onRegenerate={() => void runGeneration()}
               publishing={publishing}
               onPremiumClick={() => track('premium_click', { props: { from: 'editor' } })}
             />
           </>
         )}
 
+        {/* Jumped here straight from the stepper before any text was
+         * generated — nothing to edit yet, so send them to fill in what's
+         * missing instead of rendering a blank editor. */}
+        {stage === 'editor' && !editor && (
+          <EmptyStepPrompt
+            title="עדיין אין טקסט לערוך"
+            body="קודם בוחרים אירוע וממלאים כמה פרטים, ואז ה-AI כותב את הטקסט."
+            actionLabel={eventType ? 'למלא פרטים' : 'לבחור אירוע'}
+            onAction={() => setStage(eventType ? 'details' : 'event')}
+          />
+        )}
+
         {stage === 'gift' && (
           <GiftStep
+            draftId={draftId}
             recipientName={details.recipientName}
             aboutThem={details.aboutThem}
             sharedMemory={details.sharedMemory}
             gift={gift}
-            onChange={setGift}
-            onDone={() => void publish()}
+            onChange={(g) => {
+              setGift(g);
+              setGiftSkipped(false);
+            }}
+            onDone={() => {
+              if (!editor || !eventType) {
+                setGenError('קודם צריך טקסט מוכן — נחזור לשלב העריכה');
+                setStage('editor');
+                return;
+              }
+              void publish();
+            }}
             onSkip={() => {
               setGift(null);
+              setGiftSkipped(true);
+              if (!editor || !eventType) {
+                setGenError('קודם צריך טקסט מוכן — נחזור לשלב העריכה');
+                setStage('editor');
+                return;
+              }
               void publish();
             }}
           />
@@ -527,6 +632,15 @@ export default function CreateFlow() {
             slug={published.slug}
             recipientName={details.recipientName}
             greetingId={published.id}
+          />
+        )}
+
+        {stage === 'share' && !published && (
+          <EmptyStepPrompt
+            title="עדיין לא פרסמתם"
+            body="אחרי שהטקסט מוכן ומוסיפים (או מדלגים על) מתנה, יופיע כאן קישור לשיתוף."
+            actionLabel="לשלב המתנה"
+            onAction={() => setStage('gift')}
           />
         )}
       </main>

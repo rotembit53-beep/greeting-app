@@ -15,21 +15,50 @@ import { z } from 'zod';
  * Interests & budget
  * ------------------------------------------------------------------ */
 
+/**
+ * What the sender says the recipient is into.
+ *
+ * `query` is the Hebrew search phrase handed to the places provider — it is
+ * what turns an abstract interest into real, nearby businesses. Anything
+ * without a `query` (only "surprise me") has no physical place to visit.
+ */
 export const INTERESTS = [
-  { id: 'food', emoji: '☕', label: 'אוכל' },
-  { id: 'restaurants', emoji: '🍷', label: 'מסעדות' },
-  { id: 'movies', emoji: '🎬', label: 'סרטים' },
-  { id: 'music', emoji: '🎵', label: 'מוזיקה' },
-  { id: 'travel', emoji: '🏖️', label: 'חופשות' },
-  { id: 'spa', emoji: '💆', label: 'ספא' },
-  { id: 'shopping', emoji: '🛍️', label: 'שופינג' },
-  { id: 'gaming', emoji: '🎮', label: 'גיימינג' },
-  { id: 'sports', emoji: '🏋️', label: 'ספורט' },
-  { id: 'shows', emoji: '🎭', label: 'הופעות' },
-  { id: 'surprise', emoji: '🎁', label: 'לא משנה — תפתיע אותי' },
+  { id: 'restaurants', emoji: '🍷', label: 'מסעדות', query: 'מסעדה' },
+  { id: 'food', emoji: '☕', label: 'בתי קפה', query: 'בית קפה' },
+  { id: 'bar', emoji: '🍸', label: 'בר', query: 'בר קוקטיילים' },
+  { id: 'bakery', emoji: '🧁', label: 'קינוחים', query: 'קונדיטוריה' },
+  { id: 'spa', emoji: '💆', label: 'ספא ועיסוי', query: 'ספא עיסוי' },
+  { id: 'beauty', emoji: '💅', label: 'יופי וטיפוח', query: 'מספרה סלון יופי' },
+  { id: 'sports', emoji: '🏋️', label: 'ספורט וכושר', query: 'חדר כושר' },
+  { id: 'outdoors', emoji: '🥾', label: 'טבע ואוויר פתוח', query: 'פארק טיולים' },
+  { id: 'travel', emoji: '🏖️', label: 'חופשות', query: 'מלון צימר' },
+  { id: 'shows', emoji: '🎭', label: 'הופעות ותיאטרון', query: 'תיאטרון אולם הופעות' },
+  { id: 'movies', emoji: '🎬', label: 'קולנוע', query: 'קולנוע' },
+  { id: 'music', emoji: '🎵', label: 'מוזיקה', query: 'חנות כלי נגינה' },
+  { id: 'books', emoji: '📚', label: 'ספרים', query: 'חנות ספרים' },
+  { id: 'art', emoji: '🎨', label: 'אומנות ויצירה', query: 'סדנת יצירה גלריה' },
+  { id: 'workshops', emoji: '👩‍🍳', label: 'סדנאות וחוגים', query: 'סדנה' },
+  { id: 'gaming', emoji: '🎮', label: 'גיימינג', query: 'חנות משחקי מחשב' },
+  { id: 'tech', emoji: '🎧', label: 'טכנולוגיה וגאדג׳טים', query: 'חנות אלקטרוניקה' },
+  { id: 'shopping', emoji: '🛍️', label: 'שופינג', query: 'קניון' },
+  { id: 'kids', emoji: '🧸', label: 'ילדים', query: 'חנות צעצועים' },
+  { id: 'pets', emoji: '🐾', label: 'חיות מחמד', query: 'חנות חיות' },
+  { id: 'surprise', emoji: '🎁', label: 'לא משנה — תפתיעו אותי' },
 ] as const;
 
 export type InterestId = (typeof INTERESTS)[number]['id'];
+
+/** The places-search phrase for an interest, when it maps to somewhere real. */
+export function interestQuery(id: InterestId): string | undefined {
+  const found = INTERESTS.find((i) => i.id === id) as
+    | { query?: string }
+    | undefined;
+  return found?.query;
+}
+
+export function interestLabel(id: InterestId): string {
+  return INTERESTS.find((i) => i.id === id)?.label ?? id;
+}
 
 export const INTEREST_IDS = INTERESTS.map((i) => i.id) as [InterestId, ...InterestId[]];
 
@@ -102,7 +131,14 @@ export type Gift = z.infer<typeof GiftSchema>;
  * ------------------------------------------------------------------ */
 
 export interface GiftSearchParams {
+  /** What the sender ticked themselves. These drive the results. */
   interests: InterestId[];
+  /**
+   * Interests the AI read out of the free text. Only ever used to break ties
+   * between ideas that already match an explicit pick, or to fill in when the
+   * sender ticked nothing — never to introduce an unrelated category.
+   */
+  inferredInterests?: InterestId[];
   budget?: number;
   recipientName?: string;
 }
@@ -130,6 +166,9 @@ const CATALOGUE: {
   description: string;
   emoji: string;
   matches: InterestId[];
+  /** Fits any interest, so it can top up a thin on-topic list — but always
+   *  ranks below a real category match. */
+  universal?: boolean;
 }[] = [
   {
     kind: 'voucher',
@@ -143,7 +182,14 @@ const CATALOGUE: {
     title: 'שובר לבית קפה',
     description: 'קפה ומאפה על חשבונכם',
     emoji: '☕',
-    matches: ['food'],
+    matches: ['food', 'bakery'],
+  },
+  {
+    kind: 'voucher',
+    title: 'שובר לבר',
+    description: 'ערב בבר שהם אוהבים',
+    emoji: '🍸',
+    matches: ['bar'],
   },
   {
     kind: 'voucher',
@@ -151,6 +197,20 @@ const CATALOGUE: {
     description: 'עיסוי או יום ספא',
     emoji: '💆',
     matches: ['spa', 'travel'],
+  },
+  {
+    kind: 'voucher',
+    title: 'שובר לטיפוח',
+    description: 'מספרה, סלון יופי או טיפול פנים',
+    emoji: '💅',
+    matches: ['beauty'],
+  },
+  {
+    kind: 'voucher',
+    title: 'סדנה או חוג',
+    description: 'בישול, קרמיקה, צילום — משהו שילמדו',
+    emoji: '👩‍🍳',
+    matches: ['workshops', 'art'],
   },
   {
     kind: 'ticket',
@@ -174,11 +234,25 @@ const CATALOGUE: {
     matches: ['sports'],
   },
   {
+    kind: 'voucher',
+    title: 'מנוי לחדר כושר',
+    description: 'או כמה אימונים אישיים',
+    emoji: '🏋️',
+    matches: ['sports'],
+  },
+  {
     kind: 'ticket',
     title: 'כרטיס לאטרקציה',
     description: 'חוויה או אטרקציה',
     emoji: '🎢',
-    matches: ['travel', 'sports'],
+    matches: ['travel', 'sports', 'kids', 'outdoors'],
+  },
+  {
+    kind: 'voucher',
+    title: 'יום בטבע',
+    description: 'טיול מודרך, קמפינג או השכרת ציוד',
+    emoji: '🥾',
+    matches: ['outdoors'],
   },
   {
     kind: 'voucher',
@@ -209,11 +283,47 @@ const CATALOGUE: {
     matches: ['music'],
   },
   {
+    kind: 'giftcard',
+    title: 'כרטיס מתנה לספרים',
+    description: 'שיבחרו את הערימה הבאה שלהם',
+    emoji: '📚',
+    matches: ['books'],
+  },
+  {
+    kind: 'giftcard',
+    title: 'כרטיס מתנה לטכנולוגיה',
+    description: 'גאדג׳ט או אביזר שהם רצו',
+    emoji: '🎧',
+    matches: ['tech'],
+  },
+  {
+    kind: 'giftcard',
+    title: 'כרטיס מתנה לחנות צעצועים',
+    description: 'שיבחרו בעצמם מה שבא להם',
+    emoji: '🧸',
+    matches: ['kids'],
+  },
+  {
+    kind: 'giftcard',
+    title: 'כרטיס מתנה לחנות חיות',
+    description: 'פינוק לחבר הכי נאמן שלהם',
+    emoji: '🐾',
+    matches: ['pets'],
+  },
+  {
+    kind: 'giftcard',
+    title: 'כרטיס מתנה לאומנות ויצירה',
+    description: 'צבעים, בד או ציוד יצירה',
+    emoji: '🎨',
+    matches: ['art'],
+  },
+  {
     kind: 'amount',
     title: 'סכום מתנה',
     description: 'הכי פשוט — והם בוחרים',
     emoji: '💰',
     matches: ['surprise', 'shopping'],
+    universal: true,
   },
   {
     kind: 'buyme',
@@ -221,6 +331,7 @@ const CATALOGUE: {
     description: 'שובר שניתן לממש במגוון רחב של עסקים',
     emoji: '🎁',
     matches: ['surprise', 'restaurants', 'shopping', 'spa'],
+    universal: true,
   },
 ];
 
@@ -228,15 +339,29 @@ export const catalogueProvider: GiftProvider = {
   id: 'catalogue',
   label: 'קטגוריות',
   live: false,
-  async search({ interests, budget }) {
-    const wanted = new Set(interests);
-    const surprise = wanted.has('surprise') || wanted.size === 0;
+  async search({ interests, inferredInterests = [], budget }) {
+    /* "Surprise me" is the only case where anything goes. Otherwise an idea
+     * has to match something the sender explicitly ticked — inferred
+     * interests only *rank* the survivors. Previously both sets were merged
+     * flat, so a model guess of "food" could outrank the sender's own pick
+     * and bury it under restaurant vouchers. */
+    const picked = new Set<InterestId>(interests.filter((i) => i !== 'surprise'));
+    const inferred = new Set<InterestId>(
+      inferredInterests.filter((i) => !picked.has(i))
+    );
+    const openEnded = picked.size === 0;
 
     const scored = CATALOGUE.map((entry) => {
-      const hits = entry.matches.filter((m) => wanted.has(m)).length;
-      return { entry, score: surprise ? 1 : hits };
+      const explicitHits = entry.matches.filter((m) => picked.has(m)).length;
+      const inferredHits = entry.matches.filter((m) => inferred.has(m)).length;
+      // Weighted so no pile of inferred hits can ever outrank one real pick,
+      // and a universal top-up can never outrank an on-topic idea.
+      const score = openEnded
+        ? 1 + inferredHits
+        : explicitHits * 100 + inferredHits * 10 + (entry.universal ? 1 : 0);
+      return { entry, score, keep: openEnded || explicitHits > 0 || entry.universal };
     })
-      .filter((s) => s.score > 0)
+      .filter((s) => s.keep)
       .sort((a, b) => b.score - a.score);
 
     return scored.slice(0, 6).map(({ entry }, i) => ({

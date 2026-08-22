@@ -1107,3 +1107,162 @@
 @media (prefers-reduced-motion: reduce) {
   .v2-check-box::after { transition: none; }
 }
+
+/* ------------------------------------------------------------------ *
+ * Budget calculator
+ *
+ * A physical calculator rather than a form field: a warm shell, a recessed
+ * LCD, and keys that sit slightly proud of the body. The budget is the one
+ * number the sender genuinely deliberates over, so it gets an object to
+ * think with instead of an input to fill.
+ * ------------------------------------------------------------------ */
+
+.v2-scope .v2-calc {
+  max-width: 22rem;
+  margin-inline: auto;
+  padding: 1.1rem 1.1rem 1.25rem;
+  border-radius: 1.6rem;
+  background: linear-gradient(168deg, var(--v2-surface) 0%, var(--v2-bg) 100%);
+  border: 1px solid var(--v2-surface-border);
+  /* Two shadows: a tight one to seat it, a wide soft one for the lift. */
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 2px 5px -2px rgba(0, 0, 0, 0.1),
+    0 22px 45px -28px rgba(0, 0, 0, 0.45);
+}
+
+/* Brand plate along the top of the shell, where it sits on real hardware. */
+.v2-scope .v2-calc-brand {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0.25rem 0.7rem;
+}
+
+.v2-scope .v2-calc-mark {
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--v2-ink);
+  direction: ltr;
+}
+
+.v2-scope .v2-calc-solar {
+  display: flex;
+  gap: 2px;
+  padding: 3px 5px;
+  border-radius: 4px;
+  background: var(--v2-bg);
+  border: 1px solid var(--v2-surface-border);
+}
+
+.v2-scope .v2-calc-cell {
+  width: 9px;
+  height: 12px;
+  border-radius: 1px;
+  background: linear-gradient(160deg, var(--v2-gold-deep, #8a6d3b), rgba(0, 0, 0, 0.35));
+  opacity: 0.5;
+}
+
+/* The screen. Recessed: inner shadow at the top, hairline highlight below. */
+.v2-scope .v2-calc-screen {
+  position: relative;
+  overflow: hidden;
+  padding: 0.9rem 1rem 0.85rem;
+  border-radius: 0.85rem;
+  background: linear-gradient(180deg, #e8e6dc 0%, #f2f0e7 100%);
+  border: 1px solid rgba(0, 0, 0, 0.13);
+  box-shadow:
+    0 2px 7px -1px rgba(0, 0, 0, 0.16) inset,
+    0 1px 0 rgba(255, 255, 255, 0.75);
+}
+
+.v2-scope .v2-calc-screen-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(0, 0, 0, 0.42);
+}
+
+.v2-scope .v2-calc-readout {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 0.3rem;
+  direction: ltr;
+  margin-top: 0.2rem;
+}
+
+/* Tabular figures so the number doesn't reflow while it counts. */
+.v2-scope .v2-calc-value {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  font-size: clamp(2.1rem, 9vw, 2.7rem);
+  line-height: 1;
+  color: #1c1a17;
+}
+
+.v2-scope .v2-calc-currency {
+  font-weight: 700;
+  font-size: 1.4rem;
+  color: rgba(0, 0, 0, 0.55);
+}
+
+/* Faint segmented ghost behind the digits, like an unlit LCD. */
+.v2-scope .v2-calc-screen::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.02) 0 2px,
+    transparent 2px 4px
+  );
+}
+
+.v2-scope .v2-calc-keys {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  margin-top: 0.95rem;
+}
+
+/* Keys sit proud of the shell: light from above, a seated shadow below. */
+.v2-scope .v2-calc-key {
+  position: relative;
+  padding: 0.85rem 0;
+  border-radius: 0.75rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--v2-ink);
+  background: linear-gradient(180deg, #fffefb 0%, #f4f1e9 100%);
+  border: 1px solid var(--v2-surface-border);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 2px 0 rgba(0, 0, 0, 0.07),
+    0 3px 6px -3px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  will-change: transform;
+}
+
+.v2-scope .v2-calc-key[data-action] {
+  background: linear-gradient(180deg, var(--v2-accent-soft) 0%, var(--v2-bg) 100%);
+  color: var(--v2-accent);
+}
+
+/* Travel: the key drops onto the shell and its shadow collapses with it. */
+.v2-scope .v2-calc-key:active {
+  transform: translateY(2px);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 0 0 rgba(0, 0, 0, 0.07),
+    0 1px 2px -1px rgba(0, 0, 0, 0.3);
+}
+
+.v2-scope .v2-calc-key:focus-visible {
+  outline: 2px solid var(--v2-accent);
+  outline-offset: 2px;
+}

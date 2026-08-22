@@ -1,6 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
 import { TEMPLATE_LIST, getTemplate } from '@/lib/v2/templates';
 import {
   GreetingContent,
@@ -13,6 +15,8 @@ import MediaUploader from './MediaUploader';
 import MusicPicker from './MusicPicker';
 import StyleGallery from '@/components/v2/style/StyleGallery';
 import PartToggle from './PartToggle';
+
+gsap.registerPlugin(useGSAP);
 
 type Tab = 'text' | 'images' | 'music' | 'design';
 
@@ -38,8 +42,10 @@ interface Props {
   state: EditorState;
   premium: boolean;
   onChange: (patch: Partial<EditorState>) => void;
+  onBack: () => void;
   onPreview: () => void;
   onPublish: () => void;
+  onRegenerate: () => void;
   publishing: boolean;
   onPremiumClick: () => void;
 }
@@ -49,13 +55,48 @@ export default function Editor({
   state,
   premium,
   onChange,
+  onBack,
   onPreview,
   onPublish,
+  onRegenerate,
   publishing,
   onPremiumClick,
 }: Props) {
   const [tab, setTab] = useState<Tab>('text');
   const content = state.content;
+  const actionsRef = useRef<HTMLDivElement>(null);
+
+  // A tactile lift-and-grow on hover for the two buttons that actually move
+  // the flow forward — GSAP-driven (per project convention) rather than a
+  // CSS :hover, so it can be killed cleanly and skipped for reduced motion.
+  useGSAP(
+    () => {
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const buttons =
+        actionsRef.current?.querySelectorAll<HTMLButtonElement>('[data-hover-lift]');
+      if (!buttons?.length) return;
+
+      const cleanups: (() => void)[] = [];
+      buttons.forEach((btn) => {
+        const enter = () => {
+          if (btn.disabled) return;
+          gsap.to(btn, { y: -3, scale: 1.035, duration: 0.3, ease: 'power2.out', overwrite: 'auto' });
+        };
+        const leave = () => {
+          gsap.to(btn, { y: 0, scale: 1, duration: 0.3, ease: 'power2.out', overwrite: 'auto' });
+        };
+        btn.addEventListener('pointerenter', enter);
+        btn.addEventListener('pointerleave', leave);
+        cleanups.push(() => {
+          btn.removeEventListener('pointerenter', enter);
+          btn.removeEventListener('pointerleave', leave);
+        });
+      });
+
+      return () => cleanups.forEach((fn) => fn());
+    },
+    { scope: actionsRef }
+  );
 
   const patchContent = (patch: Partial<GreetingContent>) =>
     onChange({ content: { ...content, ...patch } });
@@ -112,18 +153,14 @@ export default function Editor({
         אפשר לשלוח כמו שזה, או לערוך כל דבר
       </p>
 
-      {/* Sticky action bar — the two things that matter are always reachable */}
-      <div className="flex gap-3 mb-6">
-        <button type="button" onClick={onPreview} className="v2-btn v2-btn-ghost flex-1">
-          👀 תצוגה מקדימה
-        </button>
+      <div className="flex justify-start mb-4">
         <button
           type="button"
-          onClick={onPublish}
-          disabled={publishing}
-          className="v2-btn v2-btn-primary flex-1"
+          onClick={onBack}
+          className="v2-btn v2-btn-ghost"
+          style={{ padding: '0.6rem 1.2rem', fontSize: '0.88rem' }}
         >
-          {publishing ? 'מכינים…' : '🎁 להוספת מתנה'}
+          ← חזרה לפרטים
         </button>
       </div>
 
@@ -148,6 +185,27 @@ export default function Editor({
         ))}
       </div>
 
+      {/* Sticky action bar — the two things that matter are always reachable */}
+      <div ref={actionsRef} className="flex gap-3 mb-6">
+        <button
+          type="button"
+          data-hover-lift
+          onClick={onPreview}
+          className="v2-btn v2-btn-ghost flex-1"
+        >
+          👀 תצוגה מקדימה
+        </button>
+        <button
+          type="button"
+          data-hover-lift
+          onClick={onPublish}
+          disabled={publishing}
+          className="v2-btn v2-btn-primary flex-1"
+        >
+          {publishing ? 'מכינים…' : '🎁 להוספת מתנה'}
+        </button>
+      </div>
+
       {/* ---------------- Text ----------------
         * Every block is opt-out. The AI writes the full set, and a sender who
         * only wants a title and one paragraph unchecks the rest instead of
@@ -162,6 +220,24 @@ export default function Editor({
               {includedCount === 1 ? 'חלק אחד ייכלל' : `${includedCount} חלקים ייכללו`}
             </strong>
           </p>
+
+          <div className="flex justify-start">
+            <button
+              type="button"
+              className="v2-btn v2-btn-ghost text-sm"
+              onClick={() => {
+                if (
+                  window.confirm(
+                    'זה יכתוב טקסט חדש לגמרי ויחליף את מה שיש כאן עכשיו, כולל עריכות שעשיתם. להמשיך?'
+                  )
+                ) {
+                  onRegenerate();
+                }
+              }}
+            >
+              🔄 טקסט חדש עם AI
+            </button>
+          </div>
 
           <div>
             <label className="v2-label" htmlFor="v2-ed-title">
