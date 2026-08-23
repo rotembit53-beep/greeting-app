@@ -4,6 +4,7 @@ import { generateId } from '@/lib/ids';
 import { getFunnel, incrementCounter, recordEvent } from '@/lib/v2/db';
 import { ANALYTICS_EVENTS } from '@/lib/v2/analytics';
 import { rateLimit } from '@/lib/v2/rateLimit';
+import { getCloudflareContext } from '@opennextjs/cloudflare';
 
 const BodySchema = z.object({
   name: z.enum(ANALYTICS_EVENTS),
@@ -56,7 +57,15 @@ export async function GET(req: NextRequest) {
    * default: if the secret is unset or the header doesn't match, respond 404
    * so the endpoint's existence isn't even confirmed. Compared with a
    * length-then-content check that avoids leaking length via an early return. */
-  const expected = process.env.ANALYTICS_ADMIN_TOKEN;
+  // On Workers, secrets reach the Cloudflare env binding, not process.env
+  // (same reason as lib/v2/ai.ts / lib/v2/places.ts) — read the binding first.
+  let expected: string | undefined;
+  try {
+    const { env } = await getCloudflareContext({ async: true });
+    expected = env?.ANALYTICS_ADMIN_TOKEN ?? process.env.ANALYTICS_ADMIN_TOKEN;
+  } catch {
+    expected = process.env.ANALYTICS_ADMIN_TOKEN;
+  }
   const provided = req.headers.get('x-admin-token') ?? '';
   if (!expected || provided.length !== expected.length || provided !== expected) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 });

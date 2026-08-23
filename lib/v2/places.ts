@@ -12,9 +12,28 @@
  * "12 ק״מ ממך" line on a result is a real measurement, not an estimate.
  */
 
+import { getCloudflareContext } from '@opennextjs/cloudflare';
+
 /** Israel-centric defaults — the product ships in Hebrew for an Israeli audience. */
 const REGION = 'il';
 const LANGUAGE = 'he';
+
+/**
+ * Read the key from the Cloudflare env binding first, falling back to
+ * process.env. On Workers, runtime secrets reach the `env` binding — NOT
+ * `process.env` — so reading process.env alone made the key invisible in
+ * production even when it was set (it only worked in `next dev`, which does
+ * populate process.env). Same pattern as lib/v2/ai.ts.
+ */
+async function placesApiKey(): Promise<string | undefined> {
+  try {
+    const { env } = await getCloudflareContext({ async: true });
+    if (env?.GOOGLE_PLACES_API_KEY) return env.GOOGLE_PLACES_API_KEY;
+  } catch {
+    // Outside a Cloudflare request context (e.g. plain node) — fall through.
+  }
+  return process.env.GOOGLE_PLACES_API_KEY;
+}
 
 export interface LatLng {
   lat: number;
@@ -90,8 +109,8 @@ function assertOkStatus(status: string, errorMessage: string | undefined) {
   );
 }
 
-function apiKey(): string {
-  const key = process.env.GOOGLE_PLACES_API_KEY;
+async function apiKey(): Promise<string> {
+  const key = await placesApiKey();
   if (!key) {
     throw new PlacesError(
       'PLACES_NOT_CONFIGURED',
@@ -102,8 +121,8 @@ function apiKey(): string {
 }
 
 /** True when a places search can run at all. Lets callers degrade quietly. */
-export function placesConfigured(): boolean {
-  return Boolean(process.env.GOOGLE_PLACES_API_KEY);
+export async function placesConfigured(): Promise<boolean> {
+  return Boolean(await placesApiKey());
 }
 
 /* ------------------------------------------------------------------ *
@@ -189,7 +208,7 @@ export async function geocode(query: string): Promise<GeocodedPlace> {
   url.searchParams.set('address', query);
   url.searchParams.set('region', REGION);
   url.searchParams.set('language', LANGUAGE);
-  url.searchParams.set('key', apiKey());
+  url.searchParams.set('key', await apiKey());
 
   const res = await fetch(url, { cache: 'no-store' });
   if (!res.ok) {
@@ -301,7 +320,7 @@ export async function searchPlaces({
   url.searchParams.set('radius', String(radiusMeters));
   url.searchParams.set('region', REGION);
   url.searchParams.set('language', LANGUAGE);
-  url.searchParams.set('key', apiKey());
+  url.searchParams.set('key', await apiKey());
 
   const res = await fetch(url, { cache: 'no-store' });
   if (!res.ok) {

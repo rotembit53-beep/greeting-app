@@ -8,6 +8,8 @@ interface __BaseEnv_CloudflareEnv {
 	ADMIN_EMAIL: "rotembit53@gmail.com";
 	GEMINI_API_KEY: string;
 	RESEND_API_KEY: string;
+	GOOGLE_PLACES_API_KEY: string;
+	ANALYTICS_ADMIN_TOKEN: string;
 }
 declare namespace Cloudflare {
 	interface GlobalProps {
@@ -20,7 +22,7 @@ type StringifyValues<EnvType extends Record<string, unknown>> = {
 	[Binding in keyof EnvType]: EnvType[Binding] extends string ? EnvType[Binding] : string;
 };
 declare namespace NodeJS {
-	interface ProcessEnv extends StringifyValues<Pick<Cloudflare.Env, "ADMIN_EMAIL" | "GEMINI_API_KEY" | "RESEND_API_KEY">> {}
+	interface ProcessEnv extends StringifyValues<Pick<Cloudflare.Env, "ADMIN_EMAIL" | "GEMINI_API_KEY" | "RESEND_API_KEY" | "GOOGLE_PLACES_API_KEY" | "ANALYTICS_ADMIN_TOKEN">> {}
 }
 
 // Begin runtime types

@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
     let placesError: string | null = null;
 
     if (input.location.trim()) {
-      if (!placesConfigured()) {
+      if (!(await placesConfigured())) {
         placesError = 'PLACES_NOT_CONFIGURED';
       } else {
         try {
