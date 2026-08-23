@@ -27,6 +27,23 @@ const prefersReduced = () =>
   typeof window !== 'undefined' &&
   window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+/**
+ * Defence-in-depth for the redemption link. The schema already rejects any
+ * non-http(s) `gift.url` on write, but this guards older rows written before
+ * that rule and makes the safe-scheme invariant local to the render — a
+ * `javascript:` href must never reach the DOM. Returns undefined so the link
+ * simply doesn't render for anything unsafe.
+ */
+function safeHref(url: string | undefined): string | undefined {
+  if (!url) return undefined;
+  try {
+    const scheme = new URL(url).protocol.toLowerCase();
+    return scheme === 'http:' || scheme === 'https:' ? url : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export default function GiftScene({ template, gift, recipientName }: Props) {
   const rootRef = useRef<HTMLElement>(null);
   const boxRef = useRef<HTMLDivElement>(null);
@@ -315,9 +332,9 @@ export default function GiftScene({ template, gift, recipientName }: Props) {
               </div>
             ) : null}
 
-            {gift.url ? (
+            {safeHref(gift.url) ? (
               <a
-                href={gift.url}
+                href={safeHref(gift.url)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="v2-btn v2-btn-primary w-full mt-2"

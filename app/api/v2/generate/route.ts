@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { AIError, generateGreetingContent } from '@/lib/v2/ai';
 import { EVENT_TYPES, TEMPLATE_IDS } from '@/lib/v2/types';
+import { rateLimit } from '@/lib/v2/rateLimit';
 
 const BodySchema = z.object({
   eventType: z.enum(EVENT_TYPES),
@@ -22,6 +23,10 @@ const STATUS: Record<AIError['code'], number> = {
 };
 
 export async function POST(req: NextRequest) {
+  // Each call bills Gemini — throttle hard before doing any work.
+  const limited = rateLimit(req, { bucket: 'generate', limit: 8, windowMs: 60_000 });
+  if (limited) return limited;
+
   try {
     const body = await req.json();
     const input = BodySchema.parse(body);

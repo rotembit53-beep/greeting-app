@@ -12,6 +12,7 @@ import {
   TEMPLATE_IDS,
 } from '@/lib/v2/types';
 import { GiftSchema, INTEREST_IDS } from '@/lib/v2/gifts';
+import { rateLimit } from '@/lib/v2/rateLimit';
 
 const MediaSchema = z.object({
   id: z.string().min(1).max(64),
@@ -54,6 +55,10 @@ async function uniqueSlug(): Promise<string> {
 }
 
 export async function POST(req: NextRequest) {
+  // Bound how fast rows can be created from one source.
+  const limited = rateLimit(req, { bucket: 'create-greeting', limit: 20, windowMs: 60_000 });
+  if (limited) return limited;
+
   try {
     const body = await req.json();
     const input = BodySchema.parse(body);

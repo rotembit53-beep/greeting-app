@@ -108,6 +108,59 @@ export interface GiftSuggestion {
   provider?: string;
 }
 
+/**
+ * An external URL the recipient will click — rendered into `<a href>`.
+ *
+ * Only absolute `http(s)` (or empty) is allowed. This is the authoritative
+ * guard against a `javascript:`/`data:`/`vbscript:` URI being stored and then
+ * executed when React renders the href — React does not strip dangerous
+ * schemes itself. Enforced on the schema so both create and update (which
+ * share it) are covered at the trust boundary.
+ */
+const safeHttpUrl = z
+  .string()
+  .max(600)
+  .optional()
+  .default('')
+  .refine(
+    (v) => {
+      if (!v) return true;
+      try {
+        const scheme = new URL(v).protocol.toLowerCase();
+        return scheme === 'http:' || scheme === 'https:';
+      } catch {
+        return false; // relative / unparseable — reject rather than guess
+      }
+    },
+    { message: 'URL must be http(s)' }
+  );
+
+/**
+ * An image reference rendered into `<img src>`. The app sets this to a
+ * same-origin relative path (`/api/media/...`); an absolute `http(s)` URL is
+ * also accepted for forward-compat. Everything else — `javascript:`, `data:`,
+ * and protocol-relative `//host` (which escapes the origin) — is rejected.
+ */
+const safeImageRef = z
+  .string()
+  .max(600)
+  .optional()
+  .default('')
+  .refine(
+    (v) => {
+      if (!v) return true;
+      // Same-origin relative path, but not protocol-relative "//evil".
+      if (v.startsWith('/') && !v.startsWith('//')) return true;
+      try {
+        const scheme = new URL(v).protocol.toLowerCase();
+        return scheme === 'http:' || scheme === 'https:';
+      } catch {
+        return false;
+      }
+    },
+    { message: 'Image URL must be http(s) or a same-origin path' }
+  );
+
 export const GiftSchema = z.object({
   kind: z.enum(GIFT_KINDS),
   title: z.string().min(1).max(120),
@@ -119,8 +172,8 @@ export const GiftSchema = z.object({
   note: z.string().max(300).optional().default(''),
   /** Redemption details the sender pastes in (code / link / photo of a card). */
   code: z.string().max(120).optional().default(''),
-  url: z.string().max(600).optional().default(''),
-  imageUrl: z.string().max(600).optional().default(''),
+  url: safeHttpUrl,
+  imageUrl: safeImageRef,
   provider: z.string().max(60).optional().default(''),
 });
 

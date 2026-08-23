@@ -14,6 +14,7 @@ import {
   placesConfigured,
   searchPlaces,
 } from '@/lib/v2/places';
+import { rateLimit } from '@/lib/v2/rateLimit';
 
 const BodySchema = z.object({
   /** Interests the sender picked themselves. */
@@ -29,6 +30,11 @@ const BodySchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
+  // Each call can trigger a Gemini call plus one geocode + several Places
+  // calls — the most expensive endpoint in the app. Throttle before any work.
+  const limited = rateLimit(req, { bucket: 'gift-suggestions', limit: 12, windowMs: 60_000 });
+  if (limited) return limited;
+
   try {
     const body = await req.json();
     const input = BodySchema.parse(body);

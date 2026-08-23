@@ -36,7 +36,17 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     await incrementCounter(slug, 'viewCount');
   }
 
-  return NextResponse.json({ success: true, greeting: toPublicGreeting(greeting) });
+  /* The redeemable gift secrets (code / link) are intentionally withheld from
+   * this anonymous JSON endpoint. The recipient experience is server-rendered
+   * from the DB directly (app/g/[slug]/page.tsx), so it still reveals the gift
+   * in the box; this endpoint has no legitimate consumer that needs the code,
+   * and serving it here would hand a redeemable value to any scraper. */
+  const pub = toPublicGreeting(greeting);
+  const safe = pub.gift
+    ? { ...pub, gift: { ...pub.gift, code: '', url: '' } }
+    : pub;
+
+  return NextResponse.json({ success: true, greeting: safe });
 }
 
 const MediaSchema = z.object({

@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateId } from '@/lib/ids';
 import { putObject, deleteObject, mediaUrl } from '@/lib/media';
+import { getGreetingBySlug } from '@/lib/v2/db';
+import { isValidSlug } from '@/lib/v2/slug';
+import { rateLimit } from '@/lib/v2/rateLimit';
 
 // Only ever lets clients delete their own uploaded media — never the shared
 // audio library (audio/...) or anything outside this exact key shape.
@@ -22,6 +25,10 @@ const ALLOWED_MIME_TYPES = [
 ];
 
 export async function POST(req: NextRequest) {
+  // Each upload writes up to 50MB to R2 — cap the rate per source.
+  const limited = rateLimit(req, { bucket: 'upload', limit: 30, windowMs: 60_000 });
+  if (limited) return limited;
+
   try {
     const formData = await req.formData();
     const file = formData.get('file') as File;
@@ -82,10 +89,40 @@ export async function POST(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
-    const { key } = (await req.json()) as { key?: unknown };
+    const { key, slug, ownerToken } = (await req.json()) as {
+      key?: unknown;
+      slug?: unknown;
+      ownerToken?: unknown;
+    };
 
     if (typeof key !== 'string' || !UPLOAD_KEY_PATTERN.test(key)) {
       return NextResponse.json({ error: 'Invalid media key' }, { status: 400 });
+    }
+
+    // Ownership is proven, not assumed: the caller must present the owner
+    // token of a published greeting, and the key must actually belong to that
+    // greeting. Media keys appear in every public greeting's JSON, so without
+    // this check anyone could delete anyone's uploads by replaying a key.
+    if (
+      typeof slug !== 'string' ||
+      !isValidSlug(slug) ||
+      typeof ownerToken !== 'string' ||
+      ownerToken.length === 0
+    ) {
+      return NextResponse.json({ error: 'Not authorised' }, { status: 403 });
+    }
+
+    const greeting = await getGreetingBySlug(slug);
+    if (!greeting || greeting.ownerToken !== ownerToken) {
+      return NextResponse.json({ error: 'Not authorised' }, { status: 403 });
+    }
+
+    // The key must be one this greeting actually references. mediaUrl() maps a
+    // key to the `/api/media/<key>` form stored in each media item's url.
+    const target = mediaUrl(key);
+    const owned = greeting.media.some((m) => m.url === target);
+    if (!owned) {
+      return NextResponse.json({ error: 'Not authorised' }, { status: 403 });
     }
 
     await deleteObject(key);
