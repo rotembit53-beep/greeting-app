@@ -371,6 +371,85 @@ export const STYLE_ART: Record<TemplateId, StyleArtSpec> = {
       signoff: 'עד לנסיעה הבאה שלנו יחד.',
     },
   },
+
+  newborn: {
+    pitch: 'תכלת אבקתי על שמנת — רך, שקט וחדש לגמרי.',
+    tags: [{ emoji: '🍼', label: 'רך' }, { emoji: '☁️', label: 'עדין' }, { emoji: '🤍', label: 'חדש' }],
+    layout: 'cinematic',
+    sample: {
+      kicker: 'חדש בעולם',
+      title: 'ברוך הבא, קטן שלנו',
+      body: 'עוד לא הספקת לעשות כלום, וכבר שינית לנו את כל הסדר. בדרך הכי טובה.',
+      cta: '✦ פתחו בעדינות',
+      messages: ['הכול כאן חדש בשבילך', 'ואנחנו כאן בשבילך'],
+      signoff: 'בשקט, ובאהבה גדולה.',
+    },
+  },
+  winter: {
+    pitch: 'כחול קרחוני וכפור על זכוכית — צלול, קריר ושקט.',
+    tags: [{ emoji: '❄️', label: 'קריר' }, { emoji: '🤍', label: 'צלול' }, { emoji: '🕊️', label: 'שקט' }],
+    layout: 'editorial',
+    sample: {
+      kicker: 'אוויר צלול',
+      title: 'שמרנו לכם רגע שקט',
+      body: 'יש בוקר חורפי אחד בשנה שבו הכול נראה נקי יותר. שמרנו לכם אותו.',
+      cta: '❄ פתחו',
+      messages: ['קחו נשימה עמוקה אחת', 'ואז עוד אחת'],
+      signoff: 'בחום, גם כשקר בחוץ.',
+    },
+  },
+  desert: {
+    pitch: 'חימר, חול וגווני מרווה — חם, יבש ורגוע.',
+    tags: [{ emoji: '🏜️', label: 'עפרורי' }, { emoji: '🧡', label: 'חם' }, { emoji: '🌾', label: 'רגוע' }],
+    layout: 'organic',
+    sample: {
+      kicker: 'אופק פתוח',
+      title: 'עצרנו כאן בשבילכם',
+      body: 'אין לאן למהר, ואין מה להספיק. יש רק את הרגע הזה, וזה מספיק.',
+      cta: '☀ פתחו',
+      messages: ['השקט כאן הוא לא ריק', 'הוא פשוט מקום לנשום בו'],
+      signoff: 'בחום, ובלי חיפזון.',
+    },
+  },
+  bloom: {
+    pitch: 'עלי כותרת אפרסק על שנהב — רך, נשי ומלא חיים.',
+    tags: [{ emoji: '🌸', label: 'פורח' }, { emoji: '💗', label: 'רך' }, { emoji: '🌿', label: 'טרי' }],
+    layout: 'cinematic',
+    sample: {
+      kicker: 'בדיוק בעונה',
+      title: 'משהו פרח בשבילכם',
+      body: 'דברים יפים לוקחים זמן לפרוח, וכשהם פורחים אי אפשר לפספס אותם.',
+      cta: '❀ פתחו',
+      messages: ['קחו רגע להריח', 'זה לא נשאר ככה לנצח'],
+      signoff: 'באהבה, ובעונה הנכונה.',
+    },
+  },
+  arcade: {
+    pitch: 'פיקסלים גסים וירוק זרחני — משחקי וידאו ישנים, בכוונה.',
+    tags: [{ emoji: '👾', label: 'רטרו' }, { emoji: '🕹️', label: 'שובב' }, { emoji: '💚', label: 'זרחני' }],
+    layout: 'punch',
+    sample: {
+      kicker: 'INSERT COIN',
+      title: 'שלב חדש נפתח',
+      body: 'צברתם מספיק נקודות. הגיע הזמן לראות מה מחכה בשלב הבא.',
+      cta: '▶ START',
+      messages: ['אין כאן חיים נוספים', 'אז תעשו את זה טוב'],
+      signoff: 'GAME OVER? עוד לא. רחוק מזה.',
+    },
+  },
+  zen: {
+    pitch: 'דיו סומי על נייר אורז — ריק, מדויק ומאוד שקט.',
+    tags: [{ emoji: '☯️', label: 'מאוזן' }, { emoji: '🖌️', label: 'דיו' }, { emoji: '🤍', label: 'ריק' }],
+    layout: 'editorial',
+    sample: {
+      kicker: '—',
+      title: 'רגע אחד, לפני הכול',
+      body: 'לא צריך למלא כל מקום ריק. לפעמים הריק הוא בדיוק מה שרצינו להגיד.',
+      cta: '○ פתחו',
+      messages: ['נשימה אחת', 'ואז עוד אחת'],
+      signoff: 'בשקט. זה הכול.',
+    },
+  },
 };
 
 export function styleArt(id: TemplateId): StyleArtSpec {

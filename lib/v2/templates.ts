@@ -895,6 +895,179 @@ export const TEMPLATES: Record<TemplateId, TemplateDef> = {
     motion: { duration: 1.05, stagger: 0.12, ease: 'power2.out' },
     musicMood: 'happy', photoPresentation: 'polaroid',
   },
+
+  /* ---------------------------------------------------------------- *
+   * NEWBORN — powder blue on cream, clouds. Soft without being sugary.
+   * ---------------------------------------------------------------- */
+  newborn: {
+    id: 'newborn',
+    label: 'לידה',
+    description: 'תכלת אבקתי על שמנת רכה — עדין, שקט וחדש לגמרי',
+    premium: false,
+    preview: { gradient: 'linear-gradient(145deg, #fdf6ee 0%, #cfe3f0 55%, #9db9cf 100%)', emoji: '🍼' },
+    palette: {
+      /* Cream first, blue second — a nursery palette that isn't the
+       * standard powder-blue wash: the ground stays warm so the blue
+       * reads as a chosen accent rather than the whole room. */
+      pageBg: 'radial-gradient(circle at 26% 0%, #FEF6EB 0%, #F2EFE6 40%, #D2E3EE 100%)',
+      ink: '#2F3A44', inkSoft: '#71808C', accent: '#6E93AC',
+      accentSoft: 'rgba(110, 147, 172, 0.11)',
+      surface: '#FFFDFA', surfaceBorder: 'rgba(47, 58, 68, 0.09)',
+      glow: 'rgba(140, 175, 200, 0.26)',
+    },
+    dark: false,
+    type: { display: 'serif', titleSize: 'clamp(2rem, 8vw, 3.2rem)', titleWeight: 500,
+      titleTracking: '-0.008em', titleTransform: 'none',
+      bodySize: 'clamp(1.05rem, 4vw, 1.2rem)', bodyLeading: '2' },
+    decor: { kind: 'bubbles', palette: ['#9DBFD4', '#E7D3C4', '#C3D9E4'], density: 16 },
+    scenes: ['gate-envelope', 'reveal', 'memories', 'messages', 'gift', 'closing'],
+    gate: { badge: '🍼 חדש בעולם', title: 'מישהו קטן הגיע',
+      subtitle: 'רגע רך לפני שנפתח', cta: '✦ פתחו בעדינות' },
+    motion: { duration: 1.3, stagger: 0.14, ease: 'power2.out' },
+    musicMood: 'calm', photoPresentation: 'cinematic',
+  },
+
+  /* ---------------------------------------------------------------- *
+   * WINTER — glacier blue and frost. Cold air, not a Christmas card.
+   * ---------------------------------------------------------------- */
+  winter: {
+    id: 'winter',
+    label: 'חורף',
+    description: 'כחול קרחוני וכפור על זכוכית — צלול, קריר ושקט',
+    premium: false,
+    preview: { gradient: 'linear-gradient(145deg, #f2f9fd 0%, #bcd9ec 50%, #5d84a6 100%)', emoji: '❄️' },
+    palette: {
+      pageBg: 'linear-gradient(172deg, #F4FAFD 0%, #DCEBF4 42%, #B9D2E3 100%)',
+      ink: '#1E3040', inkSoft: '#5F7889', accent: '#3D6A8C',
+      accentSoft: 'rgba(61, 106, 140, 0.10)',
+      surface: '#FFFFFF', surfaceBorder: 'rgba(30, 48, 64, 0.11)',
+      glow: 'rgba(110, 155, 190, 0.30)',
+    },
+    dark: false,
+    type: { display: 'serif', titleSize: 'clamp(2.1rem, 8.4vw, 3.4rem)', titleWeight: 400,
+      titleTracking: '0.015em', titleTransform: 'none',
+      bodySize: 'clamp(1.03rem, 4vw, 1.18rem)', bodyLeading: '2.05' },
+    decor: { kind: 'sparkles', palette: ['#FFFFFF', '#BDD8E8', '#7FA6C2'], density: 30 },
+    scenes: ['gate-envelope', 'reveal', 'memories', 'messages', 'gift', 'closing'],
+    gate: { badge: '❄️ אוויר צלול', title: 'שמרנו לכם רגע שקט',
+      subtitle: 'קחו נשימה עמוקה אחת', cta: '❄ פתחו' },
+    motion: { duration: 1.3, stagger: 0.14, ease: 'power2.out' },
+    musicMood: 'calm', photoPresentation: 'parallax',
+  },
+
+  /* ---------------------------------------------------------------- *
+   * DESERT — clay, sand and sage. Matte and sun-baked, never orange soda.
+   * ---------------------------------------------------------------- */
+  desert: {
+    id: 'desert',
+    label: 'מדבר',
+    description: 'חימר, חול וגווני מרווה — חם, יבש ורגוע כמו שעת אחר צהריים',
+    premium: false,
+    preview: { gradient: 'linear-gradient(145deg, #f0dcc0 0%, #c98a5e 52%, #8a4a2f 100%)', emoji: '🏜️' },
+    palette: {
+      pageBg: 'linear-gradient(168deg, #F6EADA 0%, #E9D2B6 45%, #D3AE8B 100%)',
+      ink: '#3B2A20', inkSoft: '#8A7159', accent: '#9C512E',
+      accentSoft: 'rgba(156, 81, 46, 0.10)',
+      surface: '#FFF9F0', surfaceBorder: 'rgba(59, 42, 32, 0.12)',
+      glow: 'rgba(190, 130, 90, 0.28)',
+    },
+    dark: false,
+    type: { display: 'serif', titleSize: 'clamp(2.1rem, 8.2vw, 3.4rem)', titleWeight: 500,
+      titleTracking: '0.01em', titleTransform: 'none',
+      bodySize: 'clamp(1.05rem, 4vw, 1.2rem)', bodyLeading: '1.95' },
+    decor: { kind: 'none', palette: [], density: 0 },
+    scenes: ['gate-gift', 'reveal', 'memories', 'messages', 'gift', 'closing'],
+    gate: { badge: '🏜️ אופק פתוח', title: 'עצרנו כאן בשבילכם',
+      subtitle: 'אין לאן למהר', cta: '☀ פתחו' },
+    motion: { duration: 1.2, stagger: 0.13, ease: 'power2.out' },
+    musicMood: 'calm', photoPresentation: 'cinematic',
+  },
+
+  /* ---------------------------------------------------------------- *
+   * BLOOM — peony blush over ivory. Floral without a single clip-art flower.
+   * ---------------------------------------------------------------- */
+  bloom: {
+    id: 'bloom',
+    label: 'פריחה',
+    description: 'עלי כותרת אפרסק וורודים על שנהב — רך, נשי ומלא חיים',
+    premium: true,
+    preview: { gradient: 'linear-gradient(145deg, #fff1ec 0%, #f6b3a6 50%, #d1607a 100%)', emoji: '🌸' },
+    palette: {
+      pageBg: 'radial-gradient(circle at 20% 2%, #FFF6F1 0%, #FBE7E0 44%, #F3D2D4 100%)',
+      ink: '#4A2A31', inkSoft: '#8E6970', accent: '#C25873',
+      accentSoft: 'rgba(194, 88, 115, 0.10)',
+      surface: '#FFFCFA', surfaceBorder: 'rgba(74, 42, 49, 0.09)',
+      glow: 'rgba(226, 150, 155, 0.30)',
+    },
+    dark: false,
+    type: { display: 'serif', titleSize: 'clamp(2.2rem, 8.8vw, 3.6rem)', titleWeight: 500,
+      titleTracking: '-0.012em', titleTransform: 'none',
+      bodySize: 'clamp(1.05rem, 4.1vw, 1.22rem)', bodyLeading: '1.95' },
+    decor: { kind: 'petals', palette: ['#F0A6A0', '#D97E93', '#F7D2C6', '#C25873'], density: 24 },
+    scenes: ['gate-envelope', 'reveal', 'memories', 'messages', 'gift', 'closing'],
+    gate: { badge: '🌸 בדיוק בעונה', title: 'משהו פרח בשבילכם',
+      subtitle: 'קחו רגע להריח', cta: '❀ פתחו' },
+    motion: { duration: 1.2, stagger: 0.13, ease: 'power2.out' },
+    musicMood: 'romantic', photoPresentation: 'cinematic',
+  },
+
+  /* ---------------------------------------------------------------- *
+   * ARCADE — 8-bit. The one place a hard neon-on-dark palette is the
+   * point rather than a default, so it commits: acid green, chunky
+   * pixels, scanlines.
+   * ---------------------------------------------------------------- */
+  arcade: {
+    id: 'arcade',
+    label: 'פיקסל',
+    description: 'משחקי וידאו ישנים — פיקסלים גסים, ירוק זרחני וקווי סריקה',
+    premium: true,
+    preview: { gradient: 'linear-gradient(145deg, #7cf76f 0%, #6a3df0 52%, #12081f 100%)', emoji: '👾' },
+    palette: {
+      pageBg: 'linear-gradient(168deg, #1B1233 0%, #150E28 55%, #0B0716 100%)',
+      ink: '#EFEAFF', inkSoft: '#9C90C4', accent: '#7CF76F',
+      accentSoft: 'rgba(124, 247, 111, 0.13)',
+      surface: 'rgba(255,255,255,0.055)', surfaceBorder: 'rgba(124, 247, 111, 0.34)',
+      glow: 'rgba(124, 247, 111, 0.34)',
+    },
+    dark: true,
+    type: { display: 'sans', titleSize: 'clamp(2rem, 8vw, 3.2rem)', titleWeight: 900,
+      titleTracking: '0.04em', titleTransform: 'uppercase',
+      bodySize: 'clamp(1rem, 3.9vw, 1.14rem)', bodyLeading: '1.8' },
+    decor: { kind: 'confetti', palette: ['#7CF76F', '#F76FC5', '#6A3DF0', '#FFE45E'], density: 20 },
+    scenes: ['gate-gift', 'reveal', 'messages', 'surprise', 'memories', 'gift', 'closing'],
+    gate: { badge: '👾 INSERT COIN', title: 'שלב חדש נפתח',
+      subtitle: 'לחצו START כדי להתחיל', cta: '▶ START' },
+    motion: { duration: 0.5, stagger: 0.06, ease: 'steps(4)' },
+    musicMood: 'party', photoPresentation: 'wall',
+  },
+
+  /* ---------------------------------------------------------------- *
+   * ZEN — sumi ink on warm rice paper. Emptiness as the composition.
+   * ---------------------------------------------------------------- */
+  zen: {
+    id: 'zen',
+    label: 'זן',
+    description: 'דיו סומי על נייר אורז חם — ריק, מדויק ומאוד שקט',
+    premium: true,
+    preview: { gradient: 'linear-gradient(145deg, #f4efe3 0%, #cfc6b2 50%, #2b2824 100%)', emoji: '☯️' },
+    palette: {
+      pageBg: 'linear-gradient(165deg, #F6F1E6 0%, #EFE8D9 50%, #E4DBC9 100%)',
+      ink: '#26241F', inkSoft: '#7A7466', accent: '#2B2824',
+      accentSoft: 'rgba(43, 40, 36, 0.06)',
+      surface: '#FDFBF5', surfaceBorder: 'rgba(38, 36, 31, 0.10)',
+      glow: 'rgba(60, 56, 48, 0.14)',
+    },
+    dark: false,
+    type: { display: 'serif', titleSize: 'clamp(1.9rem, 7.6vw, 3rem)', titleWeight: 400,
+      titleTracking: '0.05em', titleTransform: 'none',
+      bodySize: 'clamp(1.02rem, 3.9vw, 1.16rem)', bodyLeading: '2.15' },
+    decor: { kind: 'none', palette: [], density: 0 },
+    scenes: ['gate-envelope', 'reveal', 'memories', 'gift', 'closing'],
+    gate: { badge: '—', title: 'רגע אחד, לפני הכול',
+      subtitle: 'נשימה אחת. ואז נפתח', cta: '○ פתחו' },
+    motion: { duration: 1.5, stagger: 0.17, ease: 'power2.out' },
+    musicMood: 'calm', photoPresentation: 'parallax',
+  },
 };
 
 export const TEMPLATE_LIST = Object.values(TEMPLATES);

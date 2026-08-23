@@ -232,6 +232,12 @@ export const TEMPLATE_IDS = [
   'military',
   'sea',
   'world',
+  'newborn',
+  'winter',
+  'desert',
+  'bloom',
+  'arcade',
+  'zen',
 ] as const;
 
 export type TemplateId = (typeof TEMPLATE_IDS)[number];
@@ -402,10 +408,28 @@ export interface GreetingV2 {
   updatedAt: string;
 }
 
-/** What the recipient page is allowed to see — never the owner token. */
-export type PublicGreetingV2 = Omit<GreetingV2, 'ownerToken'>;
+/**
+ * What the recipient page is allowed to see.
+ *
+ * Strips the owner token *and* the sender's private planning inputs. These
+ * latter fields exist only to seed AI generation — the recipient UI never
+ * renders them — and they contain free-text personal detail about a third
+ * party who never consented to it being published. Keeping them out of the
+ * public shape at the type level means no route can leak them by accident.
+ */
+export type PublicGreetingV2 = Omit<
+  GreetingV2,
+  'ownerToken' | 'aboutThem' | 'sharedMemory' | 'giftInterests' | 'giftBudget'
+>;
 
 export function toPublicGreeting(g: GreetingV2): PublicGreetingV2 {
-  const { ownerToken: _ownerToken, ...pub } = g;
+  const {
+    ownerToken: _ownerToken,
+    aboutThem: _aboutThem,
+    sharedMemory: _sharedMemory,
+    giftInterests: _giftInterests,
+    giftBudget: _giftBudget,
+    ...pub
+  } = g;
   return pub;
 }

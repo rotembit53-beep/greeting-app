@@ -36,6 +36,13 @@ interface Props {
   active?: boolean;
   className?: string;
   style?: CSSProperties;
+  /**
+   * Multiplier on every particle count. Full density is tuned for the
+   * full-bleed page backdrop; inside the phone preview the same counts are
+   * detail nobody can resolve, bought at the cost of ~150 simultaneously
+   * animating (and in the bokeh's case, blurred) layers per style switch.
+   */
+  density?: number;
 }
 
 /* ------------------------------------------------------------------ *
@@ -209,14 +216,16 @@ function DepthBokeh({
   seed,
   colors,
   active,
+  count = 4,
 }: {
   seed: string;
   colors: string[];
   active: boolean;
+  count?: number;
 }) {
   const orbs = useMemo(() => {
     const rnd = seeded(seed);
-    return Array.from({ length: 4 }, (_, i) => ({
+    return Array.from({ length: count }, (_, i) => ({
       x: 8 + rnd() * 84,
       y: 8 + rnd() * 84,
       size: 26 + rnd() * 46,
@@ -225,7 +234,7 @@ function DepthBokeh({
       o: 0.18 + rnd() * 0.22,
       d: rnd() * 3,
     }));
-  }, [seed, colors]);
+  }, [seed, colors, count]);
 
   return (
     <>
@@ -294,9 +303,19 @@ function Starfield({ seed, count, color }: { seed: string; count: number; color:
  * The compositions
  * ------------------------------------------------------------------ */
 
-export default function StyleArt({ template, active = false, className = '', style }: Props) {
+export default function StyleArt({
+  template,
+  active = false,
+  className = '',
+  style,
+  density = 1,
+}: Props) {
   const p = template.palette;
   const id = template.id;
+
+  /** Scales a particle count, never below 1 so a style never loses its
+   *  signature element entirely at low density. */
+  const n = (count: number) => Math.max(1, Math.round(count * density));
 
   const shell: CSSProperties = {
     position: 'relative',
@@ -326,7 +345,7 @@ export default function StyleArt({ template, active = false, className = '', sty
       art = (
         <>
           <div style={{ position: 'absolute', inset: 0, ...lift(4) }}>
-            <Confetti seed="bday" colors={template.decor.palette} count={26} />
+            <Confetti seed="bday" colors={template.decor.palette} count={n(26)} />
           </div>
           <div style={{ position: 'absolute', inset: 0, ...lift(9) }}>
             <Balloon color="#e8365d" x={8} y={-16} size={44} delay={0} rotate={-8} />
@@ -556,7 +575,7 @@ export default function StyleArt({ template, active = false, className = '', sty
             />
           ))}
           <div style={{ position: 'absolute', inset: 0, ...lift(5) }}>
-            <Confetti seed="party" colors={['#00f5d4', '#9b5de5', '#f15bb5', '#fee440']} count={22} />
+            <Confetti seed="party" colors={['#00f5d4', '#9b5de5', '#f15bb5', '#fee440']} count={n(22)} />
           </div>
           <div
             style={{
@@ -671,7 +690,7 @@ export default function StyleArt({ template, active = false, className = '', sty
       art = (
         <>
           <div style={{ position: 'absolute', inset: 0, ...lift(2) }}>
-            <Starfield seed="mid" count={46} color="#eaf0ff" />
+            <Starfield seed="mid" count={n(46)} color="#eaf0ff" />
           </div>
           {/* crescent: one disc masked by an offset disc */}
           <div
@@ -766,7 +785,7 @@ export default function StyleArt({ template, active = false, className = '', sty
       art = (
         <>
           <div style={{ position: 'absolute', inset: 0, ...lift(2) }}>
-            <Starfield seed="aur" count={34} color="#dbe8ff" />
+            <Starfield seed="aur" count={n(34)} color="#dbe8ff" />
           </div>
           {[
             { c: 'rgba(100,240,196,.55)', x: '-10%', w: '58%', r: -16, d: '0s' },
@@ -968,7 +987,7 @@ export default function StyleArt({ template, active = false, className = '', sty
             />
           ))}
           <div style={{ position: 'absolute', inset: 0, ...lift(4) }}>
-            <Confetti seed="candy" colors={['#ef7fb4', '#8ec9ff', '#c9b0ff']} count={14} />
+            <Confetti seed="candy" colors={['#ef7fb4', '#8ec9ff', '#c9b0ff']} count={n(14)} />
           </div>
         </>
       );
@@ -1021,7 +1040,7 @@ export default function StyleArt({ template, active = false, className = '', sty
       art = (
         <>
           <div style={{ position: 'absolute', inset: 0, ...lift(2) }}>
-            <Starfield seed="fable" count={28} color="#f3ecff" />
+            <Starfield seed="fable" count={n(28)} color="#f3ecff" />
           </div>
           <div
             className="sa-float"
@@ -1096,7 +1115,7 @@ export default function StyleArt({ template, active = false, className = '', sty
             }}
           />
           <div style={{ position: 'absolute', inset: 0, ...lift(4) }}>
-            <Confetti seed="sport" colors={['#ff7a1a', '#ffffff', '#2ecc71']} count={16} />
+            <Confetti seed="sport" colors={['#ff7a1a', '#ffffff', '#2ecc71']} count={n(16)} />
           </div>
         </>
       );
@@ -1175,7 +1194,7 @@ export default function StyleArt({ template, active = false, className = '', sty
             </svg>
           ))}
           <div style={{ position: 'absolute', inset: 0, ...lift(3) }}>
-            <Confetti seed="sea" colors={['#0e93a8', '#4fa8c9']} count={10} />
+            <Confetti seed="sea" colors={['#0e93a8', '#4fa8c9']} count={n(10)} />
           </div>
         </>
       );
@@ -1229,6 +1248,276 @@ export default function StyleArt({ template, active = false, className = '', sty
       );
       break;
 
+    /* ---------- NEWBORN: real cloud silhouettes + a mobile's drifting motes
+     * Clouds are drawn as one merged path rather than stacked pill divs —
+     * a wide `border-radius: 999px` box reads as a rounded bar, not a
+     * cloud, and three of them greyed the whole card out. */
+    case 'newborn':
+      art = (
+        <>
+          <svg
+            viewBox="0 0 200 150"
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', ...lift(4) }}
+            aria-hidden="true"
+          >
+            <defs>
+              <linearGradient id="nb-cloud" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#FFFFFF" stopOpacity=".95" />
+                <stop offset="100%" stopColor="#DCEAF3" stopOpacity=".7" />
+              </linearGradient>
+            </defs>
+            {/* each cloud is a run of overlapping lobes on a flat base */}
+            <g fill="url(#nb-cloud)">
+              <g className="sa-float">
+                <ellipse cx="44" cy="44" rx="20" ry="15" />
+                <ellipse cx="62" cy="38" rx="15" ry="14" />
+                <ellipse cx="76" cy="46" rx="16" ry="12" />
+                <rect x="28" y="44" width="64" height="14" rx="7" />
+              </g>
+              <g className="sa-float" style={{ animationDelay: '1.8s' }} opacity=".62">
+                <ellipse cx="146" cy="92" rx="17" ry="12" />
+                <ellipse cx="161" cy="86" rx="13" ry="12" />
+                <rect x="132" y="90" width="46" height="12" rx="6" />
+              </g>
+            </g>
+          </svg>
+          {/* a nursery mobile's soft dots, warm rather than starlit */}
+          <div style={{ position: 'absolute', inset: 0, ...lift(2) }}>
+            <Confetti seed="newborn" colors={['#9DBFD4', '#E7C9B4', '#C3D9E4']} count={n(9)} />
+          </div>
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background:
+                'radial-gradient(60% 46% at 22% 2%, rgba(255,244,230,.75) 0%, transparent 62%)',
+            }}
+          />
+        </>
+      );
+      break;
+
+    /* ---------- WINTER: falling snow + a drawn frost crystal ------------- */
+    case 'winter':
+      art = (
+        <>
+          <div style={{ position: 'absolute', inset: 0, ...lift(2) }}>
+            <Starfield seed="winter" count={n(30)} color="#ffffff" />
+          </div>
+          <svg
+            viewBox="0 0 200 150"
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', ...lift(5) }}
+            aria-hidden="true"
+          >
+            {/* one six-fold crystal, drawn rather than an emoji */}
+            <g
+              stroke="#6E9BBE"
+              strokeWidth="1.3"
+              strokeLinecap="round"
+              fill="none"
+              opacity=".65"
+              transform="translate(100 74)"
+            >
+              {[0, 60, 120].map((a) => (
+                <g key={a} transform={`rotate(${a})`}>
+                  <path d="M0 -34 V34" />
+                  <path d="M0 -24 l -8 -8 M0 -24 l 8 -8" />
+                  <path d="M0 24 l -8 8 M0 24 l 8 8" />
+                </g>
+              ))}
+            </g>
+          </svg>
+          {/* frost creeping in from the edges */}
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background:
+                'radial-gradient(80% 70% at 50% 50%, transparent 44%, rgba(255,255,255,.55) 100%)',
+            }}
+          />
+        </>
+      );
+      break;
+
+    /* ---------- DESERT: layered dunes under a low, hazy sun -------------- */
+    case 'desert':
+      art = (
+        <>
+          <div
+            style={{
+              position: 'absolute',
+              insetInlineEnd: '20%',
+              top: '16%',
+              width: 52,
+              height: 52,
+              borderRadius: '999px',
+              background: 'radial-gradient(circle at 40% 36%, #FFF0D4 0%, #F0C48C 52%, #D89A62 100%)',
+              opacity: 0.9,
+              ...lift(4),
+            }}
+          />
+          <svg
+            viewBox="0 0 200 150"
+            preserveAspectRatio="none"
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', ...lift(6) }}
+            aria-hidden="true"
+          >
+            <path d="M0 96 C 44 74, 78 104, 118 88 S 176 66, 200 82 V150 H0 Z" fill="#D7AE85" opacity=".8" />
+            <path d="M0 116 C 38 100, 88 130, 130 112 S 182 98, 200 110 V150 H0 Z" fill="#C08E63" opacity=".85" />
+            <path d="M0 136 C 50 124, 96 146, 142 132 S 186 124, 200 132 V150 H0 Z" fill="#9C6B45" opacity=".8" />
+          </svg>
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(180deg, rgba(255,238,214,.5) 0%, transparent 42%)',
+            }}
+          />
+        </>
+      );
+      break;
+
+    /* ---------- BLOOM: overlapping petal forms, no clip-art flower ------- */
+    case 'bloom':
+      art = (
+        <>
+          {[
+            { c: '#F3AFA6', x: 26, y: 40, s: 92, r: -18, d: '0s' },
+            { c: '#E58AA0', x: 62, y: 24, s: 74, r: 26, d: '1.3s' },
+            { c: '#F8D3C7', x: 46, y: 66, s: 84, r: 8, d: '2.4s' },
+          ].map((b, i) => (
+            <div
+              key={i}
+              className="sa-float"
+              style={{
+                position: 'absolute',
+                insetInlineStart: `${b.x}%`,
+                top: `${b.y}%`,
+                width: b.s,
+                height: b.s * 0.72,
+                // A petal, not a circle: one rounded end, one drawn to a point.
+                borderRadius: '76% 24% 62% 38% / 68% 58% 42% 32%',
+                background: `radial-gradient(70% 80% at 32% 26%, #FFFFFF 0%, ${b.c} 46%, ${b.c} 100%)`,
+                opacity: 0.62,
+                filter: 'blur(.5px)',
+                animationDelay: b.d,
+                transform: `translate(-50%,-50%) rotate(${b.r}deg) scale(${active ? 1.07 : 1})`,
+                transition: 'transform .6s cubic-bezier(0.16, 1, 0.3, 1)',
+              }}
+            />
+          ))}
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'radial-gradient(56% 46% at 22% 4%, rgba(255,252,250,.72) 0%, transparent 62%)',
+            }}
+          />
+        </>
+      );
+      break;
+
+    /* ---------- ARCADE: chunky pixel blocks + CRT scanlines -------------- */
+    case 'arcade':
+      art = (
+        <>
+          {/* an 8-bit invader, built from real blocks rather than an emoji */}
+          <div
+            style={{
+              position: 'absolute',
+              insetInlineStart: '50%',
+              top: '50%',
+              transform: `translate(-50%,-50%) scale(${active ? 1.1 : 1})`,
+              transition: 'transform .35s steps(4)',
+              display: 'grid',
+              gridTemplateColumns: 'repeat(11, 7px)',
+              gridAutoRows: '7px',
+            }}
+          >
+            {[
+              '00100000100',
+              '00010001000',
+              '00111111100',
+              '01101110110',
+              '11111111111',
+              '10111111101',
+              '10100000101',
+              '00011011000',
+            ]
+              .join('')
+              .split('')
+              .map((bit, i) => (
+                <span
+                  key={i}
+                  style={{
+                    background: bit === '1' ? '#7CF76F' : 'transparent',
+                    boxShadow: bit === '1' ? '0 0 6px rgba(124,247,111,.55)' : 'none',
+                  }}
+                />
+              ))}
+          </div>
+          <div style={{ position: 'absolute', inset: 0, ...lift(4) }}>
+            <Confetti seed="arcade" colors={['#7CF76F', '#F76FC5', '#6A3DF0']} count={n(12)} />
+          </div>
+          {/* CRT scanlines — a repeating gradient, not 40 elements */}
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundImage:
+                'repeating-linear-gradient(180deg, rgba(0,0,0,.32) 0px, rgba(0,0,0,.32) 1px, transparent 1px, transparent 4px)',
+              opacity: 0.7,
+            }}
+          />
+        </>
+      );
+      break;
+
+    /* ---------- ZEN: a single sumi enso, brushed and deliberately open --- */
+    case 'zen':
+      art = (
+        <>
+          <svg
+            viewBox="0 0 200 150"
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', ...lift(3) }}
+            aria-hidden="true"
+          >
+            {/* the ring is left unclosed and unevenly weighted — a closed,
+             * even circle would read as a border-radius, not a brushstroke */}
+            <path
+              d="M132 44 C 154 60, 152 100, 122 114 C 90 129, 54 116, 46 88 C 38 60, 62 36, 96 34"
+              stroke="#2B2824"
+              strokeWidth="9"
+              strokeLinecap="round"
+              fill="none"
+              opacity=".82"
+            />
+            <path
+              d="M132 44 C 154 60, 152 100, 122 114"
+              stroke="#2B2824"
+              strokeWidth="3.5"
+              strokeLinecap="round"
+              fill="none"
+              opacity=".45"
+            />
+            <circle cx="150" cy="120" r="4.5" fill="#8C3A2E" opacity=".8" />
+          </svg>
+          {/* rice-paper fibre */}
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundImage:
+                "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3'/%3E%3C/filter%3E%3Crect width='150' height='150' filter='url(%23n)' opacity='0.45'/%3E%3C/svg%3E\")",
+              opacity: 0.24,
+              mixBlendMode: 'multiply',
+            }}
+          />
+        </>
+      );
+      break;
+
     default:
       art = null;
   }
@@ -1244,7 +1533,7 @@ export default function StyleArt({ template, active = false, className = '', sty
     <div className={`sa-shell ${className}`} style={shell} aria-hidden="true">
       {art}
       {bokehColors.length > 0 && (
-        <DepthBokeh seed={`${id}-bokeh`} colors={bokehColors} active={active} />
+        <DepthBokeh seed={`${id}-bokeh`} colors={bokehColors} active={active} count={n(4)} />
       )}
     </div>
   );

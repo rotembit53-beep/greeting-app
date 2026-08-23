@@ -89,32 +89,21 @@ export default function DevicePreview({ template, previewKey }: Props) {
   // Swap the screen in with a real 3D turn (perspective + rotateY), not just
   // a cross-fade — the phone reads as a physical object showing a new card,
   // not a <div> changing its background.
+  //
+  // The scroll reveals are built only once that turn has fully settled.
+  // ScrollTrigger measures real layout (offsets, scrollHeight) from inside
+  // this same rotated/scaled element, and measuring it mid-turn bakes the
+  // skewed geometry into its cached start positions — the reveals then fire
+  // at the wrong offset once the transform finishes and the true position
+  // takes over. Building them after `onComplete` means they measure a
+  // settled, untransformed layout, so no global ScrollTrigger.refresh() is
+  // needed either (that call re-measured every trigger on the page — a
+  // synchronous full-document layout on every single style click).
   useGSAP(
     () => {
       const el = screenRef.current;
-      if (!el) return;
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-      gsap.fromTo(
-        el,
-        { autoAlpha: 0, rotateY: -13, rotateX: 5, scale: 1.05, transformPerspective: 900 },
-        { autoAlpha: 1, rotateY: 0, rotateX: 0, scale: 1, duration: 0.85, ease: 'caseOut' }
-      );
-    },
-    { dependencies: [previewKey], scope: wrapRef }
-  );
-
-  // A new style may render taller or shorter than the last one — jump the
-  // scroll position back to the top, re-check whether there's now anything
-  // to scroll to, reveal the "rest of the card" (memory photo, message
-  // bubbles, sign-off) with a 3D card-in as it scrolls into view, and — the
-  // showcase piece — automatically scroll through the whole design once so
-  // a visitor who never touches the phone still sees the full template. The
-  // instant a real person scrolls or touches it, autoplay steps aside for
-  // good until the style changes again.
-  useGSAP(
-    () => {
       const scroller = scrollRef.current;
-      if (!scroller) return;
+      if (!el || !scroller) return;
 
       scroller.scrollTop = 0;
       setShowScrollHint(scroller.scrollHeight > scroller.clientHeight + 4);
@@ -127,77 +116,94 @@ export default function DevicePreview({ template, previewKey }: Props) {
       scroller.addEventListener('scroll', onScroll, { passive: true });
 
       const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const revealTriggers: ScrollTrigger[] = [];
+
+      // A new style may render taller or shorter than the last one — this
+      // re-checks whether there's anything to scroll to and reveals the
+      // "rest of the card" (memory photo, message bubbles, sign-off) with a
+      // 3D card-in as the reader scrolls it into view. Scrolling is theirs
+      // to drive: the phone used to pan itself up and down the card on an
+      // endless loop, which fought anyone trying to read it and kept a
+      // continuous repaint running over blurred, animated art.
+      const setupScrollEffects = () => {
+        if (reduced) {
+          gsap.set('[data-gp-reveal]', { autoAlpha: 1, x: 0, y: 0, rotateX: 0, rotateY: 0 });
+          return;
+        }
+
+        scroller.querySelectorAll<HTMLElement>('[data-gp-reveal]').forEach((revealEl) => {
+          const dir = revealEl.dataset.gpRevealDir;
+          const from =
+            dir === 'left'
+              ? { x: -30, rotateY: -20 }
+              : dir === 'right'
+                ? { x: 30, rotateY: 20 }
+                : { y: 30, rotateX: 12 };
+          const tween = gsap.fromTo(
+            revealEl,
+            { autoAlpha: 0, transformPerspective: 700, ...from },
+            {
+              autoAlpha: 1,
+              x: 0,
+              y: 0,
+              rotateX: 0,
+              rotateY: 0,
+              duration: 0.75,
+              ease: 'caseOut',
+              scrollTrigger: {
+                trigger: revealEl,
+                scroller,
+                start: 'top 92%',
+                // Never reverse — scrolling back up should leave the card as
+                // read, not animate it out again. Left re-playable rather
+                // than `once: true` on purpose: `once` self-destructs the
+                // trigger, so a single mis-evaluated first pass would strand
+                // the element at autoAlpha 0 permanently. Replaying an
+                // already-finished tween is a visual no-op.
+                toggleActions: 'play none none none',
+              },
+            }
+          );
+          if (tween.scrollTrigger) revealTriggers.push(tween.scrollTrigger);
+        });
+      };
 
       if (reduced) {
-        gsap.set('[data-gp-reveal]', { autoAlpha: 1, x: 0, y: 0, rotateX: 0, rotateY: 0 });
-        return () => scroller.removeEventListener('scroll', onScroll);
-      }
-
-      // Scroll-triggered 3D reveal for everything below the hero.
-      scroller.querySelectorAll<HTMLElement>('[data-gp-reveal]').forEach((el) => {
-        const dir = el.dataset.gpRevealDir;
-        const from =
-          dir === 'left'
-            ? { x: -30, rotateY: -20 }
-            : dir === 'right'
-              ? { x: 30, rotateY: 20 }
-              : { y: 30, rotateX: 12 };
+        setupScrollEffects();
+      } else {
+        // A brief settle, not a full fade-out-and-in.
+        //
+        // This used to run `autoAlpha: 0 -> 1` over 0.85s, which meant every
+        // style click blanked the screen and made you wait most of a second
+        // to see the design you just picked — the switch reading as "laggy"
+        // was largely this animation, not the render. `opacity` (never
+        // `autoAlpha`) also matters: autoAlpha parks `visibility: hidden` on
+        // the start state, so anything that interrupts the tween — a rapid
+        // second click, a backgrounded tab pausing rAF mid-flight — left the
+        // phone permanently blank. Starting part-faded means the worst case
+        // is a slightly dim screen that the next frame corrects.
         gsap.fromTo(
           el,
-          { autoAlpha: 0, transformPerspective: 700, ...from },
+          { opacity: 0.5, rotateY: -7, rotateX: 3, scale: 1.02, transformPerspective: 900 },
           {
-            autoAlpha: 1,
-            x: 0,
-            y: 0,
-            rotateX: 0,
+            opacity: 1,
             rotateY: 0,
-            duration: 0.75,
+            rotateX: 0,
+            scale: 1,
+            duration: 0.45,
             ease: 'caseOut',
-            scrollTrigger: {
-              trigger: el,
-              scroller,
-              start: 'top 92%',
-              // Never reverse. The autoplay below loops down AND back up
-              // forever, so the previous `reverse` made every element
-              // animate out on each upward pass and back in on the next
-              // downward one — the photo and message rows visibly jumped on
-              // a loop. Left re-playable rather than `once: true` on
-              // purpose: `once` self-destructs the trigger, so a single
-              // mis-evaluated first pass (the scroller starts life inside a
-              // `content-visibility` subtree, which can measure oddly) would
-              // strand the element at autoAlpha 0 permanently. Replaying an
-              // already-finished tween is a visual no-op.
-              toggleActions: 'play none none none',
-            },
+            overwrite: 'auto',
+            onComplete: setupScrollEffects,
           }
         );
-      });
-
-      // Autoplay: down through the whole card, hold, back up, hold, repeat —
-      // a slow, deliberate demo pace, never a scrub.
-      const max = scroller.scrollHeight - scroller.clientHeight;
-      const autoplay = gsap.timeline({ repeat: -1, paused: true });
-      if (max > 24) {
-        const downDuration = gsap.utils.clamp(2.4, 6, max / 90);
-        autoplay
-          .to(scroller, { scrollTop: max, duration: downDuration, ease: 'sine.inOut' }, 1.1)
-          .to(scroller, { scrollTop: 0, duration: downDuration, ease: 'sine.inOut' }, '+=1.3');
-        autoplay.play();
       }
-
-      // kill() is idempotent — safe to call again from cleanup even after a
-      // real scroll/touch already stopped it.
-      const stopAutoplay = () => autoplay.kill();
-      scroller.addEventListener('pointerdown', stopAutoplay, { passive: true });
-      scroller.addEventListener('wheel', stopAutoplay, { passive: true });
-      scroller.addEventListener('touchstart', stopAutoplay, { passive: true });
 
       return () => {
         scroller.removeEventListener('scroll', onScroll);
-        scroller.removeEventListener('pointerdown', stopAutoplay);
-        scroller.removeEventListener('wheel', stopAutoplay);
-        scroller.removeEventListener('touchstart', stopAutoplay);
-        autoplay.kill();
+        // Created inside the tween's onComplete — outside this hook's own
+        // gsap.context() capture — so they need an explicit kill here rather
+        // than relying on useGSAP's automatic revert.
+        revealTriggers.forEach((st) => st.kill());
       };
     },
     { dependencies: [previewKey], scope: wrapRef }

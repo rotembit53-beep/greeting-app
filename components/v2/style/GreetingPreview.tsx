@@ -15,6 +15,18 @@ import { onAccentFor } from '@/components/v2/TemplateSurface';
  * made the old preview feel like a static mockup.
  */
 
+/* Particle budget for the phone screen.
+ *
+ * StyleArt's counts are tuned for a full-bleed page backdrop. This preview
+ * renders it three times over (card backdrop + two photo plates) inside a
+ * ~300px-wide screen, which put ~150 simultaneously animating layers — many
+ * of them blurred — behind a 3D-transformed, rounded-clipped subtree, and
+ * every style switch tore all of them down and built them again. That is
+ * where the stutter on selecting a style came from; at this scale the extra
+ * particles were never resolvable anyway. */
+const BACKDROP_DENSITY = 0.5;
+const PLATE_DENSITY = 0.3;
+
 interface Props {
   template: TemplateDef;
   /** Retriggers the entrance animation when the style changes. */
@@ -69,29 +81,49 @@ export default function GreetingPreview({ template, animationKey }: Props) {
     </p>
   );
 
-  const cta = (
+  /**
+   * The "open" control.
+   *
+   * Deliberately NOT a fully-rounded pill sitting on a coloured glow —
+   * `border-radius: 999px` + an accent-tinted drop shadow is the single most
+   * generic button on the web right now, and next to hand-built art like the
+   * enso or the dune stack it was the one element that gave the whole card
+   * away as generated. This is a printed button instead: a 3px corner, flat
+   * accent fill, letterspaced label, and a hairline highlight inside the top
+   * edge doing the job the glow was faking.
+   */
+  const ctaFor = (align: CSSProperties['alignSelf'], marginTop: string) => (
     <span
       className="gp-in"
       style={{
-        alignSelf: 'center',
+        alignSelf: align,
         // Fixed, not `auto` — an auto top-margin here fights the flex
         // container's min-height floor and pins the whole box at exactly
         // the screen height, clipping `extra` (the messages/signoff below)
         // instead of letting the card grow tall enough to scroll to it.
-        marginTop: '1.4rem',
-        fontSize: '.68rem',
+        marginTop,
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '.42rem',
+        fontSize: '.63rem',
         fontWeight: 700,
-        padding: '.5rem 1.05rem',
-        borderRadius: 999,
+        letterSpacing: '.07em',
+        padding: '.54rem 1rem',
+        borderRadius: 3,
         background: p.accent,
         color: onAccentFor(template),
-        boxShadow: `0 8px 22px -10px ${p.glow}`,
+        boxShadow: `inset 0 1px 0 ${
+          template.dark ? 'rgba(255,255,255,.20)' : 'rgba(255,255,255,.32)'
+        }`,
+        textShadow: 'none',
         animationDelay: '.45s',
       }}
     >
       {spec.sample.cta}
     </span>
   );
+
+  const cta = ctaFor('center', '1.4rem');
 
   /* ---- an "image" stand-in built from the style's own art ---- */
   const imagePlate = (
@@ -107,7 +139,7 @@ export default function GreetingPreview({ template, animationKey }: Props) {
         animationDelay: '.18s',
       }}
     >
-      <StyleArt template={template} active />
+      <StyleArt template={template} active density={PLATE_DENSITY} />
     </div>
   );
 
@@ -156,7 +188,7 @@ export default function GreetingPreview({ template, animationKey }: Props) {
           boxShadow: `0 16px 34px -20px ${p.glow}`,
         }}
       >
-        <StyleArt template={template} />
+        <StyleArt template={template} density={PLATE_DENSITY} />
         <figcaption
           style={{
             position: 'absolute',
@@ -366,24 +398,7 @@ export default function GreetingPreview({ template, animationKey }: Props) {
               {spec.sample.title}
             </h3>
             {body}
-            <span
-              className="gp-in"
-              style={{
-                alignSelf: 'flex-start',
-                marginTop: '.15rem',
-                fontSize: '.68rem',
-                fontWeight: 700,
-                padding: '.5rem 1.05rem',
-                borderRadius: 999,
-                background: p.accent,
-                color: onAccentFor(template),
-                boxShadow: `0 8px 22px -10px ${p.glow}`,
-                textShadow: 'none',
-                animationDelay: '.45s',
-              }}
-            >
-              {spec.sample.cta}
-            </span>
+            {ctaFor('flex-start', '.15rem')}
           </div>
         </div>
       );
@@ -413,7 +428,12 @@ export default function GreetingPreview({ template, animationKey }: Props) {
        * gradient. Absolute (not fixed) so it spans this scrollable card
        * rather than the browser viewport. */}
       <div className="gp-art" aria-hidden="true">
-        <StyleArt template={template} active style={{ background: 'transparent' }} />
+        <StyleArt
+          template={template}
+          active
+          density={BACKDROP_DENSITY}
+          style={{ background: 'transparent' }}
+        />
       </div>
 
       <div style={{ position: 'relative', zIndex: 1 }}>{inner}</div>
