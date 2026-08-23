@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
 import { DEFAULT_TEMPLATE, getTemplate } from '@/lib/v2/templates';
 import { defaultTrackForMood, trackUrl } from '@/lib/v2/music';
 import { track } from '@/lib/v2/analytics';
@@ -23,6 +22,7 @@ import SharePanel from './SharePanel';
 import GiftStep from './GiftStep';
 import Stepper, { FlowStage } from './Stepper';
 import HomeLink from '@/components/v2/HomeLink';
+import BackButton from '@/components/v2/BackButton';
 
 type Stage = FlowStage;
 
@@ -401,21 +401,13 @@ export default function CreateFlow() {
     return (
       <div className="relative">
         <GreetingExperience greeting={previewGreeting} preview />
-        <button
-          type="button"
-          onClick={() => setStage('editor')}
-          className="fixed z-[60] v2-btn"
-          style={{
-            top: '1rem',
-            insetInlineStart: '1rem',
-            background: '#fff',
-            color: '#111',
-            padding: '0.65rem 1.1rem',
-            boxShadow: '0 10px 30px -12px rgba(0,0,0,0.6)',
-          }}
-        >
-          ← חזרה לעריכה
-        </button>
+        <div className="fixed z-[60]" style={{ top: '1rem', insetInlineStart: '1rem' }}>
+          <BackButton
+            onClick={() => setStage('editor')}
+            label="לעריכה"
+            variant="floating"
+          />
+        </div>
       </div>
     );
   }
@@ -478,9 +470,7 @@ export default function CreateFlow() {
             />
 
             <div className="flex mt-10">
-              <Link href="/" className="v2-btn v2-btn-ghost">
-                חזרה לדף הבית
-              </Link>
+              <BackButton href="/" label="לדף הבית" />
             </div>
           </>
         )}
@@ -496,14 +486,8 @@ export default function CreateFlow() {
               error={formError}
             />
 
-            <div className="flex gap-3 mt-10">
-              <button
-                type="button"
-                onClick={() => setStage('event')}
-                className="v2-btn v2-btn-ghost"
-              >
-                חזרה
-              </button>
+            <div className="flex items-center gap-3 mt-10">
+              <BackButton onClick={() => setStage('event')} />
               <button
                 type="button"
                 className="v2-btn v2-btn-primary flex-1 text-lg"

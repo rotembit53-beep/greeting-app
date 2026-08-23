@@ -188,6 +188,75 @@
   box-shadow: var(--v2-shadow-ambient);
 }
 
+/* ---------- Back button ----------
+ * A circular chevron rather than a labelled pill, so the control reads as
+ * "go back" the way a phone's native back button does — before anyone
+ * parses the Hebrew next to it. */
+.v2-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.v2-back-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 999px;
+  border: 1.5px solid var(--v2-hairline-strong);
+  color: var(--v2-ink);
+  overflow: hidden;
+  transition: background var(--v2-dur-s) var(--v2-ease-out),
+    border-color var(--v2-dur-s) var(--v2-ease-out),
+    transform var(--v2-dur-s) var(--v2-ease-out);
+}
+
+.v2-back-arrow {
+  display: inline-flex;
+}
+
+.v2-back-btn:hover .v2-back-circle {
+  background: var(--v2-accent-soft);
+  transform: translateY(-1px);
+}
+
+.v2-back-btn:active .v2-back-circle {
+  transform: translateY(0) scale(0.94);
+}
+
+.v2-back-btn:focus-visible .v2-back-circle {
+  outline: 2px solid var(--v2-accent);
+  outline-offset: 2px;
+}
+
+.v2-back-label {
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--v2-ink-soft);
+}
+
+/* Floating variant: sits over photo/preview content, so it carries its own
+ * light plate and shadow instead of relying on page background contrast. */
+.v2-back-btn-floating .v2-back-circle {
+  background: #fff;
+  border-color: transparent;
+  box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.6);
+}
+
+.v2-back-btn-floating .v2-back-label {
+  color: #111;
+  font-weight: 700;
+}
+
 /* ---------- Inputs ---------- */
 
 .v2-field {
@@ -1251,6 +1320,12 @@
 .v2-scope .v2-calc-key[data-action] {
   background: linear-gradient(180deg, var(--v2-accent-soft) 0%, var(--v2-bg) 100%);
   color: var(--v2-accent);
+}
+
+/* 0 fills the space the clear key left, so the last row stays a full 3
+ * columns instead of leaving a gap where C used to be. */
+.v2-scope .v2-calc-key-zero {
+  grid-column: span 2;
 }
 
 /* Travel: the key drops onto the shell and its shadow collapses with it. */

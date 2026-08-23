@@ -360,7 +360,13 @@ export async function searchPlaces({
         outsideChosenArea: Boolean(
           origin.locality && !address.includes(origin.locality)
         ),
-        mapsUrl: `https://www.google.com/maps/place/?q=place_id:${r.place_id}`,
+        // `q=place_id:` is not a documented deep link and 404s in the Maps
+        // app ("no results found"). The supported form is the Search Action
+        // API — `query` gives it text to show/search, `query_place_id` pins
+        // the exact business.
+        mapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+          `${r.name} ${address}`
+        )}&query_place_id=${r.place_id}`,
       };
     })
     /* Budget confidence outranks proximity: a place we know fits is worth

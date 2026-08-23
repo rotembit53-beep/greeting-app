@@ -6,7 +6,7 @@ import { useGSAP } from '@gsap/react';
 
 gsap.registerPlugin(useGSAP);
 
-type Key = { label: string; action?: 'clear' | 'back' };
+type Key = { label: string; action?: 'back' };
 
 const KEYS: Key[] = [
   { label: '1' },
@@ -18,7 +18,6 @@ const KEYS: Key[] = [
   { label: '7' },
   { label: '8' },
   { label: '9' },
-  { label: 'C', action: 'clear' },
   { label: '0' },
   { label: '⌫', action: 'back' },
 ];
@@ -58,8 +57,7 @@ export default function BudgetCalculator({ value, onChange }: Props) {
 
   const press = (key: Key) => {
     let next = raw;
-    if (key.action === 'clear') next = '';
-    else if (key.action === 'back') next = raw.slice(0, -1);
+    if (key.action === 'back') next = raw.slice(0, -1);
     else {
       const candidate = (raw + key.label).replace(/^0+/, '');
       // Silently ignore a digit that would push it past the ceiling, the way
@@ -83,9 +81,6 @@ export default function BudgetCalculator({ value, onChange }: Props) {
       } else if (e.key === 'Backspace') {
         e.preventDefault();
         press({ label: '⌫', action: 'back' });
-      } else if (e.key === 'Escape') {
-        e.preventDefault();
-        press({ label: 'C', action: 'clear' });
       }
     };
     window.addEventListener('keydown', onKeyDown);
@@ -164,7 +159,10 @@ export default function BudgetCalculator({ value, onChange }: Props) {
         </div>
       </div>
 
-      <div className="v2-calc-keys" role="group" aria-label="מקלדת תקציב">
+      {/* Forced ltr: a calculator keypad reads 1-2-3 left-to-right even
+        * inside an otherwise-rtl page — left to the page direction, the
+        * grid would mirror and 1 would land on the right. */}
+      <div className="v2-calc-keys" dir="ltr" role="group" aria-label="מקלדת תקציב">
         {KEYS.map((key) => (
           <button
             key={key.label}
@@ -174,14 +172,10 @@ export default function BudgetCalculator({ value, onChange }: Props) {
               press(key);
               bump(e.currentTarget);
             }}
-            aria-label={
-              key.action === 'back'
-                ? 'מחיקת ספרה'
-                : key.action === 'clear'
-                  ? 'ניקוי'
-                  : key.label
+            aria-label={key.action === 'back' ? 'מחיקת ספרה' : key.label}
+            className={
+              key.label === '0' ? 'v2-calc-key v2-calc-key-zero' : 'v2-calc-key'
             }
-            className="v2-calc-key"
           >
             {key.label}
           </button>

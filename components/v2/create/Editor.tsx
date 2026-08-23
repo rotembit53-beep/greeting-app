@@ -15,6 +15,7 @@ import MediaUploader from './MediaUploader';
 import MusicPicker from './MusicPicker';
 import StyleGallery from '@/components/v2/style/StyleGallery';
 import PartToggle from './PartToggle';
+import BackButton from '@/components/v2/BackButton';
 
 gsap.registerPlugin(useGSAP);
 
@@ -154,14 +155,7 @@ export default function Editor({
       </p>
 
       <div className="flex justify-start mb-4">
-        <button
-          type="button"
-          onClick={onBack}
-          className="v2-btn v2-btn-ghost"
-          style={{ padding: '0.6rem 1.2rem', fontSize: '0.88rem' }}
-        >
-          ← חזרה לפרטים
-        </button>
+        <BackButton onClick={onBack} label="לפרטים" />
       </div>
 
       <div

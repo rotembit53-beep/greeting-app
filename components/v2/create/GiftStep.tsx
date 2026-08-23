@@ -10,6 +10,7 @@ import {
   interestLabel,
 } from '@/lib/v2/gifts';
 import { compressImage } from '@/lib/v2/imageCompress';
+import BackButton from '@/components/v2/BackButton';
 import BudgetCalculator from './BudgetCalculator';
 
 /**
@@ -326,14 +327,8 @@ export default function GiftStep({
           ))}
         </div>
 
-        <div className="flex gap-3 mt-8">
-          <button
-            type="button"
-            onClick={() => setPhase('choose')}
-            className="v2-btn v2-btn-ghost"
-          >
-            חזרה
-          </button>
+        <div className="flex items-center gap-3 mt-8">
+          <BackButton onClick={() => setPhase('choose')} />
           <button
             type="button"
             onClick={() => setPhase('budget')}
@@ -394,14 +389,8 @@ export default function GiftStep({
           </p>
         )}
 
-        <div className="flex gap-3 mt-8">
-          <button
-            type="button"
-            onClick={() => setPhase('ask')}
-            className="v2-btn v2-btn-ghost"
-          >
-            חזרה
-          </button>
+        <div className="flex items-center gap-3 mt-8">
+          <BackButton onClick={() => setPhase('ask')} />
           <button
             type="button"
             onClick={() => void loadSuggestions()}
@@ -602,10 +591,8 @@ export default function GiftStep({
           שנוח לכם, ומדביקים כאן את הקוד או הקישור.
         </div>
 
-        <div className="flex gap-3">
-          <button type="button" onClick={() => setPhase('budget')} className="v2-btn v2-btn-ghost">
-            חזרה
-          </button>
+        <div className="flex items-center gap-3">
+          <BackButton onClick={() => setPhase('budget')} />
           <button
             type="button"
             onClick={() => setPhase('choose')}
