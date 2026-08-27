@@ -426,6 +426,12 @@ export interface GreetingV2 {
   /** id of the MediaItem used as the opening image. */
   coverMediaId?: string;
 
+  /**
+   * The personalised unlock challenge, as validated JSON (see
+   * lib/v2/opening/types.ts). Empty string means the classic gate.
+   */
+  opening: string;
+
   /** The attached digital gift, revealed at the end. */
   gift?: import('./gifts').Gift | null;
   giftInterests?: string[];

@@ -64,6 +64,7 @@ CREATE TABLE IF NOT EXISTS greetings_v2 (
   coverMediaId TEXT NOT NULL DEFAULT '',
   giftInterests TEXT NOT NULL DEFAULT '[]',
   giftBudget TEXT NOT NULL DEFAULT '',
+  opening TEXT NOT NULL DEFAULT '',
   viewCount INTEGER NOT NULL DEFAULT 0,
   openCount INTEGER NOT NULL DEFAULT 0,
   createdAt TEXT NOT NULL,

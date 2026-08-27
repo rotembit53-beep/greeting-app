@@ -5,6 +5,7 @@ import { DEFAULT_TEMPLATE, getTemplate } from '@/lib/v2/templates';
 import { defaultTrackForMood, trackUrl } from '@/lib/v2/music';
 import { track } from '@/lib/v2/analytics';
 import { Gift, hasGift } from '@/lib/v2/gifts';
+import { OpeningConfig, OpeningPreference } from '@/lib/v2/opening/types';
 import {
   EVENT_BY_ID,
   EventType,
@@ -20,6 +21,7 @@ import Generating from './Generating';
 import Editor, { EditorState } from './Editor';
 import SharePanel from './SharePanel';
 import GiftStep from './GiftStep';
+import OpeningStep from './OpeningStep';
 import Stepper, { FlowStage } from './Stepper';
 import HomeLink from '@/components/v2/HomeLink';
 import BackButton from '@/components/v2/BackButton';
@@ -73,6 +75,8 @@ interface SavedDraft {
   /** The AI's output plus every edit made on top of it. */
   editor?: EditorState | null;
   gift?: Gift | null;
+  openingPref?: OpeningPreference;
+  opening?: OpeningConfig | null;
   stage?: FlowStage;
 }
 
@@ -121,6 +125,14 @@ export default function CreateFlow() {
   const [generated, setGenerated] = useState<GreetingContent | null>(null);
   const [editor, setEditor] = useState<EditorState | null>(null);
   const [gift, setGift] = useState<Gift | null>(null);
+
+  /* The opening experience. `openingPref` is what the creator asked for and
+   * `opening` is what the model built from it — kept apart so switching the
+   * preference can re-run generation without losing the choice. */
+  const [openingPref, setOpeningPref] = useState<OpeningPreference>('surprise');
+  const [opening, setOpening] = useState<OpeningConfig | null>(null);
+  const [openingLoading, setOpeningLoading] = useState(false);
+  const [openingError, setOpeningError] = useState<string | null>(null);
   /** "No gift" is a real answer, not an unanswered step — tracked separately
    * so the stepper can tick step 4 off for someone who chose to skip it. */
   const [giftSkipped, setGiftSkipped] = useState(false);
@@ -184,13 +196,19 @@ export default function CreateFlow() {
         setEditor(parsed.editor);
         setGenerated(parsed.editor.content);
         if (parsed.gift) setGift(parsed.gift);
+        if (parsed.openingPref) setOpeningPref(parsed.openingPref);
+        if (parsed.opening) setOpening(parsed.opening);
         // Resume where they actually were. Someone who stepped back to the
         // event picker before leaving meant to start over, and shoving them
         // forward into the old editor would undo that decision for them.
         // (The stepper won't jump forward either — it only makes completed
         // steps clickable — so from there the flow runs again and the next
         // generation replaces what's held here.)
-        if (parsed.stage === 'editor' || parsed.stage === 'gift') {
+        if (
+          parsed.stage === 'editor' ||
+          parsed.stage === 'opening' ||
+          parsed.stage === 'gift'
+        ) {
           setStage(parsed.stage);
         }
       }
@@ -216,6 +234,8 @@ export default function CreateFlow() {
           draftId,
           editor,
           gift,
+          openingPref,
+          opening,
           /* `generating` and `preview` are transient views of the editor
            * step — recording them verbatim would resume a reload into a
            * spinner that never resolves, or into a full-screen preview. */
@@ -225,7 +245,7 @@ export default function CreateFlow() {
     } catch {
       // Storage full / disabled — the flow still works, just not resumable.
     }
-  }, [hydrated, eventType, details, stage, draftId, editor, gift]);
+  }, [hydrated, eventType, details, stage, draftId, editor, gift, openingPref, opening]);
 
   /** Jumps to any step, forward or back. A step whose own data isn't ready
    * yet (no generated text, no published link) renders its own empty-state
@@ -233,6 +253,22 @@ export default function CreateFlow() {
   const goToStage = (target: FlowStage) => {
     setGenError(null);
     setStage(target);
+    if (target === 'opening') enterOpeningStep();
+  };
+
+  /**
+   * Arriving at the opening step starts building the experience straight away.
+   *
+   * "Surprise Me" is the default *and* the recommendation, so making the
+   * creator click it to make anything happen would leave the recommended path
+   * looking broken. Only ever fires when there's nothing to show yet, so
+   * revisiting the step doesn't burn another model call or replace a game the
+   * creator already accepted.
+   */
+  const enterOpeningStep = () => {
+    if (!editor || opening || openingLoading) return;
+    if (openingPref === 'classic') return;
+    void runOpeningGeneration(openingPref);
   };
 
   /* ---------------- Generation ---------------- */
@@ -310,6 +346,80 @@ export default function CreateFlow() {
     }
   };
 
+  /* ---------------- Opening experience ---------------- */
+
+  /**
+   * Asks the model to design the unlock challenge.
+   *
+   * Failure is never fatal and never blocks the flow: the creator sees a
+   * retry, and publishing without a config simply means the recipient gets
+   * the classic gate. That is why nothing here throws upward.
+   */
+  const runOpeningGeneration = async (preference: OpeningPreference) => {
+    if (!eventType || !editor) return;
+
+    if (preference === 'classic') {
+      setOpening(null);
+      setOpeningError(null);
+      return;
+    }
+
+    setOpeningLoading(true);
+    setOpeningError(null);
+
+    // The greeting copy is a second, richer source of personal detail than
+    // the form fields — the model already distilled the free text into it.
+    const greetingText = [
+      editor.content.title,
+      editor.content.intro,
+      ...editor.content.sections.map((section) => section.body),
+      ...(editor.content.messages ?? []),
+      editor.content.closing,
+    ]
+      .filter(Boolean)
+      .join('\n')
+      .slice(0, 4000);
+
+    try {
+      const res = await fetch('/api/v2/opening', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          eventType,
+          recipientName: details.recipientName,
+          recipientGender: details.recipientGender,
+          relationship: details.relationship,
+          recipientAge: details.recipientAge,
+          aboutThem: details.aboutThem,
+          sharedMemory: details.sharedMemory,
+          senderName: details.senderName,
+          senderGender: details.senderGender,
+          tone: details.tone,
+          greetingText,
+          photoCount: editor.media.filter((m) => m.type === 'image').length,
+          videoCount: editor.media.filter((m) => m.type === 'video').length,
+          preference,
+        }),
+      });
+
+      const data = (await res.json().catch(() => null)) as {
+        opening?: OpeningConfig | null;
+      } | null;
+
+      if (!res.ok || !data?.opening) throw new Error('failed');
+
+      setOpening(data.opening);
+      track('opening_generated', {
+        props: { mechanic: data.opening.mechanic, preference },
+      });
+    } catch {
+      setOpening(null);
+      setOpeningError('לא הצלחנו לבנות משחק הפעם — אפשר לנסות שוב, או להמשיך עם פתיחה קלאסית');
+    } finally {
+      setOpeningLoading(false);
+    }
+  };
+
   /* ---------------- Publish ---------------- */
 
   const publish = async () => {
@@ -338,6 +448,7 @@ export default function CreateFlow() {
           media: editor.media,
           coverMediaId: editor.coverMediaId,
           gift,
+          opening,
           giftInterests: [],
           giftBudget: '',
         }),
@@ -386,6 +497,7 @@ export default function CreateFlow() {
       senderName: details.senderName,
       senderGender: details.senderGender,
       tone: details.tone,
+      opening: opening ? JSON.stringify(opening) : '',
       content: editor.content,
       templateId: editor.templateId,
       musicTrack: editor.musicTrack,
@@ -401,7 +513,7 @@ export default function CreateFlow() {
       createdAt: now,
       updatedAt: now,
     });
-  }, [editor, eventType, details, premium, gift]);
+  }, [editor, eventType, details, premium, gift, opening]);
 
   /* ---------------- Preview takes over the screen ---------------- */
 
@@ -432,6 +544,7 @@ export default function CreateFlow() {
     event: Boolean(eventType),
     details: canContinueFromDetails,
     editor: Boolean(editor),
+    opening: Boolean(opening) || openingPref === 'classic',
     gift: hasGift(gift) || giftSkipped,
     share: Boolean(published),
   };
@@ -563,14 +676,15 @@ export default function CreateFlow() {
             <Editor
               draftId={draftId}
               state={editor}
-              premium={premium}
               onChange={(patch) => setEditor((s) => (s ? { ...s, ...patch } : s))}
               onBack={() => setStage('details')}
               onPreview={() => setStage('preview')}
-              onPublish={() => setStage('gift')}
+              onPublish={() => {
+                setStage('opening');
+                enterOpeningStep();
+              }}
               onRegenerate={() => void runGeneration()}
               publishing={publishing}
-              onPremiumClick={() => track('premium_click', { props: { from: 'editor' } })}
             />
           </>
         )}
@@ -582,6 +696,35 @@ export default function CreateFlow() {
           <EmptyStepPrompt
             title="עדיין אין טקסט לערוך"
             body="קודם בוחרים אירוע וממלאים כמה פרטים, ואז ה-AI כותב את הטקסט."
+            actionLabel={eventType ? 'למלא פרטים' : 'לבחור אירוע'}
+            onAction={() => setStage(eventType ? 'details' : 'event')}
+          />
+        )}
+
+        {stage === 'opening' && editor && (
+          <OpeningStep
+            preference={openingPref}
+            config={opening}
+            loading={openingLoading}
+            error={openingError}
+            onPreferenceChange={(preference) => {
+              setOpeningPref(preference);
+              // Picking a different kind is a request for a different game,
+              // so it regenerates rather than leaving the previous one on
+              // screen looking like the answer.
+              void runOpeningGeneration(preference);
+            }}
+            onRegenerate={() => void runOpeningGeneration(openingPref)}
+            onBack={() => setStage('editor')}
+            onContinue={() => setStage('gift')}
+          />
+        )}
+
+        {/* Jumped here before there is any greeting to attach an opening to. */}
+        {stage === 'opening' && !editor && (
+          <EmptyStepPrompt
+            title="עדיין אין ברכה"
+            body="קודם יוצרים את הטקסט, ואז בונים את חוויית הפתיחה סביב מי שחוגגים."
             actionLabel={eventType ? 'למלא פרטים' : 'לבחור אירוע'}
             onAction={() => setStage(eventType ? 'details' : 'event')}
           />

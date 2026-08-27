@@ -20,15 +20,24 @@ export interface PlanLimits {
   premiumMusic: boolean;
 }
 
+/**
+ * Premium is currently switched off as a product concept: every capability is
+ * available to everyone. The tier still exists as a column and a table so a
+ * paid plan can be reintroduced by changing these numbers alone — but nothing
+ * in the product may gate on it while the two rows are identical.
+ *
+ * `branding` deliberately stays true on free: the footer is the viral loop
+ * back to the product, not a restriction on anything the creator can make.
+ */
 export const PLANS: Record<PlanId, PlanLimits> = {
   free: {
     id: 'free',
     label: 'חינם',
-    maxImages: 10,
+    maxImages: 40,
     branding: true,
-    video: false,
-    premiumTemplates: false,
-    premiumMusic: false,
+    video: true,
+    premiumTemplates: true,
+    premiumMusic: true,
   },
   premium: {
     id: 'premium',
@@ -47,9 +56,9 @@ export const PREMIUM_PRICE_ILS = 19.9;
 export const GROUP_PRICE_ILS = 39;
 
 /**
- * Derived from the templates themselves rather than hand-listed: keeping a
- * second copy here meant a new premium template could silently stay free
- * (or vice versa) if someone updated only one of the two places.
+ * Still derived from the templates rather than hand-listed, so reinstating a
+ * paid tier needs no edit here — with `premiumTemplates: true` on every plan,
+ * `canUseTemplate` never consults it today.
  */
 export const PREMIUM_TEMPLATES: TemplateId[] = Object.values(TEMPLATES)
   .filter((t) => t.premium)

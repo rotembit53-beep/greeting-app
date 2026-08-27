@@ -4,24 +4,28 @@ import { useEffect, useRef, useState } from 'react';
 import { MOODS, TRACKS, Track, trackUrl } from '@/lib/v2/music';
 import { MusicMood } from '@/lib/v2/types';
 
+/**
+ * Every track is available to everyone.
+ *
+ * `Track.premium` still exists in the catalogue so a paid tier can be
+ * reintroduced later, but this component deliberately does not read it:
+ * gating on a prop here is exactly what kept two tracks locked even after the
+ * plan table itself had been opened up.
+ */
 interface Props {
   value: string;
   enabled: boolean;
-  premium: boolean;
   suggestedMood?: MusicMood;
   onChange: (url: string) => void;
   onToggle: (enabled: boolean) => void;
-  onPremiumClick: () => void;
 }
 
 export default function MusicPicker({
   value,
   enabled,
-  premium,
   suggestedMood,
   onChange,
   onToggle,
-  onPremiumClick,
 }: Props) {
   const [mood, setMood] = useState<MusicMood>(suggestedMood ?? 'happy');
   const [previewing, setPreviewing] = useState<string | null>(null);
@@ -96,7 +100,6 @@ export default function MusicPicker({
           <div className="flex flex-col gap-2">
             {tracks.map((track) => {
               const url = trackUrl(track);
-              const locked = track.premium && !premium;
               const selected = value === url;
 
               return (
@@ -106,7 +109,6 @@ export default function MusicPicker({
                   style={{
                     background: selected ? 'var(--v2-accent-soft)' : 'var(--v2-surface)',
                     border: `1.5px solid ${selected ? 'var(--v2-accent)' : 'var(--v2-surface-border)'}`,
-                    opacity: locked ? 0.6 : 1,
                   }}
                 >
                   <button
@@ -124,19 +126,11 @@ export default function MusicPicker({
 
                   <button
                     type="button"
-                    onClick={() => (locked ? onPremiumClick() : onChange(url))}
+                    onClick={() => onChange(url)}
                     className="flex-1 text-start text-sm font-semibold"
                     style={{ color: 'var(--v2-ink)' }}
                   >
                     {track.title}
-                    {locked && (
-                      <span
-                        className="ms-2 text-[10px] font-bold px-2 py-0.5 rounded-full"
-                        style={{ background: 'var(--v2-accent)', color: '#fff' }}
-                      >
-                        PREMIUM
-                      </span>
-                    )}
                   </button>
 
                   {selected && <span style={{ color: 'var(--v2-accent)' }}>✓</span>}

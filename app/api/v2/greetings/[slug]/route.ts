@@ -14,6 +14,7 @@ import {
   toPublicGreeting,
 } from '@/lib/v2/types';
 import { GiftSchema } from '@/lib/v2/gifts';
+import { OpeningConfigSchema } from '@/lib/v2/opening/types';
 
 interface RouteParams {
   params: Promise<{ slug: string }>;
@@ -68,6 +69,7 @@ const PatchSchema = z.object({
   media: z.array(MediaSchema).max(60).optional(),
   coverMediaId: z.string().max(64).optional(),
   gift: GiftSchema.nullable().optional(),
+  opening: OpeningConfigSchema.nullable().optional(),
 });
 
 export async function PATCH(req: NextRequest, { params }: RouteParams) {
@@ -110,6 +112,12 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
       media,
       coverMediaId: patch.coverMediaId,
       gift: patch.gift,
+      opening:
+        patch.opening === undefined
+          ? undefined
+          : patch.opening
+            ? JSON.stringify(patch.opening)
+            : '',
     });
 
     const updated = await getGreetingBySlug(slug);

@@ -16,6 +16,10 @@ export const ANALYTICS_EVENTS = [
   'greeting_shared',
   'greeting_opened',
   'greeting_completed',
+  /* Which mechanic the model reached for, and whether the creator let it
+   * choose — the signal for whether the personalisation is actually varied. */
+  'opening_generated',
+  'opening_played',
   'premium_click',
   'purchase',
 ] as const;

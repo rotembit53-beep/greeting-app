@@ -9,6 +9,16 @@ import {
   GreetingContentSchema,
   TemplateId,
 } from './types';
+import {
+  OPENING_SYSTEM_PROMPT,
+  OpeningPromptInput,
+  buildOpeningPrompt,
+} from './opening/prompt';
+import {
+  OpeningConfig,
+  OpeningConfigSchema,
+  normaliseOpening,
+} from './opening/types';
 
 /**
  * V2's generation pipeline.
@@ -381,4 +391,44 @@ ${description}
     interests: interests.length ? interests : ['surprise'],
     reason: parsed.data.reason,
   };
+}
+
+/* ------------------------------------------------------------------ *
+ * Opening experience
+ * ------------------------------------------------------------------ */
+
+/**
+ * Designs the personalised unlock challenge.
+ *
+ * Returns a *config*, never code: the mechanic comes from a fixed vocabulary
+ * and everything else is authored per greeting. `normaliseOpening` then
+ * clamps the numbers so the result is winnable by construction — the model is
+ * good at concepts and unreliable at arithmetic, and an unwinnable doorway
+ * would be worse than no game at all.
+ *
+ * Callers must treat a throw as "no game": the greeting has to open either
+ * way, so every failure falls back to the classic gate.
+ */
+export async function generateOpeningConfig(
+  input: OpeningPromptInput
+): Promise<OpeningConfig> {
+  const raw = await runPrompt(
+    `${OPENING_SYSTEM_PROMPT}\n\n${buildOpeningPrompt(input)}`
+  );
+
+  const parsed = OpeningConfigSchema.safeParse(extractJson(raw));
+  if (!parsed.success) {
+    console.error('[v2] opening config failed validation:', parsed.error.issues);
+    throw new AIError(
+      'AI_INVALID_RESPONSE',
+      'Model returned an opening config that did not match the contract'
+    );
+  }
+
+  // A pinned mechanic is the creator's choice, not a suggestion.
+  if (input.preference !== 'surprise' && input.preference !== 'classic') {
+    parsed.data.mechanic = input.preference;
+  }
+
+  return normaliseOpening(parsed.data);
 }

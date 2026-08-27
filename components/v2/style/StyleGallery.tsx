@@ -103,7 +103,6 @@ export default function StyleGallery({
       </p>
       <h3 className="style-brief-name">
         {shown.label}
-        {shown.premium && <span className="style-brief-badge">פרימיום</span>}
       </h3>
       <p className="style-brief-pitch">{art.pitch}</p>
       <ul className="style-brief-tags">
@@ -153,7 +152,6 @@ export default function StyleGallery({
                 aria-hidden="true"
               >
                 <span className="style-swatch-emoji">{t.preview.emoji}</span>
-                {locked && <span className="style-swatch-lock">🔒</span>}
               </span>
               <span className="style-swatch-label">{t.label}</span>
             </button>
