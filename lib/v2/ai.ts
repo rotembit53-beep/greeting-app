@@ -4,6 +4,7 @@ import { z } from 'zod';
 import {
   EVENT_BY_ID,
   EventType,
+  GenderValue,
   GreetingContent,
   GreetingContentSchema,
   TemplateId,
@@ -188,9 +189,18 @@ turns into an interactive experience revealed beat by beat.
 VOICE RULES
 1. Write ONLY in Hebrew.
 2. Write as the SENDER, in first person, speaking directly TO the recipient.
-3. Hebrew is gendered. Infer the recipient's gender from the relationship and the
-   description, and keep every verb/pronoun consistent throughout. If genuinely
-   unclear, prefer direct address that works for both.
+3. Hebrew is gendered, in BOTH directions, and getting it wrong makes the whole
+   greeting read as broken:
+   - The RECIPIENT's gender governs every second-person verb, adjective and
+     pronoun addressed to them: "אתה מדהים" vs "את מדהימה", "תמשיך" vs "תמשיכי".
+   - The SENDER's gender governs every first-person verb and adjective written in
+     their voice: "אני מתגעגע" vs "אני מתגעגעת", "אני אוהב" vs "אני אוהבת".
+   The two are independent — a man writing to a woman uses masculine first person
+   and feminine second person in the same sentence.
+   When a gender is stated below, obey it exactly and stay consistent from the
+   title to the surprise line. Only when one is NOT stated may you infer it from
+   the relationship and description — and if that is still unclear, choose
+   phrasing that reads correctly for either gender rather than guessing.
 4. NO clichés. Ban outright: "בריאות אושר ועושר", "עד 120", "שיהיה רק טוב",
    "המשך שנה נפלאה". If a line could be sent to any person on earth, rewrite it.
 5. The specific details the sender gave you (the description, the shared memory)
@@ -218,6 +228,13 @@ STRUCTURE RULES
 
 Return ONLY the JSON object. No markdown fences, no commentary.`;
 
+/** Spelled out for the model, including the "they didn't say" case. */
+function describeGender(value: GenderValue | undefined): string {
+  if (value === 'male') return 'male — use masculine Hebrew forms';
+  if (value === 'female') return 'female — use feminine Hebrew forms';
+  return 'not specified — infer it if the details make it clear, otherwise use phrasing that works for either';
+}
+
 function buildUserPrompt(input: GenerateInput): string {
   const event = EVENT_BY_ID[input.eventType];
   const lines = [
@@ -225,6 +242,15 @@ function buildUserPrompt(input: GenerateInput): string {
     `Recipient's name: ${input.recipientName}`,
     `Sender's relationship to them: ${input.relationship || 'not specified'}`,
   ];
+
+  // Stated outright rather than left to inference — this is what keeps the
+  // Hebrew conjugation right, so it goes in even when the answer is "unknown".
+  lines.push(
+    `Recipient's gender (governs second-person forms): ${describeGender(input.recipientGender)}`
+  );
+  lines.push(
+    `Sender's gender (governs first-person forms, the voice you write in): ${describeGender(input.senderGender)}`
+  );
 
   if (input.recipientAge) lines.push(`Recipient's age: ${input.recipientAge}`);
   if (input.senderName) lines.push(`Sender's name: ${input.senderName}`);
@@ -255,11 +281,13 @@ Output exactly ONE JSON object and nothing else, with these keys:
 export interface GenerateInput {
   eventType: EventType;
   recipientName: string;
+  recipientGender?: GenderValue;
   relationship: string;
   recipientAge?: string;
   aboutThem?: string;
   sharedMemory?: string;
   senderName?: string;
+  senderGender?: GenderValue;
   tone?: string;
   /** The template the user already picked, if any — the AI won't override it. */
   preferredTemplate?: TemplateId;

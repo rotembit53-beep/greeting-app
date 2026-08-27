@@ -2,6 +2,7 @@ import { getCloudflareContext } from '@opennextjs/cloudflare';
 import { Gift } from './gifts';
 import {
   EventType,
+  GenderValue,
   GreetingContent,
   GreetingV2,
   MediaItem,
@@ -26,11 +27,13 @@ interface GreetingV2Row {
   ownerToken: string;
   eventType: string;
   recipientName: string;
+  recipientGender: string;
   relationship: string;
   recipientAge: string;
   aboutThem: string;
   sharedMemory: string;
   senderName: string;
+  senderGender: string;
   tone: string;
   content: string;
   templateId: string;
@@ -57,11 +60,13 @@ function rowToGreeting(row: GreetingV2Row): GreetingV2 {
     ownerToken: row.ownerToken,
     eventType: row.eventType as EventType,
     recipientName: row.recipientName,
+    recipientGender: (row.recipientGender || '') as GenderValue,
     relationship: row.relationship,
     recipientAge: row.recipientAge,
     aboutThem: row.aboutThem,
     sharedMemory: row.sharedMemory,
     senderName: row.senderName,
+    senderGender: (row.senderGender || '') as GenderValue,
     tone: row.tone,
     content: JSON.parse(row.content) as GreetingContent,
     templateId: row.templateId as TemplateId,
@@ -86,12 +91,13 @@ export async function createGreeting(g: GreetingV2): Promise<void> {
   await (await db())
     .prepare(
       `INSERT INTO greetings_v2
-        (id, slug, ownerToken, eventType, recipientName, relationship, recipientAge,
-         aboutThem, sharedMemory, senderName, tone, content, templateId, musicTrack,
+        (id, slug, ownerToken, eventType, recipientName, recipientGender, relationship,
+         recipientAge, aboutThem, sharedMemory, senderName, senderGender, tone,
+         content, templateId, musicTrack,
          musicEnabled, media, coverMediaId, gift, giftInterests, giftBudget,
          plan, status, allowContributions, viewCount, openCount,
          createdAt, updatedAt)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
     .bind(
       g.id,
@@ -99,11 +105,13 @@ export async function createGreeting(g: GreetingV2): Promise<void> {
       g.ownerToken,
       g.eventType,
       g.recipientName,
+      g.recipientGender,
       g.relationship,
       g.recipientAge,
       g.aboutThem,
       g.sharedMemory,
       g.senderName,
+      g.senderGender,
       g.tone,
       JSON.stringify(g.content),
       g.templateId,
