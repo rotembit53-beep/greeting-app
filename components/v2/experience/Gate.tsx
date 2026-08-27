@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { TemplateDef } from '@/lib/v2/templates';
+import { safeReveal } from './opening/engines/shared';
 
 gsap.registerPlugin(useGSAP);
 
@@ -54,7 +55,9 @@ export default function Gate({
 
   const { contextSafe } = useGSAP(
     () => {
-      if (reduceMotion()) return;
+      // Under reduced motion the copy still has to appear — safeReveal sets
+      // the end state directly, so this only skips the decorative idle loops.
+      if (reduceMotion()) return safeReveal('[data-gate-copy] > *', { y: 0, autoAlpha: 1 });
 
       // fromTo, never from: React StrictMode mounts effects twice in dev, and
       // a `from` tween that gets interrupted can leave the element pinned at
@@ -91,18 +94,21 @@ export default function Gate({
       // Targeted by selector rather than `copyRef.current.children`: that's a
       // live HTMLCollection, and handing it straight to GSAP left the tween
       // pinned at its start values (elements stuck invisible).
-      gsap.fromTo(
-        '[data-gate-copy] > *',
-        { y: 22, autoAlpha: 0 },
-        {
-          y: 0,
-          autoAlpha: 1,
-          duration: 0.7,
-          stagger: 0.09,
-          ease: 'power2.out',
-          delay: 0.25,
-        }
-      );
+      //
+      // Revealed through safeReveal because this block carries the recipient's
+      // name and the gate's headline: GSAP runs on requestAnimationFrame,
+      // which a browser suspends outright when the tab isn't painting, and
+      // this tween would then freeze on frame 0 with the copy invisible. Seen
+      // for real while testing the new opening experience — the balloons and
+      // the skip link rendered, the greeting's own title did not.
+      return safeReveal('[data-gate-copy] > *', {
+        y: 0,
+        autoAlpha: 1,
+        duration: 0.7,
+        stagger: 0.09,
+        ease: 'power2.out',
+        delay: 0.25,
+      });
     },
     { scope: rootRef }
   );

@@ -13,6 +13,7 @@ import {
   TEMPLATE_IDS,
 } from '@/lib/v2/types';
 import { GiftSchema, INTEREST_IDS } from '@/lib/v2/gifts';
+import { OpeningConfigSchema } from '@/lib/v2/opening/types';
 import { rateLimit } from '@/lib/v2/rateLimit';
 
 const MediaSchema = z.object({
@@ -43,6 +44,9 @@ const BodySchema = z.object({
   media: z.array(MediaSchema).max(60).optional().default([]),
   coverMediaId: z.string().max(64).optional().default(''),
   gift: GiftSchema.nullable().optional(),
+  /* Re-validated server-side rather than trusted: this is the only thing the
+   * recipient's browser will act on, and it arrives from the client. */
+  opening: OpeningConfigSchema.nullable().optional(),
   giftInterests: z.array(z.enum(INTEREST_IDS)).optional().default([]),
   giftBudget: z.string().max(20).optional().default(''),
 });
@@ -92,6 +96,7 @@ export async function POST(req: NextRequest) {
       media,
       coverMediaId: input.coverMediaId,
       gift: input.gift ?? null,
+      opening: input.opening ? JSON.stringify(input.opening) : '',
       giftInterests: input.giftInterests,
       giftBudget: input.giftBudget,
       plan: 'free',

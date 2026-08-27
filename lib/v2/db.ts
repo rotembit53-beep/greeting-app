@@ -44,6 +44,7 @@ interface GreetingV2Row {
   gift: string;
   giftInterests: string;
   giftBudget: string;
+  opening: string;
   plan: string;
   status: string;
   allowContributions: number;
@@ -77,6 +78,7 @@ function rowToGreeting(row: GreetingV2Row): GreetingV2 {
     gift: row.gift ? (JSON.parse(row.gift) as Gift) : null,
     giftInterests: row.giftInterests ? (JSON.parse(row.giftInterests) as string[]) : [],
     giftBudget: row.giftBudget || '',
+    opening: row.opening || '',
     plan: row.plan as PlanId,
     status: row.status as GreetingV2['status'],
     allowContributions: row.allowContributions === 1,
@@ -95,9 +97,9 @@ export async function createGreeting(g: GreetingV2): Promise<void> {
          recipientAge, aboutThem, sharedMemory, senderName, senderGender, tone,
          content, templateId, musicTrack,
          musicEnabled, media, coverMediaId, gift, giftInterests, giftBudget,
-         plan, status, allowContributions, viewCount, openCount,
+         opening, plan, status, allowContributions, viewCount, openCount,
          createdAt, updatedAt)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
     .bind(
       g.id,
@@ -122,6 +124,7 @@ export async function createGreeting(g: GreetingV2): Promise<void> {
       g.gift ? JSON.stringify(g.gift) : '',
       JSON.stringify(g.giftInterests ?? []),
       g.giftBudget ?? '',
+      g.opening ?? '',
       g.plan,
       g.status,
       g.allowContributions ? 1 : 0,
@@ -160,6 +163,7 @@ export interface GreetingUpdate {
   gift?: Gift | null;
   giftInterests?: string[];
   giftBudget?: string;
+  opening?: string;
   status?: GreetingV2['status'];
   plan?: PlanId;
   allowContributions?: boolean;
@@ -211,6 +215,10 @@ export async function updateGreeting(
   if (patch.giftBudget !== undefined) {
     sets.push('giftBudget = ?');
     values.push(patch.giftBudget);
+  }
+  if (patch.opening !== undefined) {
+    sets.push('opening = ?');
+    values.push(patch.opening);
   }
   if (patch.status !== undefined) {
     sets.push('status = ?');

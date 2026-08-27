@@ -3,14 +3,14 @@
 import { useRef, useState } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
-import { TEMPLATE_LIST, getTemplate } from '@/lib/v2/templates';
+import { getTemplate } from '@/lib/v2/templates';
 import {
   GreetingContent,
   MediaItem,
   OptionalPart,
   TemplateId,
 } from '@/lib/v2/types';
-import { PREMIUM_PRICE_ILS, maxImagesFor } from '@/lib/v2/plan';
+import { maxImagesFor } from '@/lib/v2/plan';
 import MediaUploader from './MediaUploader';
 import MusicPicker from './MusicPicker';
 import StyleGallery from '@/components/v2/style/StyleGallery';
@@ -41,27 +41,23 @@ export interface EditorState {
 interface Props {
   draftId: string;
   state: EditorState;
-  premium: boolean;
   onChange: (patch: Partial<EditorState>) => void;
   onBack: () => void;
   onPreview: () => void;
   onPublish: () => void;
   onRegenerate: () => void;
   publishing: boolean;
-  onPremiumClick: () => void;
 }
 
 export default function Editor({
   draftId,
   state,
-  premium,
   onChange,
   onBack,
   onPreview,
   onPublish,
   onRegenerate,
   publishing,
-  onPremiumClick,
 }: Props) {
   const [tab, setTab] = useState<Tab>('text');
   const content = state.content;
@@ -354,8 +350,8 @@ export default function Editor({
           <MediaUploader
             draftId={draftId}
             media={state.media}
-            maxImages={maxImagesFor(premium ? 'premium' : 'free')}
-            allowVideo={premium}
+            maxImages={maxImagesFor('free')}
+            allowVideo
             onChange={(media) => onChange({ media })}
           />
 
@@ -401,11 +397,9 @@ export default function Editor({
         <MusicPicker
           value={state.musicTrack}
           enabled={state.musicEnabled}
-          premium={premium}
           suggestedMood={content.musicMood}
           onChange={(musicTrack) => onChange({ musicTrack })}
           onToggle={(musicEnabled) => onChange({ musicEnabled })}
-          onPremiumClick={onPremiumClick}
         />
       )}
 
@@ -418,27 +412,7 @@ export default function Editor({
           <StyleGallery
             value={state.templateId}
             onSelect={(templateId) => onChange({ templateId })}
-            lockedIds={TEMPLATE_LIST.filter((t) => t.premium && !premium).map((t) => t.id)}
-            onLockedClick={onPremiumClick}
           />
-
-          {!premium && (
-            <button
-              type="button"
-              onClick={onPremiumClick}
-              className="mt-5 w-full rounded-2xl px-5 py-4 text-start"
-              style={{
-                background: 'linear-gradient(135deg, #e8365d 0%, #b5179e 100%)',
-                color: '#fff',
-              }}
-            >
-              <p className="font-extrabold mb-1">✨ שדרגו לפרימיום</p>
-              <p className="text-sm opacity-90">
-                כל הסגנונות, ללא מיתוג, יותר תמונות, וידאו ומוזיקה נוספת — מ-
-                {PREMIUM_PRICE_ILS.toFixed(2)} ₪
-              </p>
-            </button>
-          )}
         </div>
       )}
 

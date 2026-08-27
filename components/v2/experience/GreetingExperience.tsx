@@ -8,10 +8,12 @@ import { PublicGreetingV2 } from '@/lib/v2/types';
 import { visibleContent } from '@/lib/v2/content';
 import { track } from '@/lib/v2/analytics';
 import { hasGift } from '@/lib/v2/gifts';
+import { parseOpening } from '@/lib/v2/opening/types';
 import TemplateSurface from '@/components/v2/TemplateSurface';
 import Decor from '@/components/v2/Decor';
 import StyleArt from '@/components/v2/style/StyleArt';
-import Gate from './Gate';
+import OpeningExperience from './opening/OpeningExperience';
+import MediaHero from './MediaHero';
 import MusicPlayer from './MusicPlayer';
 import GiftScene from './GiftScene';
 import {
@@ -50,6 +52,24 @@ export default function GreetingExperience({ greeting, preview = false }: Props)
     (m) => m.role === 'memory' || m.role === undefined || m.role === 'library'
   );
   const cover = greeting.media.find((m) => m.id === greeting.coverMediaId);
+
+  /* Media leads the greeting.
+   *
+   * When there is anything to show, it plays immediately after the unlock —
+   * before a word of text — and the template's own `memories` beat is skipped
+   * so the same photos don't appear twice further down. Hoisting here rather
+   * than reordering `scenes` keeps all 27 templates untouched: a template
+   * still declares the beat, this just decides where it happens.
+   *
+   * The cover is folded in as the opening frame, so choosing one still means
+   * "this is the picture they see first".
+   */
+  const heroMedia = cover
+    ? [cover, ...memoryMedia.filter((m) => m.id !== cover.id)]
+    : memoryMedia;
+  const mediaFirst = heroMedia.length > 0;
+
+  const opening = parseOpening(greeting.opening);
 
   // Lock scrolling behind the gate so the content can't be peeked at.
   useEffect(() => {
@@ -121,11 +141,13 @@ export default function GreetingExperience({ greeting, preview = false }: Props)
       <Decor template={template} active={opened} />
 
       {!opened && (
-        <Gate
+        <OpeningExperience
+          config={opening}
           template={template}
           recipientName={greeting.recipientName}
           senderName={greeting.senderName}
           hasGift={giftAttached}
+          media={heroMedia}
           onOpen={handleOpen}
         />
       )}
@@ -142,25 +164,7 @@ export default function GreetingExperience({ greeting, preview = false }: Props)
       ) : null}
 
       <div ref={contentRef} className="relative z-10">
-        {cover ? (
-          <div className="v2-bleed pt-10">
-            <div
-              className="overflow-hidden"
-              style={{ boxShadow: '0 26px 64px -30px var(--v2-glow)' }}
-            >
-              {cover.type === 'video' ? (
-                <video src={cover.url} controls playsInline className="w-full block" />
-              ) : (
-                <img
-                  src={cover.url}
-                  alt={greeting.recipientName}
-                  className="w-full block"
-                  style={{ maxHeight: '62vh', objectFit: 'cover' }}
-                />
-              )}
-            </div>
-          </div>
-        ) : null}
+        {mediaFirst ? <MediaHero template={template} media={heroMedia} /> : null}
         {template.scenes.map((scene) => {
           switch (scene) {
             case 'reveal':
@@ -168,7 +172,8 @@ export default function GreetingExperience({ greeting, preview = false }: Props)
             case 'messages':
               return <MessagesScene key={scene} {...sceneProps} />;
             case 'memories':
-              return (
+              // Already shown up top when there was media to lead with.
+              return mediaFirst ? null : (
                 <MemoriesScene key={scene} template={template} media={memoryMedia} />
               );
             case 'surprise':

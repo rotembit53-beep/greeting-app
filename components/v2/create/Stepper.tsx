@@ -5,6 +5,7 @@ export type FlowStage =
   | 'details'
   | 'generating'
   | 'editor'
+  | 'opening'
   | 'gift'
   | 'preview'
   | 'share';
@@ -13,6 +14,7 @@ const STEPS: { id: FlowStage; label: string }[] = [
   { id: 'event', label: 'אירוע' },
   { id: 'details', label: 'פרטים' },
   { id: 'editor', label: 'עריכה' },
+  { id: 'opening', label: 'פתיחה' },
   { id: 'gift', label: 'מתנה' },
   { id: 'share', label: 'שיתוף' },
 ];
@@ -24,8 +26,9 @@ const STAGE_ORDER: Record<FlowStage, number> = {
   generating: 2,
   editor: 2,
   preview: 2,
-  gift: 3,
-  share: 4,
+  opening: 3,
+  gift: 4,
+  share: 5,
 };
 
 interface StepperProps {
