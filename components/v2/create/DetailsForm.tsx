@@ -1,14 +1,21 @@
 'use client';
 
-import { RELATIONSHIPS, TONES } from '@/lib/v2/types';
+import {
+  GENDER_OPTIONS,
+  GenderValue,
+  RELATIONSHIPS,
+  TONES,
+} from '@/lib/v2/types';
 
 export interface DetailsValue {
   recipientName: string;
+  recipientGender: GenderValue;
   relationship: string;
   recipientAge: string;
   aboutThem: string;
   sharedMemory: string;
   senderName: string;
+  senderGender: GenderValue;
   tone: string;
 }
 
@@ -16,6 +23,60 @@ interface Props {
   value: DetailsValue;
   onChange: (patch: Partial<DetailsValue>) => void;
   error?: string | null;
+}
+
+/**
+ * The one answer the AI cannot guess its way out of: Hebrew inflects for
+ * gender in both directions, so the recipient's gender sets every "you" form
+ * and the sender's sets every "I" form.
+ *
+ * Checkboxes rather than a required radio pair — picking the selected option
+ * again clears it, because "prefer not to say" has to stay reachable and the
+ * flow only ever hard-requires a name. The prompt handles the empty case.
+ */
+function GenderChoice({
+  legend,
+  hint,
+  name,
+  labelFor,
+  value,
+  onSelect,
+}: {
+  legend: string;
+  hint: string;
+  name: string;
+  labelFor: (option: (typeof GENDER_OPTIONS)[number]) => string;
+  value: GenderValue;
+  onSelect: (next: GenderValue) => void;
+}) {
+  return (
+    <fieldset>
+      <legend className="v2-label">{legend}</legend>
+      <p className="v2-hint">{hint}</p>
+      <div className="flex gap-2.5">
+        {GENDER_OPTIONS.map((option) => {
+          const checked = value === option.id;
+          return (
+            <label
+              key={option.id}
+              data-selected={checked}
+              className="v2-choice !flex-row !justify-start !py-3 !px-4 gap-2.5 flex-1 text-sm font-semibold"
+            >
+              <input
+                type="checkbox"
+                name={name}
+                className="v2-checkbox"
+                checked={checked}
+                onChange={() => onSelect(checked ? '' : option.id)}
+              />
+              <span aria-hidden="true">{option.emoji}</span>
+              <span>{labelFor(option)}</span>
+            </label>
+          );
+        })}
+      </div>
+    </fieldset>
+  );
 }
 
 /**
@@ -61,6 +122,15 @@ export default function DetailsForm({ value, onChange, error }: Props) {
             autoComplete="off"
           />
         </div>
+
+        <GenderChoice
+          legend="הברכה מיועדת ל…"
+          hint="כדי שכל פנייה בברכה תהיה בלשון הנכונה"
+          name="recipient-gender"
+          labelFor={(option) => option.recipientLabel}
+          value={value.recipientGender}
+          onSelect={(next) => onChange({ recipientGender: next })}
+        />
 
         <div>
           <span className="v2-label">מה הקשר שלך אליו/אליה?</span>
@@ -110,6 +180,15 @@ export default function DetailsForm({ value, onChange, error }: Props) {
             />
           </div>
         </div>
+
+        <GenderChoice
+          legend="ואת/ה?"
+          hint="הברכה נכתבת בגוף ראשון בשמך — זה מה שקובע את הלשון שלה"
+          name="sender-gender"
+          labelFor={(option) => option.senderLabel}
+          value={value.senderGender}
+          onSelect={(next) => onChange({ senderGender: next })}
+        />
 
         <div>
           <label className="v2-label" htmlFor="v2-about">

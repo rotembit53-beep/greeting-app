@@ -102,11 +102,13 @@ const ERROR_MESSAGES: Record<string, string> = {
 
 const emptyDetails: DetailsValue = {
   recipientName: '',
+  recipientGender: '',
   relationship: '',
   recipientAge: '',
   aboutThem: '',
   sharedMemory: '',
   senderName: '',
+  senderGender: '',
   tone: 'warm',
 };
 
@@ -250,11 +252,13 @@ export default function CreateFlow() {
         body: JSON.stringify({
           eventType,
           recipientName: details.recipientName,
+          recipientGender: details.recipientGender,
           relationship: details.relationship,
           recipientAge: details.recipientAge,
           aboutThem: details.aboutThem,
           sharedMemory: details.sharedMemory,
           senderName: details.senderName,
+          senderGender: details.senderGender,
           tone: details.tone,
         }),
       });
@@ -319,11 +323,13 @@ export default function CreateFlow() {
         body: JSON.stringify({
           eventType,
           recipientName: details.recipientName,
+          recipientGender: details.recipientGender,
           relationship: details.relationship,
           recipientAge: details.recipientAge,
           aboutThem: details.aboutThem,
           sharedMemory: details.sharedMemory,
           senderName: details.senderName,
+          senderGender: details.senderGender,
           tone: details.tone,
           content: editor.content,
           templateId: editor.templateId,
@@ -372,11 +378,13 @@ export default function CreateFlow() {
       ownerToken: '',
       eventType,
       recipientName: details.recipientName || 'שם',
+      recipientGender: details.recipientGender,
       relationship: details.relationship,
       recipientAge: details.recipientAge,
       aboutThem: details.aboutThem,
       sharedMemory: details.sharedMemory,
       senderName: details.senderName,
+      senderGender: details.senderGender,
       tone: details.tone,
       content: editor.content,
       templateId: editor.templateId,

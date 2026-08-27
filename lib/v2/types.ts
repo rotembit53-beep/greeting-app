@@ -185,6 +185,38 @@ export const EVENT_BY_ID = Object.fromEntries(
  * Relationship & tone
  * ------------------------------------------------------------------ */
 
+/**
+ * Hebrew conjugates verbs, adjectives and pronouns by gender, so a greeting
+ * written for the wrong one reads as broken rather than merely impersonal.
+ * The model used to infer this from the free text; asking outright is both
+ * more accurate and cheaper than a guess it cannot check.
+ *
+ * `''` is a real, supported answer — the flow never blocks on anything but a
+ * name, and the prompt falls back to phrasing that works either way.
+ */
+export const GENDERS = ['male', 'female'] as const;
+
+export type Gender = (typeof GENDERS)[number];
+
+/** Gender, or "didn't say". */
+export const GenderSchema = z.union([z.enum(GENDERS), z.literal('')]);
+
+export type GenderValue = z.infer<typeof GenderSchema>;
+
+export interface GenderOption {
+  id: Gender;
+  emoji: string;
+  /** How the recipient is described — third person. */
+  recipientLabel: string;
+  /** How the sender describes themselves — the voice the text is written in. */
+  senderLabel: string;
+}
+
+export const GENDER_OPTIONS: GenderOption[] = [
+  { id: 'male', emoji: '♂️', recipientLabel: 'זכר', senderLabel: 'כותב' },
+  { id: 'female', emoji: '♀️', recipientLabel: 'נקבה', senderLabel: 'כותבת' },
+];
+
 export const RELATIONSHIPS = [
   'בן/בת זוג',
   'חבר/ה',
@@ -376,11 +408,13 @@ export interface GreetingV2 {
 
   eventType: EventType;
   recipientName: string;
+  recipientGender: GenderValue;
   relationship: string;
   recipientAge: string;
   aboutThem: string;
   sharedMemory: string;
   senderName: string;
+  senderGender: GenderValue;
   tone: string;
 
   content: GreetingContent;
