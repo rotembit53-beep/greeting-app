@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { DEFAULT_TEMPLATE, getTemplate } from '@/lib/v2/templates';
 import { defaultTrackForMood, trackUrl } from '@/lib/v2/music';
 import { track } from '@/lib/v2/analytics';
@@ -10,11 +10,8 @@ import {
   EVENT_BY_ID,
   EventType,
   GreetingContent,
-  MediaItem,
   TemplateId,
-  toPublicGreeting,
 } from '@/lib/v2/types';
-import GreetingExperience from '@/components/v2/experience/GreetingExperience';
 import EventPicker from './EventPicker';
 import DetailsForm, { DetailsValue } from './DetailsForm';
 import Generating from './Generating';
@@ -147,10 +144,6 @@ export default function CreateFlow() {
     typeof crypto !== 'undefined' ? crypto.randomUUID() : ''
   );
 
-  // Premium is scaffolding only for now — no payment provider is wired up
-  // yet, so every draft is on the free plan and the gates simply prompt.
-  const premium = false;
-
   /* Gate on the restore having run at least once. Without it the save effect
    * fires on the very first commit — with the empty initial state, since it
    * closes over the same render as the restore beside it — and overwrites the
@@ -236,10 +229,10 @@ export default function CreateFlow() {
           gift,
           openingPref,
           opening,
-          /* `generating` and `preview` are transient views of the editor
-           * step — recording them verbatim would resume a reload into a
-           * spinner that never resolves, or into a full-screen preview. */
-          stage: stage === 'generating' || stage === 'preview' ? 'editor' : stage,
+          /* `generating` is a transient view of the editor step — recording
+           * it verbatim would resume a reload into a spinner that never
+           * resolves. */
+          stage: stage === 'generating' ? 'editor' : stage,
         } satisfies SavedDraft)
       );
     } catch {
@@ -478,60 +471,6 @@ export default function CreateFlow() {
     }
   };
 
-  /* ---------------- Preview ---------------- */
-
-  const previewGreeting = useMemo(() => {
-    if (!editor || !eventType) return null;
-    const now = new Date().toISOString();
-    return toPublicGreeting({
-      id: 'preview',
-      slug: 'preview',
-      ownerToken: '',
-      eventType,
-      recipientName: details.recipientName || 'שם',
-      recipientGender: details.recipientGender,
-      relationship: details.relationship,
-      recipientAge: details.recipientAge,
-      aboutThem: details.aboutThem,
-      sharedMemory: details.sharedMemory,
-      senderName: details.senderName,
-      senderGender: details.senderGender,
-      tone: details.tone,
-      opening: opening ? JSON.stringify(opening) : '',
-      content: editor.content,
-      templateId: editor.templateId,
-      musicTrack: editor.musicTrack,
-      musicEnabled: editor.musicEnabled,
-      media: editor.media,
-      coverMediaId: editor.coverMediaId,
-      gift,
-      plan: premium ? 'premium' : 'free',
-      status: 'draft',
-      allowContributions: false,
-      viewCount: 0,
-      openCount: 0,
-      createdAt: now,
-      updatedAt: now,
-    });
-  }, [editor, eventType, details, premium, gift, opening]);
-
-  /* ---------------- Preview takes over the screen ---------------- */
-
-  if (stage === 'preview' && previewGreeting) {
-    return (
-      <div className="relative">
-        <GreetingExperience greeting={previewGreeting} preview />
-        <div className="fixed z-[60]" style={{ top: '1rem', insetInlineStart: '1rem' }}>
-          <BackButton
-            onClick={() => setStage('editor')}
-            label="לעריכה"
-            variant="floating"
-          />
-        </div>
-      </div>
-    );
-  }
-
   /* ---------------- Shell ---------------- */
 
   const canContinueFromDetails = details.recipientName.trim().length > 0;
@@ -591,7 +530,7 @@ export default function CreateFlow() {
             />
 
             <div className="flex mt-10">
-              <BackButton href="/" label="לדף הבית" />
+              <BackButton href="/" />
             </div>
           </>
         )}
@@ -629,7 +568,7 @@ export default function CreateFlow() {
                   void runGeneration();
                 }}
               >
-                {editor ? 'המשך לטקסט הקיים →' : '✨ צור לי את ההפתעה'}
+                {editor ? 'המשך לטקסט הקיים ←' : '✨ צור לי את ההפתעה'}
               </button>
             </div>
 
@@ -678,8 +617,7 @@ export default function CreateFlow() {
               state={editor}
               onChange={(patch) => setEditor((s) => (s ? { ...s, ...patch } : s))}
               onBack={() => setStage('details')}
-              onPreview={() => setStage('preview')}
-              onPublish={() => {
+              onContinue={() => {
                 setStage('opening');
                 enterOpeningStep();
               }}

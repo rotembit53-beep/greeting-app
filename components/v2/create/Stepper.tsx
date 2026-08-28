@@ -7,7 +7,6 @@ export type FlowStage =
   | 'editor'
   | 'opening'
   | 'gift'
-  | 'preview'
   | 'share';
 
 const STEPS: { id: FlowStage; label: string }[] = [
@@ -25,7 +24,6 @@ const STAGE_ORDER: Record<FlowStage, number> = {
   details: 1,
   generating: 2,
   editor: 2,
-  preview: 2,
   opening: 3,
   gift: 4,
   share: 5,

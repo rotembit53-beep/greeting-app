@@ -335,7 +335,7 @@ export default function GiftStep({
             disabled={interests.length === 0}
             className="v2-btn v2-btn-primary flex-1 text-lg"
           >
-            הבא — תקציב ומיקום →
+            הבא — תקציב ומיקום ←
           </button>
         </div>
 
