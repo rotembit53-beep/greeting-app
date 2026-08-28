@@ -200,7 +200,7 @@ export default function OpeningStep({
       )}
 
       <div className="flex items-center gap-3 mt-10">
-        <BackButton onClick={onBack} label="לעריכה" />
+        <BackButton onClick={onBack} />
         <button
           type="button"
           onClick={onContinue}

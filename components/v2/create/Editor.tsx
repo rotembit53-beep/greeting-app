@@ -469,7 +469,7 @@ export default function Editor({
           לחזור לכאן ולשנות.
         </p>
         <div className="ed-next-row">
-          <BackButton onClick={onBack} label="חזרה" />
+          <BackButton onClick={onBack} />
           <button
             type="button"
             data-hover-lift

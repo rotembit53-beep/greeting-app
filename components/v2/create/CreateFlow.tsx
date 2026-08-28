@@ -530,7 +530,7 @@ export default function CreateFlow() {
             />
 
             <div className="flex mt-10">
-              <BackButton href="/" label="לדף הבית" />
+              <BackButton href="/" />
             </div>
           </>
         )}
