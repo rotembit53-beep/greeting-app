@@ -208,7 +208,7 @@ export default function OpeningStep({
           className="v2-btn v2-btn-primary flex-1 text-lg"
           style={{ opacity: loading ? 0.6 : 1 }}
         >
-          {loading ? 'רגע…' : 'המשך למתנה →'}
+          {loading ? 'רגע…' : 'המשך למתנה ←'}
         </button>
       </div>
     </div>

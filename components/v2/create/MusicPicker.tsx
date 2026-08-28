@@ -61,9 +61,6 @@ export default function MusicPicker({
 
   return (
     <div>
-      <p className="v2-hint">
-        בחרו אווירה, ואז לחצו ▶ להאזנה — השיר יתנגן ברקע כשהברכה נפתחת
-      </p>
       <div className="flex items-center justify-between mb-4">
         <span className="v2-label !mb-0">מוזיקת רקע</span>
         <button

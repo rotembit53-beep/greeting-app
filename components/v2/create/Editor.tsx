@@ -28,6 +28,49 @@ const TABS: { id: Tab; emoji: string; label: string }[] = [
   { id: 'design', emoji: '🎨', label: 'עיצוב' },
 ];
 
+/**
+ * What each tab is for, and which control to actually press inside it.
+ *
+ * The tab bar on its own named four nouns and promised nothing — a sender
+ * landing here couldn't tell what waited behind a tab, whether any of it was
+ * required, or how to move on. Each panel now opens with its own short
+ * "what to do here" list, keyed to the open tab.
+ */
+const TAB_GUIDE: Record<Tab, { title: string; steps: string[] }> = {
+  text: {
+    title: 'מה עושים כאן?',
+    steps: [
+      'לוחצים על כל תיבת טקסט ומשנים מה שרוצים — הכול נשמר לבד.',
+      'מבטלים את הסימון ✓ שליד חלק כדי שלא יופיע בברכה.',
+      'רוצים נוסח אחר לגמרי? לוחצים על “🔄 טקסט חדש עם AI”.',
+    ],
+  },
+  images: {
+    title: 'מה עושים כאן?',
+    steps: [
+      'לוחצים על “הוסיפו תמונות” או גוררים לשם קבצים — אפשר גם סרטון.',
+      'בנייד אפשר ללחוץ על “📷 צלמו עכשיו”.',
+      'בוחרים תמונת פתיחה — התמונה שתופיע ראשונה, לפני הטקסט.',
+      'אפשר גם לדלג — ברכה בלי תמונות עובדת בדיוק אותו דבר.',
+    ],
+  },
+  music: {
+    title: 'מה עושים כאן?',
+    steps: [
+      'הכפתור העליון — “🔊 מוזיקה פועלת” — מדליק ומכבה את המוזיקה.',
+      'בוחרים אווירה, ולוחצים ▶ כדי לשמוע שיר.',
+      'לחיצה על שם השיר בוחרת אותו — השיר המסומן יתנגן כשהברכה נפתחת.',
+    ],
+  },
+  design: {
+    title: 'מה עושים כאן?',
+    steps: [
+      'לוחצים על סגנון כדי לבחור אותו — הבחירה נשמרת מיד.',
+      'כל סגנון משנה צבעים, גופנים ותנועה — לא רק את הצבעים.',
+    ],
+  },
+};
+
 export interface EditorState {
   content: GreetingContent;
   templateId: TemplateId;
@@ -43,8 +86,7 @@ interface Props {
   state: EditorState;
   onChange: (patch: Partial<EditorState>) => void;
   onBack: () => void;
-  onPreview: () => void;
-  onPublish: () => void;
+  onContinue: () => void;
   onRegenerate: () => void;
   publishing: boolean;
 }
@@ -54,8 +96,7 @@ export default function Editor({
   state,
   onChange,
   onBack,
-  onPreview,
-  onPublish,
+  onContinue,
   onRegenerate,
   publishing,
 }: Props) {
@@ -63,9 +104,10 @@ export default function Editor({
   const content = state.content;
   const actionsRef = useRef<HTMLDivElement>(null);
 
-  // A tactile lift-and-grow on hover for the two buttons that actually move
-  // the flow forward — GSAP-driven (per project convention) rather than a
-  // CSS :hover, so it can be killed cleanly and skipped for reduced motion.
+  // A tactile lift on hover for the button that moves the flow forward, with
+  // the arrow stepping ahead of it — GSAP-driven (per project convention)
+  // rather than a CSS :hover, so it can be killed cleanly and skipped for
+  // reduced motion.
   useGSAP(
     () => {
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -75,12 +117,16 @@ export default function Editor({
 
       const cleanups: (() => void)[] = [];
       buttons.forEach((btn) => {
+        const arrow = btn.querySelector('.ed-next-arrow');
         const enter = () => {
           if (btn.disabled) return;
           gsap.to(btn, { y: -3, scale: 1.035, duration: 0.3, ease: 'power2.out', overwrite: 'auto' });
+          // Forward is leftwards in RTL.
+          if (arrow) gsap.to(arrow, { x: -5, duration: 0.3, ease: 'power2.out', overwrite: 'auto' });
         };
         const leave = () => {
           gsap.to(btn, { y: 0, scale: 1, duration: 0.3, ease: 'power2.out', overwrite: 'auto' });
+          if (arrow) gsap.to(arrow, { x: 0, duration: 0.3, ease: 'power2.out', overwrite: 'auto' });
         };
         btn.addEventListener('pointerenter', enter);
         btn.addEventListener('pointerleave', leave);
@@ -146,22 +192,27 @@ export default function Editor({
       >
         🎉 ההפתעה מוכנה!
       </h1>
-      <p className="text-center mb-6" style={{ color: 'var(--v2-ink-soft)' }}>
-        אפשר לשלוח כמו שזה, או לערוך כל דבר
+      <p className="ed-lede">
+        ה-AI כתב לכם את הברכה. אפשר להמשיך כמו שהיא — או לערוך כל דבר בארבע
+        הלשוניות שלמטה: <strong>טקסט, תמונות, מוזיקה ועיצוב</strong>. כשמסיימים,
+        לוחצים על <strong>“הבא”</strong> בתחתית העמוד.
       </p>
 
-      <div className="flex justify-start mb-4">
-        <BackButton onClick={onBack} label="לפרטים" />
-      </div>
-
+      <p className="ed-tabs-lead">בחרו מה לערוך:</p>
       <div
-        className="flex gap-1.5 p-1.5 rounded-2xl mb-5 overflow-x-auto"
+        role="tablist"
+        aria-label="מה לערוך בברכה"
+        className="flex gap-1.5 p-1.5 rounded-2xl mb-4 overflow-x-auto"
         style={{ background: 'var(--v2-accent-soft)' }}
       >
         {TABS.map((t) => (
           <button
             key={t.id}
+            id={`v2-ed-tab-${t.id}`}
             type="button"
+            role="tab"
+            aria-selected={tab === t.id}
+            aria-controls="v2-ed-panel"
             onClick={() => setTab(t.id)}
             className="flex-1 min-w-fit px-3 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-colors"
             style={{
@@ -175,27 +226,20 @@ export default function Editor({
         ))}
       </div>
 
-      {/* Sticky action bar — the two things that matter are always reachable */}
-      <div ref={actionsRef} className="flex gap-3 mb-6">
-        <button
-          type="button"
-          data-hover-lift
-          onClick={onPreview}
-          className="v2-btn v2-btn-ghost flex-1"
-        >
-          👀 תצוגה מקדימה
-        </button>
-        <button
-          type="button"
-          data-hover-lift
-          onClick={onPublish}
-          disabled={publishing}
-          className="v2-btn v2-btn-primary flex-1"
-        >
-          {publishing ? 'מכינים…' : '🎁 להוספת מתנה'}
-        </button>
+      {/* The open tab's own instructions — what this panel is for and which
+        * control to press in it. */}
+      <div className="ed-guide">
+        <p className="ed-guide-title">
+          {TABS.find((t) => t.id === tab)?.emoji} {TAB_GUIDE[tab].title}
+        </p>
+        <ul className="ed-guide-list">
+          {TAB_GUIDE[tab].steps.map((step) => (
+            <li key={step}>{step}</li>
+          ))}
+        </ul>
       </div>
 
+      <div id="v2-ed-panel" role="tabpanel" aria-labelledby={`v2-ed-tab-${tab}`}>
       {/* ---------------- Text ----------------
         * Every block is opt-out. The AI writes the full set, and a sender who
         * only wants a title and one paragraph unchecks the rest instead of
@@ -204,11 +248,11 @@ export default function Editor({
       {tab === 'text' && (
         <div className="flex flex-col gap-5">
           <p className="ed-parts-note">
-            סמנו מה ייכלל בברכה — מה שלא מסומן פשוט לא יופיע, והטקסט נשמר למקרה
-            שתתחרטו.{' '}
+            נכון לעכשיו{' '}
             <strong style={{ color: 'var(--v2-ink)' }}>
               {includedCount === 1 ? 'חלק אחד ייכלל' : `${includedCount} חלקים ייכללו`}
-            </strong>
+            </strong>{' '}
+            בברכה. מה שלא מסומן פשוט לא יופיע — והטקסט נשמר למקרה שתתחרטו.
           </p>
 
           <div className="flex justify-start">
@@ -405,20 +449,41 @@ export default function Editor({
 
       {/* ---------------- Design ---------------- */}
       {tab === 'design' && (
-        <div>
-          <p className="v2-hint mb-4">
-            כל סגנון משנה את כל החוויה — לא רק את הצבעים
-          </p>
-          <StyleGallery
-            value={state.templateId}
-            onSelect={(templateId) => onChange({ templateId })}
-          />
-        </div>
+        <StyleGallery
+          value={state.templateId}
+          onSelect={(templateId) => onChange({ templateId })}
+        />
       )}
+      </div>
 
       <p className="mt-8 text-center text-xs" style={{ color: 'var(--v2-ink-soft)' }}>
         סגנון נוכחי: {getTemplate(state.templateId).label}
       </p>
+
+      {/* The single way forward, at the end of the step rather than above the
+        * content it belongs after — a sender scrolls through the tabs and
+        * finds it exactly where they finish. */}
+      <div ref={actionsRef} className="ed-next">
+        <p className="ed-next-note">
+          סיימתם לערוך? השלב הבא הוא חוויית הפתיחה, ואחריה המתנה. תמיד אפשר
+          לחזור לכאן ולשנות.
+        </p>
+        <div className="ed-next-row">
+          <BackButton onClick={onBack} label="חזרה" />
+          <button
+            type="button"
+            data-hover-lift
+            onClick={onContinue}
+            disabled={publishing}
+            className="v2-btn v2-btn-primary ed-next-btn"
+          >
+            <span>{publishing ? 'מכינים…' : 'הבא'}</span>
+            <span className="ed-next-arrow" aria-hidden="true">
+              ←
+            </span>
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

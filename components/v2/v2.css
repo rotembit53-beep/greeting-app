@@ -1084,6 +1084,117 @@
    stays on screen, dimmed, so turning it back on is obviously possible.
    ========================================================================== */
 
+.ed-lede {
+  max-width: 34rem;
+  margin: 0 auto 1.6rem;
+  text-align: center;
+  font-size: 0.95rem;
+  line-height: 1.75;
+  color: var(--v2-ink-soft);
+}
+
+.ed-lede strong {
+  font-weight: 700;
+  color: var(--v2-ink);
+}
+
+/* ---------- Editor tabs: instructions ---------- */
+
+.ed-tabs-lead {
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--v2-ink-soft);
+  margin-bottom: 0.5rem;
+}
+
+.ed-guide {
+  border: 1px solid var(--v2-hairline);
+  border-inline-start: 3px solid var(--v2-accent);
+  background: var(--v2-accent-soft);
+  border-radius: 1rem;
+  padding: 0.95rem 1.1rem;
+  margin-bottom: 1.6rem;
+}
+
+.ed-guide-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--v2-ink);
+  margin-bottom: 0.45rem;
+}
+
+.ed-guide-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.ed-guide-list li {
+  position: relative;
+  padding-inline-start: 1.05rem;
+  font-size: 0.85rem;
+  line-height: 1.65;
+  color: var(--v2-ink-soft);
+}
+
+.ed-guide-list li::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: 0.2rem;
+  top: 0.62rem;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--v2-accent);
+}
+
+/* ---------- Editor: the way forward ---------- */
+
+.ed-next {
+  margin-top: 1.6rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--v2-hairline);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.ed-next-note {
+  max-width: 30rem;
+  text-align: center;
+  font-size: 0.85rem;
+  line-height: 1.7;
+  color: var(--v2-ink-soft);
+}
+
+/* Back and forward sit together, the same pairing every other step uses. */
+.ed-next-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 26rem;
+}
+
+.ed-next-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  flex: 1;
+  font-size: 1.05rem;
+}
+
+.ed-next-arrow {
+  font-size: 1.15em;
+  line-height: 1;
+}
+
 .ed-parts-note {
   font-size: 0.88rem;
   line-height: 1.7;
