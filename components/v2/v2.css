@@ -511,6 +511,268 @@
 }
 
 /* ==========================================================================
+   Landing nav — the masthead bar
+   ========================================================================== */
+
+.v2-scope { --v2-nav-h: 64px; }
+
+.v2-nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  /* Transparent over the hero, a real surface once past it. Both states are
+   * transitions on the same element, so the change reads as the bar settling
+   * rather than as a second bar appearing. */
+  background: transparent;
+  border-bottom: 1px solid transparent;
+  transition: background var(--v2-dur-m) var(--v2-ease-out),
+    border-color var(--v2-dur-m) var(--v2-ease-out),
+    backdrop-filter var(--v2-dur-m) var(--v2-ease-out);
+}
+
+.v2-nav.is-solid {
+  /* Opaque enough that page content passing underneath never reads through
+   * the links. The blur is a finish on top of that, not the thing doing the
+   * work — `backdrop-filter` is unreliable inside a clipped ancestor. */
+  background: rgb(255 252 246 / 0.94);
+  backdrop-filter: blur(14px) saturate(1.4);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  border-bottom-color: var(--v2-hairline);
+}
+
+.v2-nav-inner {
+  height: var(--v2-nav-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+/* The wordmark only earns its place once the hero's own has scrolled off. */
+.v2-nav-mark {
+  font-family: var(--font-v2-display), 'Frank Ruhl Libre', Georgia, serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--v2-ink);
+  direction: ltr;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(4px);
+  pointer-events: none;
+  transition: opacity var(--v2-dur-m) var(--v2-ease-out),
+    transform var(--v2-dur-m) var(--v2-ease-out);
+}
+
+.v2-nav.is-solid .v2-nav-mark {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.v2-nav-links {
+  display: none;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.v2-nav-link {
+  position: relative;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  padding: 0.5rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--v2-ink-soft);
+  transition: color var(--v2-dur-s) var(--v2-ease-out),
+    background var(--v2-dur-s) var(--v2-ease-out);
+}
+
+.v2-nav-link:hover { color: var(--v2-ink); }
+
+/* The current section reads as current from the fill, not from a heavier
+ * weight — a weight change would shift every other link sideways. */
+.v2-nav-link[data-active] {
+  color: var(--v2-ink);
+  background: var(--v2-accent-soft);
+}
+
+.v2-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.v2-nav-cta {
+  padding: 0.7rem 1.25rem;
+  font-size: 0.88rem;
+}
+
+.v2-nav-toggle {
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 2.6rem;
+  height: 2.6rem;
+  padding: 0 0.6rem;
+  border-radius: 999px;
+  border: 1px solid var(--v2-hairline-strong);
+  background: transparent;
+  cursor: pointer;
+}
+
+.v2-nav-toggle [data-bar] {
+  display: block;
+  height: 1.5px;
+  width: 100%;
+  border-radius: 2px;
+  background: var(--v2-ink);
+}
+
+/* Overlays the page rather than pushing it down: sticky puts the bar in
+ * flow, so an in-flow panel would shove the hero at scroll 0 and float over
+ * it everywhere else — two different behaviours for the same control. */
+.v2-nav-panel {
+  position: absolute;
+  inset-inline: 0;
+  top: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 0.4rem 1.25rem 0.9rem;
+  background: var(--v2-surface);
+  border-bottom: 1px solid var(--v2-hairline);
+}
+
+.v2-nav-panel-link {
+  background: none;
+  border: 0;
+  cursor: pointer;
+  text-align: start;
+  padding: 0.85rem 0.35rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--v2-ink);
+  border-bottom: 1px solid var(--v2-hairline);
+}
+
+.v2-nav-panel-link:last-child { border-bottom: 0; }
+
+@media (min-width: 860px) {
+  .v2-nav-links { display: flex; }
+  .v2-nav-toggle { display: none; }
+}
+
+/* Anchor targets clear the fixed bar instead of hiding behind it. */
+.v2-section { scroll-margin-top: calc(var(--v2-nav-h) + 1rem); }
+
+/* ==========================================================================
+   How it works — the four steps
+   ========================================================================== */
+
+.hiw-grid {
+  position: relative;
+  display: grid;
+  gap: 1rem 1.25rem;
+  grid-template-columns: 1fr;
+  --hiw-circle: 4rem;
+}
+
+/* The thread the circles hang off. Sits at the vertical centre of the circle
+ * row and fades out at both ends, so it reads as a drawn line rather than as
+ * a bar that has to land pixel-exact on the first and last circle. */
+.hiw-line {
+  display: none;
+  position: absolute;
+  top: calc(var(--hiw-circle) / 2);
+  inset-inline: 14%;
+  height: 1.5px;
+  transform-origin: right center;
+  background: linear-gradient(
+    to left,
+    transparent,
+    var(--v2-hairline-strong) 14%,
+    var(--v2-hairline-strong) 86%,
+    transparent
+  );
+}
+
+.hiw-card {
+  position: relative;
+  text-align: center;
+  padding: 0 0.5rem;
+}
+
+.hiw-circle {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--hiw-circle);
+  height: var(--hiw-circle);
+  margin: 0 auto 1.1rem;
+  border-radius: 999px;
+  /* Warm plate with its own hairline, so a circle sitting on the connector
+   * line covers it rather than being crossed by it. */
+  background: var(--v2-surface);
+  border: 1px solid var(--v2-hairline-strong);
+  box-shadow: var(--v2-shadow-raised);
+  font-size: 1.5rem;
+  will-change: transform;
+}
+
+.hiw-emoji { display: block; line-height: 1; }
+
+.hiw-badge {
+  position: absolute;
+  top: -0.25rem;
+  inset-inline-start: -0.25rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-v2-display), Georgia, serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--v2-on-accent, #fff);
+  background: var(--v2-accent);
+  box-shadow: 0 6px 14px -8px var(--v2-glow);
+}
+
+.hiw-title {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--v2-ink);
+  margin-bottom: 0.4rem;
+}
+
+.hiw-body {
+  font-size: 0.88rem;
+  line-height: 1.7;
+  color: var(--v2-ink-soft);
+  max-width: 26ch;
+  margin-inline: auto;
+}
+
+@media (min-width: 640px) {
+  .hiw-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width: 1024px) {
+  .hiw-grid { grid-template-columns: repeat(4, 1fr); }
+  .hiw-line { display: block; }
+}
+
+/* ==========================================================================
    Style art — ambient motion for the per-style compositions.
    Transform/opacity only, so these stay on the compositor.
    ========================================================================== */

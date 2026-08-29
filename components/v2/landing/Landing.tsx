@@ -7,18 +7,12 @@ import { useGSAP } from '@gsap/react';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { TEMPLATE_LIST } from '@/lib/v2/templates';
 import { EVENTS } from '@/lib/v2/types';
-import { PREMIUM_PRICE_ILS } from '@/lib/v2/plan';
 import { track } from '@/lib/v2/analytics';
 import StyleGallery from '@/components/v2/style/StyleGallery';
+import LandingNav from './LandingNav';
+import HowItWorks from './HowItWorks';
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
-
-const STEPS = [
-  { n: '1', emoji: '🎂', title: 'בוחרים אירוע', body: 'יום הולדת, אהבה, שחרור — או סתם כי בא לכם' },
-  { n: '2', emoji: '✍️', title: 'מספרים לנו עליו/עליה', body: 'כמה מילים. זיכרון אחד. זה כל מה שצריך' },
-  { n: '3', emoji: '🤖', title: 'ה-AI יוצר את ההפתעה', body: 'טקסט אישי, עיצוב, אנימציות ומוזיקה' },
-  { n: '4', emoji: '🔗', title: 'משתפים בלינק', body: 'לינק אחד בוואטסאפ. זהו' },
-];
 
 export default function Landing() {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -59,6 +53,8 @@ export default function Landing() {
 
   return (
     <div ref={rootRef} className="v2-scope v2-studio v2-shell">
+      <LandingNav />
+
       {/* ---------------- Masthead ---------------- */}
       <section className="v2-container-wide pt-10 pb-4 sm:pt-16 text-center">
         <div data-hero>
@@ -115,7 +111,10 @@ export default function Landing() {
       </section>
 
       {/* ---------------- How it works ---------------- */}
-      <section className="v2-container-wide py-16 sm:py-20">
+      <section id="how" className="v2-section v2-container-wide py-16 sm:py-20">
+        <p data-anim className="v2-eyebrow text-center mb-4">
+          התהליך
+        </p>
         <h2
           data-anim
           className="v2-display text-center mb-3"
@@ -136,32 +135,14 @@ export default function Landing() {
           ארבעה שלבים. פחות מדקה.
         </p>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {STEPS.map((step) => (
-            <div
-              key={step.n}
-              data-anim
-              className="v2-panel p-6 text-center"
-            >
-              <div
-                className="w-12 h-12 rounded-full mx-auto mb-4 flex items-center justify-center text-xl"
-                style={{ background: 'var(--v2-accent-soft)' }}
-              >
-                {step.emoji}
-              </div>
-              <p className="font-extrabold mb-2" style={{ color: 'var(--v2-ink)' }}>
-                {step.n}. {step.title}
-              </p>
-              <p className="text-sm leading-relaxed" style={{ color: 'var(--v2-ink-soft)' }}>
-                {step.body}
-              </p>
-            </div>
-          ))}
-        </div>
+        <HowItWorks />
       </section>
 
       {/* ---------------- Styles: interactive gallery + live device ------- */}
-      <section className="v2-container-wide py-14 sm:py-20">
+      <section id="styles" className="v2-section v2-container-wide py-14 sm:py-20">
+        <p data-anim className="v2-eyebrow text-center mb-4">
+          הסגנונות
+        </p>
         <h2
           data-anim
           className="v2-display text-center mb-3"
@@ -193,7 +174,7 @@ export default function Landing() {
        * heading — same shape, same size, so the two rows blurred into one
        * unexplained mass. It gets its own framing now, and the tags read as
        * a quiet index rather than as a second set of controls. */}
-      <section className="v2-container py-16 sm:py-20 text-center">
+      <section id="occasions" className="v2-section v2-container py-16 sm:py-20 text-center">
         <p data-anim className="v2-eyebrow mb-4">
           לכל רגע
         </p>
@@ -248,7 +229,7 @@ export default function Landing() {
             מישהו מחכה להפתעה שלכם
           </h2>
           <p className="mb-8" style={{ fontSize: '1.05rem', color: 'rgba(246,236,220,0.82)' }}>
-            חינם לגמרי. פרימיום מ-{PREMIUM_PRICE_ILS.toFixed(2)} ₪ לברכה.
+            חינם, בלי הרשמה, ומוכן תוך דקה.
           </p>
           <Link
             href="/create"
