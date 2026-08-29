@@ -48,8 +48,12 @@ interface StepperProps {
  *
  * Replaces a set of unlabeled `aria-hidden` dots that gave no orientation —
  * neither a sighted user nor a screen reader could tell what step they were
- * on or how many remained. Every step is clickable, in either direction;
- * the checkmark/number still communicates which ones are actually done.
+ * on or how many remained. Every step's own word sits inside its badge on
+ * every breakpoint, not just from `sm` up beside a bare numbered dot — so
+ * which step is which is legible at a glance, on a phone, without having to
+ * tap in to find out. Done/active/upcoming still reads from color and the
+ * checkmark; the word itself never gets replaced, so a finished step still
+ * says what it was.
  */
 export default function Stepper({ stage, onGoTo, completed }: StepperProps) {
   if (stage === 'share') return null;
@@ -58,7 +62,7 @@ export default function Stepper({ stage, onGoTo, completed }: StepperProps) {
 
   return (
     <nav aria-label="שלבי היצירה" className="w-full overflow-x-auto">
-      <ol className="flex items-center gap-1.5 sm:gap-2 min-w-max mx-auto justify-center">
+      <ol className="stepper-list">
         {STEPS.map((step, i) => {
           if (step.id === 'share') return null;
           const stepOrder = STAGE_ORDER[step.id];
@@ -66,45 +70,25 @@ export default function Stepper({ stage, onGoTo, completed }: StepperProps) {
           const done = Boolean(completed[step.id]) && !active;
 
           return (
-            <li key={step.id} className="flex items-center gap-1.5 sm:gap-2">
+            <li key={step.id} className="stepper-item">
               <button
                 type="button"
                 onClick={() => onGoTo(step.id)}
                 aria-current={active ? 'step' : undefined}
-                className="flex items-center gap-1.5 rounded-full px-2 py-1 sm:px-2.5 transition-colors"
-                style={{
-                  cursor: 'pointer',
-                  background: active ? 'var(--v2-accent-soft)' : 'transparent',
-                }}
+                className="stepper-badge"
+                data-done={done || undefined}
+                data-active={active || undefined}
               >
-                {/* Filled only once the step actually holds an answer. The
-                  * "you are here" cue is the pill behind the label, so an
-                  * unfinished current step still reads as unfinished. */}
-                <span
-                  className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0"
-                  style={{
-                    background: done ? 'var(--v2-accent)' : 'var(--v2-surface-border)',
-                    color: done ? 'var(--v2-on-accent, #fff)' : 'var(--v2-ink-soft)',
-                    outline: active ? '2px solid var(--v2-accent)' : 'none',
-                    outlineOffset: '2px',
-                  }}
-                >
-                  {done ? '✓' : i + 1}
-                </span>
-                <span
-                  className="hidden sm:inline text-xs font-semibold whitespace-nowrap"
-                  style={{ color: active ? 'var(--v2-accent)' : 'var(--v2-ink-soft)' }}
-                >
-                  {step.label}
-                </span>
+                {done && (
+                  <span className="stepper-check" aria-hidden="true">
+                    ✓
+                  </span>
+                )}
+                {step.label}
               </button>
 
               {i < STEPS.length - 2 && (
-                <span
-                  className="w-3 sm:w-5 h-px flex-shrink-0"
-                  style={{ background: 'var(--v2-surface-border)' }}
-                  aria-hidden="true"
-                />
+                <span className="stepper-connector" aria-hidden="true" />
               )}
             </li>
           );

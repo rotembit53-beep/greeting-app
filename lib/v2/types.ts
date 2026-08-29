@@ -234,6 +234,11 @@ export const TONES = [
   { id: 'cool', emoji: '😎', label: 'מגניב' },
   { id: 'luxe', emoji: '✨', label: 'יוקרתי' },
   { id: 'party', emoji: '🎉', label: 'מסיבתי' },
+  { id: 'romantic', emoji: '💕', label: 'רומנטי' },
+  { id: 'nostalgic', emoji: '🕰️', label: 'נוסטלגי' },
+  { id: 'poetic', emoji: '🕊️', label: 'פיוטי' },
+  { id: 'formal', emoji: '🎩', label: 'רשמי ומכובד' },
+  { id: 'playful', emoji: '🤪', label: 'קליל ושובב' },
 ] as const;
 
 export type ToneId = (typeof TONES)[number]['id'];

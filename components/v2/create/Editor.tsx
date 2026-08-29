@@ -198,7 +198,10 @@ export default function Editor({
         לוחצים על <strong>“הבא”</strong> בתחתית העמוד.
       </p>
 
-      <p className="ed-tabs-lead">בחרו מה לערוך:</p>
+      <div className="ed-tabs-lead-row">
+        <p className="ed-tabs-lead">בחרו מה לערוך:</p>
+        <span className="ed-recommend">💡 מומלץ לעבור על כל הלשוניות</span>
+      </div>
       <div
         role="tablist"
         aria-label="מה לערוך בברכה"

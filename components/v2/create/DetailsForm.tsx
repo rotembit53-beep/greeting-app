@@ -1,11 +1,16 @@
 'use client';
 
+import { useState } from 'react';
 import {
   GENDER_OPTIONS,
   GenderValue,
   RELATIONSHIPS,
   TONES,
 } from '@/lib/v2/types';
+
+/** Every preset but the catch-all — that one gets its own free-text chip
+ * below rather than sitting in the grid as a dead-end choice. */
+const PRESET_RELATIONSHIPS = RELATIONSHIPS.filter((rel) => rel !== 'אחר');
 
 export interface DetailsValue {
   recipientName: string;
@@ -84,6 +89,17 @@ function GenderChoice({
  * result better but never blocks someone from finishing in under a minute.
  */
 export default function DetailsForm({ value, onChange, error }: Props) {
+  /* Whether "אחר" is the active choice — derived once from the incoming
+   * value rather than tracked independently, so a restored draft that
+   * already holds a custom relationship opens straight into the free-text
+   * chip instead of looking unanswered. Safe to compute only on mount:
+   * CreateFlow only ever mounts this component once `value` already holds
+   * its final, restored shape. */
+  const [customMode, setCustomMode] = useState(
+    () => value.relationship !== '' && !PRESET_RELATIONSHIPS.includes(value.relationship as never)
+  );
+  const [customText, setCustomText] = useState(() => (customMode ? value.relationship : ''));
+
   return (
     <div>
       <h1
@@ -135,18 +151,63 @@ export default function DetailsForm({ value, onChange, error }: Props) {
         <div>
           <span className="v2-label">מה הקשר שלך אליו/אליה?</span>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-            {RELATIONSHIPS.map((rel) => (
+            {PRESET_RELATIONSHIPS.map((rel) => (
               <button
                 key={rel}
                 type="button"
-                onClick={() => onChange({ relationship: rel })}
-                data-selected={value.relationship === rel}
+                onClick={() => {
+                  setCustomMode(false);
+                  onChange({ relationship: rel });
+                }}
+                data-selected={!customMode && value.relationship === rel}
                 className="v2-choice !py-3 text-sm font-semibold"
               >
                 {rel}
               </button>
             ))}
+            <button
+              type="button"
+              onClick={() => {
+                setCustomMode(true);
+                onChange({ relationship: customText });
+              }}
+              data-selected={customMode}
+              className="v2-choice !py-3 text-sm font-semibold"
+            >
+              אחר
+            </button>
           </div>
+
+          {/* Free text for anything the presets don't cover. The typed value
+            * becomes the actual `relationship` sent along — the AI prompt
+            * already takes it as plain text, so whatever is written here is
+            * exactly what personalizes the greeting. No separate approval
+            * step: the moment there's real text, it's in effect. */}
+          {customMode && (
+            <div className="mt-3">
+              <input
+                className="v2-field"
+                dir="rtl"
+                value={customText}
+                onChange={(e) => {
+                  const next = e.target.value;
+                  setCustomText(next);
+                  onChange({ relationship: next });
+                }}
+                placeholder="איך היית מתאר/ת את הקשר? לדוגמה: דודה, שכן/ה, מורה לשעבר"
+                maxLength={40}
+                autoComplete="off"
+                autoFocus
+              />
+              {customText.trim().length > 1 ? (
+                <p className="v2-rel-confirm">
+                  ✓ נקלט — ה-AI יתייחס לכם כ<strong>{customText.trim()}</strong> בברכה
+                </p>
+              ) : (
+                <p className="v2-hint">כתבו במילה או שתיים, וזה ישולב בברכה בדיוק כמו שכתוב</p>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="grid sm:grid-cols-2 gap-4">
