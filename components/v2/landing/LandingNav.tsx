@@ -19,10 +19,9 @@ gsap.registerPlugin(useGSAP, ScrollTrigger, ScrollToPlugin);
  * "create" action reachable from anywhere on the page, and marks which
  * section the reader is currently in.
  *
- * It starts transparent over the hero — the hero already carries the wordmark
- * at full size, so repeating it there would be shouting the brand twice — and
- * only takes on its surface, its hairline and its own small wordmark once the
- * hero has scrolled away.
+ * The bar carries its own surface from the first paint rather than fading one
+ * in past the hero: a masthead that isn't there until you scroll is a masthead
+ * a first-time visitor never sees.
  */
 
 const LINKS = [
@@ -40,30 +39,15 @@ const prefersReducedMotion = () =>
 export default function LandingNav() {
   const rootRef = useRef<HTMLElement>(null);
   const [open, setOpen] = useState(false);
-  const [solid, setSolid] = useState(false);
   const [active, setActive] = useState('');
 
   useGSAP(
     () => {
-      /* Everything this bar watches lives outside it, so these are real
+      /* The sections this bar watches live outside it, so these are real
        * element lookups: `scope` resolves selector strings against the nav
-       * itself, where none of them exist. */
-      const hero = document.querySelector<HTMLElement>('[data-hero]');
-
-      /* Solid bar once the hero is behind us. Driven by the two crossing
-       * callbacks rather than by the trigger's active range: any range whose
-       * end sits past the maximum scroll gets clamped, and the bar would
-       * drop back to transparent at the very bottom of the page. */
-      if (hero) {
-        ScrollTrigger.create({
-          trigger: hero,
-          start: `bottom ${NAV_HEIGHT}px`,
-          onEnter: () => setSolid(true),
-          onLeaveBack: () => setSolid(false),
-        });
-      }
-
-      // Which section the reader is actually in, for the link states.
+       * itself, where none of them exist.
+       *
+       * Which section the reader is actually in, for the link states. */
       LINKS.forEach((link) => {
         const section = document.getElementById(link.id);
         if (!section) return;
@@ -156,7 +140,7 @@ export default function LandingNav() {
   };
 
   return (
-    <header ref={rootRef} className={solid ? 'v2-nav is-solid' : 'v2-nav'}>
+    <header ref={rootRef} className="v2-nav">
       <div className="v2-nav-inner v2-container-wide">
         <button type="button" className="v2-nav-mark" onClick={toTop} aria-label="לראש העמוד">
           Intera<span className="v2-logo-gi">gift</span>

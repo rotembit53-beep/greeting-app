@@ -520,24 +520,13 @@
   position: sticky;
   top: 0;
   z-index: 50;
-  /* Transparent over the hero, a real surface once past it. Both states are
-   * transitions on the same element, so the change reads as the bar settling
-   * rather than as a second bar appearing. */
-  background: transparent;
-  border-bottom: 1px solid transparent;
-  transition: background var(--v2-dur-m) var(--v2-ease-out),
-    border-color var(--v2-dur-m) var(--v2-ease-out),
-    backdrop-filter var(--v2-dur-m) var(--v2-ease-out);
-}
-
-.v2-nav.is-solid {
-  /* Opaque enough that page content passing underneath never reads through
-   * the links. The blur is a finish on top of that, not the thing doing the
-   * work — `backdrop-filter` is unreliable inside a clipped ancestor. */
+  /* Its own surface from the first paint. The blur is a finish on top of an
+   * already-opaque plate, not the thing keeping the links readable —
+   * `backdrop-filter` is unreliable inside a clipped ancestor. */
   background: rgb(255 252 246 / 0.94);
   backdrop-filter: blur(14px) saturate(1.4);
   -webkit-backdrop-filter: blur(14px) saturate(1.4);
-  border-bottom-color: var(--v2-hairline);
+  border-bottom: 1px solid var(--v2-hairline);
 }
 
 .v2-nav-inner {
@@ -548,7 +537,6 @@
   gap: 1rem;
 }
 
-/* The wordmark only earns its place once the hero's own has scrolled off. */
 .v2-nav-mark {
   font-family: var(--font-v2-display), 'Frank Ruhl Libre', Georgia, serif;
   font-size: 1.15rem;
@@ -560,18 +548,10 @@
   border: 0;
   padding: 0;
   cursor: pointer;
-  opacity: 0;
-  transform: translateY(4px);
-  pointer-events: none;
-  transition: opacity var(--v2-dur-m) var(--v2-ease-out),
-    transform var(--v2-dur-m) var(--v2-ease-out);
+  transition: opacity var(--v2-dur-s) var(--v2-ease-out);
 }
 
-.v2-nav.is-solid .v2-nav-mark {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-}
+.v2-nav-mark:hover { opacity: 0.7; }
 
 .v2-nav-links {
   display: none;
