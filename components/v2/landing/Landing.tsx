@@ -99,9 +99,6 @@ export default function Landing() {
             >
               ✨ צור ברכה
             </Link>
-            <Link href="/g/dugma" className="v2-btn v2-btn-ghost text-lg">
-              👀 ראה דוגמה
-            </Link>
           </div>
 
           <p className="mt-5 text-sm" style={{ color: 'var(--v2-ink-soft)' }}>
