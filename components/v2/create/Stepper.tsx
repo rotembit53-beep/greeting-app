@@ -9,24 +9,33 @@ export type FlowStage =
   | 'gift'
   | 'share';
 
+/** Numbered 1-4 in display order; `share` sits outside the numbering — it's
+ *  the destination, not a step the creator works through. */
 const STEPS: { id: FlowStage; label: string }[] = [
-  { id: 'event', label: 'אירוע' },
-  { id: 'details', label: 'פרטים' },
-  { id: 'editor', label: 'עריכה' },
-  { id: 'opening', label: 'פתיחה' },
-  { id: 'gift', label: 'מתנה' },
+  { id: 'event', label: '1. סוג האירוע' },
+  { id: 'details', label: '2. פרטים טכניים' },
+  { id: 'editor', label: '3. עיצוב ועריכה' },
+  { id: 'gift', label: '4. הוספת מתנה' },
   { id: 'share', label: 'שיתוף' },
 ];
 
-/** Sub-stages fold into the labeled step they belong to. */
+/**
+ * Sub-stages fold into the labeled step they belong to.
+ *
+ * `opening` shares `editor`'s order on purpose: the two used to be separate
+ * numbered steps, but the "design the greeting text" and "design the unlock
+ * experience" screens are now presented as one combined "עיצוב ועריכה"
+ * step, the same way `generating` already folds into it as a transient view
+ * rather than a step of its own.
+ */
 const STAGE_ORDER: Record<FlowStage, number> = {
   event: 0,
   details: 1,
   generating: 2,
   editor: 2,
-  opening: 3,
-  gift: 4,
-  share: 5,
+  opening: 2,
+  gift: 3,
+  share: 4,
 };
 
 interface StepperProps {

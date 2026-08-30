@@ -66,8 +66,23 @@ function lenientText(max: number) {
     });
 }
 
+/**
+ * A name from a fixed art vocabulary (see `art.ts`).
+ *
+ * Deliberately typed as a plain bounded string rather than a `z.enum`: an
+ * icon name the model invented is a cosmetic miss that `resolveIcon` absorbs,
+ * and failing the whole config over it would throw away a good game and drop
+ * the recipient to the classic gate. Same reasoning as `lenientText`.
+ */
+const artName = z.string().max(40).optional().default('');
+
 /** One thing the player interacts with. */
 export const OpeningItemSchema = z.object({
+  /**
+   * Vector art to draw, from `GAME_ICONS`. This is the primary visual —
+   * `emoji` is only the fallback for an object the vocabulary can't express.
+   */
+  icon: artName,
   /** A single emoji. The engines render this — never model-supplied markup. */
   emoji: z.string().min(1).max(8),
   /** Short Hebrew label, shown on cards and in the sequence list. */
@@ -95,6 +110,23 @@ export const OpeningConfigSchema = z
     title: lenientText(60).pipe(z.string().min(1)),
     /** One line telling the player exactly what to do. */
     instruction: lenientText(140).pipe(z.string().min(1)),
+
+    /**
+     * The world the game is staged in, from `GAME_THEMES`. Resolved at render
+     * (an unrecognised value is inferred from the items rather than rejected),
+     * which is why this is a loose string here.
+     */
+    theme: artName,
+    /**
+     * The player's own character, for the engines that have one. Falls back to
+     * the first collectible, then to a neutral runner.
+     */
+    avatarIcon: artName,
+    /**
+     * What the score counts, e.g. "גולים" / "זיכרונות". Shown in the HUD, so
+     * progress reads as part of the story rather than as a bare number.
+     */
+    goalLabel: lenientText(14).optional().default(''),
 
     /** How long they get. Clamped hard: this is a doorway, not a game session. */
     durationSec: z.number().int().min(8).max(60).optional().default(20),

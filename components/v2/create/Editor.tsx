@@ -10,22 +10,25 @@ import {
   OptionalPart,
   TemplateId,
 } from '@/lib/v2/types';
+import { OpeningConfig, OpeningPreference } from '@/lib/v2/opening/types';
 import { maxImagesFor } from '@/lib/v2/plan';
 import MediaUploader from './MediaUploader';
 import MusicPicker from './MusicPicker';
 import StyleGallery from '@/components/v2/style/StyleGallery';
+import OpeningStep from './OpeningStep';
 import PartToggle from './PartToggle';
 import BackButton from '@/components/v2/BackButton';
 
 gsap.registerPlugin(useGSAP);
 
-type Tab = 'text' | 'images' | 'music' | 'design';
+type Tab = 'text' | 'images' | 'music' | 'design' | 'opening';
 
 const TABS: { id: Tab; emoji: string; label: string }[] = [
   { id: 'text', emoji: '✏️', label: 'טקסט' },
   { id: 'images', emoji: '🖼️', label: 'תמונות' },
   { id: 'music', emoji: '🎵', label: 'מוזיקה' },
   { id: 'design', emoji: '🎨', label: 'עיצוב' },
+  { id: 'opening', emoji: '🎮', label: 'משחק פתיחה' },
 ];
 
 /**
@@ -69,6 +72,13 @@ const TAB_GUIDE: Record<Tab, { title: string; steps: string[] }> = {
       'כל סגנון משנה צבעים, גופנים ותנועה — לא רק את הצבעים.',
     ],
   },
+  opening: {
+    title: 'מה עושים כאן?',
+    steps: [
+      'בוחרים איך יפתחו את הברכה — משחק קטן, "תפתיעו אותי", או בלי משחק בכלל.',
+      'כשבוחרים משחק, ה-AI בונה אותו במיוחד לפי מי שחוגגים.',
+    ],
+  },
 };
 
 export interface EditorState {
@@ -89,6 +99,13 @@ interface Props {
   onContinue: () => void;
   onRegenerate: () => void;
   publishing: boolean;
+  /** The unlock-experience half of this step — lives in the "משחק פתיחה" tab. */
+  openingPref: OpeningPreference;
+  opening: OpeningConfig | null;
+  openingLoading: boolean;
+  openingError: string | null;
+  onOpeningPreferenceChange: (preference: OpeningPreference) => void;
+  onOpeningRegenerate: () => void;
 }
 
 export default function Editor({
@@ -99,6 +116,12 @@ export default function Editor({
   onContinue,
   onRegenerate,
   publishing,
+  openingPref,
+  opening,
+  openingLoading,
+  openingError,
+  onOpeningPreferenceChange,
+  onOpeningRegenerate,
 }: Props) {
   const [tab, setTab] = useState<Tab>('text');
   const content = state.content;
@@ -193,8 +216,8 @@ export default function Editor({
         🎉 ההפתעה מוכנה!
       </h1>
       <p className="ed-lede">
-        ה-AI כתב לכם את הברכה. אפשר להמשיך כמו שהיא — או לערוך כל דבר בארבע
-        הלשוניות שלמטה: <strong>טקסט, תמונות, מוזיקה ועיצוב</strong>. כשמסיימים,
+        ה-AI כתב לכם את הברכה. אפשר להמשיך כמו שהיא — או לערוך כל דבר בחמש
+        הלשוניות שלמטה: <strong>טקסט, תמונות, מוזיקה, עיצוב ומשחק פתיחה</strong>. כשמסיימים,
         לוחצים על <strong>“הבא”</strong> בתחתית העמוד.
       </p>
 
@@ -457,6 +480,19 @@ export default function Editor({
           onSelect={(templateId) => onChange({ templateId })}
         />
       )}
+
+      {/* ---------------- Opening (unlock experience) ---------------- */}
+      {tab === 'opening' && (
+        <OpeningStep
+          embedded
+          preference={openingPref}
+          config={opening}
+          loading={openingLoading}
+          error={openingError}
+          onPreferenceChange={onOpeningPreferenceChange}
+          onRegenerate={onOpeningRegenerate}
+        />
+      )}
       </div>
 
       <p className="mt-8 text-center text-xs" style={{ color: 'var(--v2-ink-soft)' }}>
@@ -468,8 +504,8 @@ export default function Editor({
         * finds it exactly where they finish. */}
       <div ref={actionsRef} className="ed-next">
         <p className="ed-next-note">
-          סיימתם לערוך? השלב הבא הוא חוויית הפתיחה, ואחריה המתנה. תמיד אפשר
-          לחזור לכאן ולשנות.
+          סיימתם? השלב הבא הוא הוספת מתנה. תמיד אפשר לחזור לכאן ולשנות —
+          כולל את משחק הפתיחה.
         </p>
         <div className="ed-next-row">
           <BackButton onClick={onBack} />

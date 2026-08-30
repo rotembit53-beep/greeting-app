@@ -36,8 +36,13 @@ interface Props {
   error: string | null;
   onPreferenceChange: (preference: OpeningPreference) => void;
   onRegenerate: () => void;
-  onBack: () => void;
-  onContinue: () => void;
+  /** Standalone-only: the page's own heading and back/continue row. Omitted
+   *  when `embedded`, since the step wrapping this then supplies its own. */
+  onBack?: () => void;
+  onContinue?: () => void;
+  /** True when rendered as a tab inside the editor step rather than as its
+   *  own full page — hides the page heading and the back/continue row. */
+  embedded?: boolean;
 }
 
 export default function OpeningStep({
@@ -49,20 +54,25 @@ export default function OpeningStep({
   onRegenerate,
   onBack,
   onContinue,
+  embedded,
 }: Props) {
   const showPicker = preference !== 'surprise' && preference !== 'classic';
 
   return (
     <div>
-      <h1
-        className="v2-display text-center mb-2"
-        style={{ fontSize: 'clamp(1.75rem, 6.5vw, 2.5rem)', color: 'var(--v2-ink)' }}
-      >
-        איך הם יפתחו את הברכה?
-      </h1>
-      <p className="text-center mb-8" style={{ color: 'var(--v2-ink-soft)' }}>
-        אתגר קטן ומהנה לפני שההפתעה נחשפת
-      </p>
+      {!embedded && (
+        <>
+          <h1
+            className="v2-display text-center mb-2"
+            style={{ fontSize: 'clamp(1.75rem, 6.5vw, 2.5rem)', color: 'var(--v2-ink)' }}
+          >
+            איך הם יפתחו את הברכה?
+          </h1>
+          <p className="text-center mb-8" style={{ color: 'var(--v2-ink-soft)' }}>
+            אתגר קטן ומהנה לפני שההפתעה נחשפת
+          </p>
+        </>
+      )}
 
       <div className="flex flex-col gap-3">
         <button
@@ -199,18 +209,20 @@ export default function OpeningStep({
         </div>
       )}
 
-      <div className="flex items-center gap-3 mt-10">
-        <BackButton onClick={onBack} />
-        <button
-          type="button"
-          onClick={onContinue}
-          disabled={loading}
-          className="v2-btn v2-btn-primary flex-1 text-lg"
-          style={{ opacity: loading ? 0.6 : 1 }}
-        >
-          {loading ? 'רגע…' : 'המשך למתנה ←'}
-        </button>
-      </div>
+      {!embedded && (
+        <div className="flex items-center gap-3 mt-10">
+          <BackButton onClick={onBack} />
+          <button
+            type="button"
+            onClick={onContinue}
+            disabled={loading}
+            className="v2-btn v2-btn-primary flex-1 text-lg"
+            style={{ opacity: loading ? 0.6 : 1 }}
+          >
+            {loading ? 'רגע…' : 'המשך למתנה ←'}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
