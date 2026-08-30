@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useEffect, useRef } from 'react';
+import { memo, useEffect, useMemo, useRef } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { GameTheme } from '@/lib/v2/opening/art';
@@ -780,100 +780,66 @@ export function themeSky(theme: GameTheme): string {
  * under reduced motion, so nothing here can ever obscure a game object or
  * compete with the feedback effects that carry meaning.
  */
+const MOTE_ANIMATION: Record<NonNullable<ThemeDef['ambient']>, string> = {
+  stars: 'v2-mote-twinkle',
+  bubbles: 'v2-mote-rise',
+  snow: 'v2-mote-fall',
+  confetti: 'v2-mote-fall',
+  dust: 'v2-mote-drift',
+  none: '',
+};
+
 const Ambient = memo(function Ambient({ kind }: { kind: NonNullable<ThemeDef['ambient']> }) {
-  const ref = useRef<HTMLDivElement>(null);
+  // Trimmed from 34. Past roughly this many the effect stops reading as
+  // "atmosphere" and starts reading as noise, and it was the largest per-frame
+  // cost on the screen for something nobody is meant to look at.
+  const count = kind === 'stars' ? 20 : kind === 'confetti' ? 14 : 12;
+  const animation = MOTE_ANIMATION[kind];
 
-  const count = kind === 'stars' ? 34 : kind === 'confetti' ? 22 : 18;
-
-  const seeds = useRef(
-    Array.from({ length: count }, (_, i) => ({
-      left: (i * 37) % 100,
-      top: (i * 53) % 100,
-      size: 1.6 + ((i * 7) % 5) * 0.7,
-      delay: ((i * 13) % 40) / 10,
-      dur: 3 + ((i * 11) % 30) / 10,
-      hue: ['#f5c246', '#f2a0b5', '#a7d8f0', '#b9f0a0'][i % 4],
-    }))
-  ).current;
-
-  useGSAP(
-    () => {
-      if (reduceMotion()) return;
-      const nodes = gsap.utils.toArray<HTMLElement>('[data-mote]');
-
-      nodes.forEach((node, i) => {
-        const seed = seeds[i];
-        if (kind === 'stars') {
-          gsap.to(node, {
-            opacity: 0.15,
-            duration: seed.dur,
-            delay: seed.delay,
-            repeat: -1,
-            yoyo: true,
-            ease: 'sine.inOut',
-          });
-        } else if (kind === 'bubbles') {
-          gsap.fromTo(
-            node,
-            { y: 0, opacity: 0 },
-            {
-              y: -260,
-              opacity: 0.55,
-              duration: seed.dur + 3,
-              delay: seed.delay,
-              repeat: -1,
-              ease: 'none',
-              onRepeat: () => gsap.set(node, { x: gsap.utils.random(-14, 14) }),
-            }
-          );
-        } else if (kind === 'snow' || kind === 'confetti') {
-          gsap.fromTo(
-            node,
-            { y: -30, opacity: 0.9, rotation: 0 },
-            {
-              y: 320,
-              rotation: kind === 'confetti' ? 420 : 90,
-              opacity: 0.25,
-              duration: seed.dur + 4,
-              delay: seed.delay,
-              repeat: -1,
-              ease: 'none',
-            }
-          );
-        } else {
-          // dust — a slow, barely-there float
-          gsap.to(node, {
-            y: gsap.utils.random(-24, 24),
-            x: gsap.utils.random(-18, 18),
-            opacity: 0.5,
-            duration: seed.dur + 4,
-            delay: seed.delay,
-            repeat: -1,
-            yoyo: true,
-            ease: 'sine.inOut',
-          });
-        }
-      });
-    },
-    { scope: ref, dependencies: [kind] }
+  const seeds = useMemo(
+    () =>
+      Array.from({ length: count }, (_, i) => ({
+        left: (i * 37) % 100,
+        top: (i * 53) % 100,
+        size: 1.6 + ((i * 7) % 5) * 0.7,
+        delay: ((i * 13) % 40) / 10,
+        dur: 3 + ((i * 11) % 30) / 10,
+        hue: ['#f5c246', '#f2a0b5', '#a7d8f0', '#b9f0a0'][i % 4],
+      })),
+    [count]
   );
 
+  if (!animation) return null;
+
   return (
-    <div ref={ref} className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
+    <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
       {seeds.map((seed, i) => (
         <span
           key={i}
           data-mote
-          className="absolute"
+          className="v2-mote absolute"
           style={{
             left: `${seed.left}%`,
             top: `${seed.top}%`,
             width: kind === 'confetti' ? seed.size * 2.2 : seed.size,
-            height: kind === 'confetti' ? seed.size : seed.size,
+            height: seed.size,
             borderRadius: kind === 'confetti' ? '1px' : '50%',
-            background: kind === 'confetti' ? seed.hue : kind === 'bubbles' ? 'rgba(255,255,255,0.5)' : '#fff',
+            background:
+              kind === 'confetti'
+                ? seed.hue
+                : kind === 'bubbles'
+                  ? 'rgba(255,255,255,0.5)'
+                  : '#fff',
             opacity: kind === 'stars' ? 0.85 : 0.35,
             boxShadow: kind === 'stars' ? '0 0 4px rgba(255,255,255,0.8)' : undefined,
+            // The whole effect, declared — no per-frame JS at all.
+            animationName: animation,
+            animationDuration: `${seed.dur + (kind === 'stars' ? 0 : 4)}s`,
+            animationDelay: `${seed.delay}s`,
+            animationDirection: kind === 'stars' || kind === 'dust' ? 'alternate' : 'normal',
+            animationTimingFunction: kind === 'bubbles' || kind === 'snow' || kind === 'confetti'
+              ? 'linear'
+              : 'ease-in-out',
           }}
         />
       ))}
@@ -1008,8 +974,22 @@ const Scenery = memo(function Scenery({
               opacity: layer.opacity ?? 1,
             }}
           >
-            {/* Two tiles side by side — the seamless loop. */}
-            <div className="flex h-full" style={{ width: '200%' }}>
+            {/* Two tiles side by side — the seamless loop.
+              *
+              * `will-change` promotes the pair to its own compositor layer.
+              * Without it the browser repaints every shape in the band on each
+              * frame — the busiest theme carries ~80 shapes per layer, drawn
+              * twice — and scrolling the world became main-thread paint work
+              * rather than a texture being slid around. This is the single
+              * biggest cost in the whole scene. */}
+            <div
+              className="flex h-full"
+              style={{
+                width: '200%',
+                willChange: 'transform',
+                backfaceVisibility: 'hidden',
+              }}
+            >
               <div className="w-1/2 h-full">{layer.art}</div>
               <div className="w-1/2 h-full">{layer.art}</div>
             </div>
