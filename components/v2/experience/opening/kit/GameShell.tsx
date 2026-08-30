@@ -95,7 +95,7 @@ export function useDifficulty(durationSec: number, base = 1): Difficulty {
       // able to hold the game in its easy phase forever.
       const elapsed = (Date.now() - startRef.current) / 1000;
       setT(Math.min(1, elapsed / Math.max(1, durationSec)));
-    }, 250);
+    }, 500);
     return () => window.clearInterval(id);
   }, [durationSec]);
 

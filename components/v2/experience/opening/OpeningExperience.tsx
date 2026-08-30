@@ -34,7 +34,23 @@ gsap.registerPlugin(useGSAP);
 
 /* Engines are code-split: a greeting loads the one mechanic it uses, not all
  * six. `ssr: false` because they read layout and drive rAF loops — there is
- * nothing meaningful to render on the server. */
+ * nothing meaningful to render on the server.
+ *
+ * The loaders are named separately so the intro can start fetching the chunk
+ * the moment the recipient lands. Without that the download only began when
+ * the countdown ended, so "3, 2, 1…" was followed by a blank pause while the
+ * chunk arrived — the game appeared to hang at exactly the moment it was
+ * supposed to start. The import cache means the `dynamic` below then resolves
+ * instantly. */
+const ENGINE_LOADERS: Record<OpeningMechanic, () => Promise<unknown>> = {
+  'tap-targets': () => import('./engines/TapTargets'),
+  'timing-bar': () => import('./engines/TimingBar'),
+  'sequence-order': () => import('./engines/SequenceOrder'),
+  'memory-match': () => import('./engines/MemoryMatch'),
+  'dodge-run': () => import('./engines/DodgeRun'),
+  'quiz-unlock': () => import('./engines/QuizUnlock'),
+};
+
 const ENGINES: Record<OpeningMechanic, React.ComponentType<EngineComponentProps>> = {
   'tap-targets': dynamic(() => import('./engines/TapTargets'), { ssr: false }),
   'timing-bar': dynamic(() => import('./engines/TimingBar'), { ssr: false }),
@@ -122,6 +138,17 @@ export default function OpeningExperience({
     setMutedState(next);
     if (!next) sfx.tap();
   };
+
+  /* Fetch the engine chunk while the recipient is still reading the brief, so
+   * the countdown lands straight into gameplay rather than into a pause. */
+  const mechanic = config?.mechanic;
+  useEffect(() => {
+    if (!mechanic) return;
+    void ENGINE_LOADERS[mechanic]?.().catch(() => {
+      // A failed preload is not a failure: the `dynamic` import below will try
+      // again, and the boundary around it still falls back to the classic gate.
+    });
+  }, [mechanic]);
 
   /* ---------------- Theme resolution ----------------
    *
@@ -238,7 +265,17 @@ export default function OpeningExperience({
         * wash of the theme's own sky also gives the stage a hard edge, which is
         * what makes it read as a screen you're playing *into*. */}
       <div className="fixed inset-0 pointer-events-none">
-        {phase !== 'playing' && <Scenery theme={theme} speed={phase === 'intro' ? 0.02 : 0} />}
+        {phase !== 'playing' && (
+          <Scenery
+            theme={theme}
+            speed={phase === 'intro' ? 0.02 : 0}
+            // Each theme is composed for a stage about a phone's shape. Left to
+            // fill a desktop viewport the bands pull apart and the scene reads
+            // as half-drawn, so the world is capped and sits on the floor with
+            // the sky gradient above it.
+            worldHeight="min(100%, 42rem)"
+          />
+        )}
         {/* The scrim that keeps white copy legible on ANY theme.
           *
           * A vertical wash rather than a radial one, because a radial is by
@@ -518,11 +555,21 @@ export default function OpeningExperience({
             * where the primary button already does this. */}
           {phase !== 'won' && (
             <div className="flex justify-center mt-7">
+              {/* A quiet chip rather than bare underlined text: this sits over
+                * whatever part of the world the layout happens to land on, and
+                * on the lighter themes pale text on a lit wall was barely
+                * there. The backing makes it legible everywhere without
+                * promoting it into competition with the real CTA. */}
               <button
                 type="button"
                 onClick={onOpen}
-                className="text-xs underline underline-offset-4"
-                style={{ color: 'rgba(255,255,255,0.7)' }}
+                className="text-xs font-semibold rounded-full backdrop-blur-md transition-colors"
+                style={{
+                  color: 'rgba(255,255,255,0.9)',
+                  background: 'rgba(0,0,0,0.34)',
+                  border: '1px solid rgba(255,255,255,0.18)',
+                  padding: '0.4rem 0.9rem',
+                }}
               >
                 דלגו ופתחו ישר
               </button>

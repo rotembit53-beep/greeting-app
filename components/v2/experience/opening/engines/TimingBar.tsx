@@ -74,7 +74,18 @@ export default function TimingBar({ config, onWin, onLose }: EngineProps) {
 
   const secondsLeft = useCountdown(config.durationSec, () => finish(false));
 
-  /* The sweep. Re-armed on every round so the new speed takes effect. */
+  /* The sweep. Re-armed on every round so the new speed takes effect.
+   *
+   * Tweens a plain number and writes `left` from it, rather than tweening the
+   * marker's own transform. `xPercent` — the obvious choice, and what this
+   * used to do — is a percentage of the element's OWN width, and the marker is
+   * a zero-width holder, so it resolved to zero pixels: the marker sat still
+   * while `getProperty` happily reported a sweeping 0→100. Hit detection was
+   * therefore reading a position nothing on screen corresponded to, which made
+   * the whole game luck. Driving both the pixels and the reading off one
+   * number is what guarantees they can never disagree again. */
+  const posRef = useRef({ pct: 0 });
+
   useGSAP(
     () => {
       const marker = markerRef.current;
@@ -84,10 +95,22 @@ export default function TimingBar({ config, onWin, onLose }: EngineProps) {
         ? 2.4
         : Math.max(0.5, (config.difficulty === 'medium' ? 0.92 : 1.2) - tighten * 0.08);
 
+      const pos = posRef.current;
+      pos.pct = 0;
+
       tweenRef.current = gsap.fromTo(
-        marker,
-        { xPercent: 0 },
-        { xPercent: 100, duration, ease: 'none', repeat: -1, yoyo: true }
+        pos,
+        { pct: 0 },
+        {
+          pct: 100,
+          duration,
+          ease: 'none',
+          repeat: -1,
+          yoyo: true,
+          onUpdate: () => {
+            marker.style.left = `${pos.pct}%`;
+          },
+        }
       );
 
       return () => {
@@ -100,9 +123,8 @@ export default function TimingBar({ config, onWin, onLose }: EngineProps) {
   const strike = () => {
     if (settledRef.current || !markerRef.current) return;
 
-    // Read the live transform: the tween is the source of truth and React
-    // state would always be a frame behind.
-    const pct = Number(gsap.getProperty(markerRef.current, 'xPercent'));
+    // The same number the marker is drawn from — see the sweep above.
+    const pct = posRef.current.pct;
 
     const result: Verdict =
       pct >= perfectStart && pct <= perfectStart + perfectWidth
@@ -269,14 +291,18 @@ export default function TimingBar({ config, onWin, onLose }: EngineProps) {
               }}
             />
 
-            {/* The sweeping marker. Inset so xPercent 0–100 stays on-track. */}
-            <div className="absolute inset-y-0 left-0 right-0" style={{ padding: '0 0.4rem' }}>
-              <div ref={markerRef} className="h-full" style={{ width: 0 }}>
+            {/* The sweeping marker. Inset by half its own width at each end,
+              * so left: 0%–100% keeps the whole bar on the track. */}
+            <div className="absolute inset-y-0" style={{ left: '0.4rem', right: '0.4rem' }}>
+              <div
+                ref={markerRef}
+                className="absolute inset-y-0"
+                style={{ left: 0, transform: 'translateX(-50%)' }}
+              >
                 <div
                   className="h-full rounded-full"
                   style={{
                     width: '0.42rem',
-                    marginInlineStart: '-0.21rem',
                     background: '#fff',
                     boxShadow: '0 0 14px rgba(255,255,255,0.95)',
                   }}

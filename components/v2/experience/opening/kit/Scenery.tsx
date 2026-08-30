@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useRef } from 'react';
+import { memo, useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { GameTheme } from '@/lib/v2/opening/art';
@@ -179,17 +179,27 @@ const THEMES: Record<GameTheme, ThemeDef> = {
     ambient: 'dust',
     layers: [
       {
-        depth: 0.15, bottom: 34, height: 40, opacity: 0.55,
+        // Runs to the top of the world box: a splashback that stops in mid-air
+        // with blank wall above it is the single most "unfinished" thing an
+        // interior theme can do, and it is what a shorter band left behind on
+        // anything taller than a phone.
+        depth: 0.15, bottom: 22, height: 78, opacity: 0.55,
         art: band(
           <>
-            {/* Tiled splashback */}
-            {Array.from({ length: 14 }).map((_, i) => (
-              <g key={i}>
-                <rect x={i * 7.2} y="2" width="6.4" height="6" rx="0.6" fill="#e6d4bb" />
-                <rect x={i * 7.2 + 3.6} y="9" width="6.4" height="6" rx="0.6" fill="#ddc8ab" />
-                <rect x={i * 7.2} y="16" width="6.4" height="6" rx="0.6" fill="#e6d4bb" />
-              </g>
-            ))}
+            {/* Tiled splashback, filling the whole band */}
+            {Array.from({ length: 6 }).map((_, row) =>
+              Array.from({ length: 14 }).map((_, col) => (
+                <rect
+                  key={`${row}-${col}`}
+                  x={col * 7.2 + (row % 2 ? 3.6 : 0)}
+                  y={row * 6.8 + 0.4}
+                  width="6.4"
+                  height="6"
+                  rx="0.6"
+                  fill={row % 2 ? '#ddc8ab' : '#e6d4bb'}
+                />
+              ))
+            )}
           </>
         ),
       },
@@ -485,16 +495,20 @@ const THEMES: Record<GameTheme, ThemeDef> = {
     ambient: 'dust',
     layers: [
       {
-        depth: 0.14, bottom: 30, height: 44, opacity: 0.7,
+        // Full-height wall: panelling above the windows rather than blank space.
+        depth: 0.14, bottom: 20, height: 80, opacity: 0.7,
         art: band(
           <>
-            {/* Window light and a hanging plant */}
-            <rect x="8" y="2" width="26" height="30" rx="2" fill="#fdfbf4" opacity="0.9" />
-            <rect x="8" y="2" width="26" height="30" rx="2" fill="none" stroke="#c8a97a" strokeWidth="1.2" />
-            <path d="M21 2v30M8 17h26" stroke="#c8a97a" strokeWidth="1" />
-            <rect x="62" y="2" width="26" height="30" rx="2" fill="#fdfbf4" opacity="0.9" />
-            <rect x="62" y="2" width="26" height="30" rx="2" fill="none" stroke="#c8a97a" strokeWidth="1.2" />
-            <path d="M75 2v30M62 17h26" stroke="#c8a97a" strokeWidth="1" />
+            <g stroke="#c8a97a" strokeWidth="0.5" opacity="0.55">
+              <path d="M0 6h100M0 12h100" />
+            </g>
+            {/* Windows */}
+            <rect x="8" y="16" width="26" height="24" rx="2" fill="#fdfbf4" opacity="0.9" />
+            <rect x="8" y="16" width="26" height="24" rx="2" fill="none" stroke="#c8a97a" strokeWidth="1.2" />
+            <path d="M21 16v24M8 28h26" stroke="#c8a97a" strokeWidth="1" />
+            <rect x="62" y="16" width="26" height="24" rx="2" fill="#fdfbf4" opacity="0.9" />
+            <rect x="62" y="16" width="26" height="24" rx="2" fill="none" stroke="#c8a97a" strokeWidth="1.2" />
+            <path d="M75 16v24M62 28h26" stroke="#c8a97a" strokeWidth="1" />
           </>
         ),
       },
@@ -880,6 +894,17 @@ interface Props {
   speed?: number;
   /** Hides the ambient motes — used when gameplay already fills the stage. */
   quiet?: boolean;
+  /**
+   * How tall the layer stack is allowed to get, bottom-anchored.
+   *
+   * Every theme is composed against a stage roughly a phone's shape. Stretched
+   * across a full desktop viewport those same percentage bands pull apart and
+   * the scene reads as half-drawn — a tiled wall ending in mid-air with a flat
+   * slab above it. Capping the world and anchoring it to the floor keeps the
+   * composition at its intended proportions and lets the sky gradient own the
+   * space above, which is what a backdrop should do anyway.
+   */
+  worldHeight?: string;
 }
 
 /**
@@ -889,57 +914,108 @@ interface Props {
  * -50%, which loops seamlessly forever with a single tween per layer. Deeper
  * layers move slower (`depth`), which is the parallax.
  */
-const Scenery = memo(function Scenery({ theme, speed = 0, quiet = false }: Props) {
+const Scenery = memo(function Scenery({
+  theme,
+  speed = 0,
+  quiet = false,
+  worldHeight = '100%',
+}: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const def = THEMES[theme];
+  const tweensRef = useRef<gsap.core.Tween[]>([]);
+
+  /* Rate control, decoupled from tween construction — see the effect below.
+   *
+   * Keyed on `theme` as well as `speed`: a theme change rebuilds the tweens in
+   * their paused state, and without re-running this they would stay parked
+   * even though the caller had already asked for movement. */
+  useEffect(() => {
+    tweensRef.current.forEach((tween) => {
+      if (speed <= 0) {
+        tween.pause();
+        return;
+      }
+      tween.timeScale(speed);
+      if (!tween.isActive()) tween.play();
+    });
+  }, [speed, theme]);
 
   useGSAP(
     () => {
-      if (speed <= 0 || reduceMotion()) return;
+      if (reduceMotion()) return;
 
       const tweens = def.layers.map((layer, i) => {
         const el = ref.current?.querySelector<HTMLElement>(`[data-layer="${i}"] > div`);
         if (!el) return null;
         // A tile pair spans 200% of the stage, so travelling -50% lands the
-        // second copy exactly where the first began.
-        const duration = 1 / Math.max(0.02, speed * layer.depth);
+        // second copy exactly where the first began. Built at a fixed base
+        // rate and started paused; `speed` is applied as a time scale below.
         return gsap.fromTo(
           el,
           { xPercent: 0 },
-          { xPercent: -50, duration, ease: 'none', repeat: -1 }
+          {
+            xPercent: -50,
+            duration: 1 / Math.max(0.02, layer.depth),
+            ease: 'none',
+            repeat: -1,
+            paused: true,
+          }
         );
       });
 
-      return () => tweens.forEach((t) => t?.kill());
+      tweensRef.current = tweens.filter((t): t is gsap.core.Tween => Boolean(t));
+
+      return () => {
+        tweensRef.current.forEach((t) => t.kill());
+        tweensRef.current = [];
+      };
     },
-    { scope: ref, dependencies: [theme, speed] }
+    // Deliberately NOT keyed on `speed`. The runner feeds this the difficulty
+    // ramp, which ticks several times a second — rebuilding the tweens on each
+    // change restarted every layer from xPercent 0, so the whole world snapped
+    // back repeatedly and the game read as stuttering. Speed is a time scale on
+    // the running tweens instead, which is continuous.
+    { scope: ref, dependencies: [theme] }
   );
 
   return (
     <div
       ref={ref}
+      // Pinned to LTR for the whole subtree. The app runs `dir="rtl"`, where a
+      // block wider than its parent overflows LEFTWARD and a flex row lays out
+      // right-to-left — so each 200%-wide tile pair sat at -100%..100% and the
+      // negative scroll below walked it further off, leaving bare strips of
+      // undrawn background down the right of every theme. The art is abstract
+      // and direction-agnostic, so forcing LTR here costs nothing and makes the
+      // loop behave identically whichever way the page reads.
+      dir="ltr"
       className="absolute inset-0 overflow-hidden pointer-events-none"
       style={{ background: def.sky }}
       aria-hidden="true"
     >
-      {def.layers.map((layer, i) => (
-        <div
-          key={i}
-          data-layer={i}
-          className="absolute inset-x-0"
-          style={{
-            bottom: `${layer.bottom}%`,
-            height: `${layer.height}%`,
-            opacity: layer.opacity ?? 1,
-          }}
-        >
-          {/* Two tiles side by side — the seamless loop. */}
-          <div className="flex h-full" style={{ width: '200%' }}>
-            <div className="w-1/2 h-full">{layer.art}</div>
-            <div className="w-1/2 h-full">{layer.art}</div>
+      {/* The world, bottom-anchored. Layer percentages are relative to THIS
+        * box, not the viewport, so the scene keeps its proportions whatever
+        * shape the screen is. */}
+      <div className="absolute inset-x-0 bottom-0" style={{ height: worldHeight }}>
+        {def.layers.map((layer, i) => (
+          <div
+            key={i}
+            data-layer={i}
+            className="absolute inset-x-0"
+            style={{
+              bottom: `${layer.bottom}%`,
+              height: `${layer.height}%`,
+              opacity: layer.opacity ?? 1,
+            }}
+          >
+            {/* Two tiles side by side — the seamless loop. */}
+            <div className="flex h-full" style={{ width: '200%' }}>
+              <div className="w-1/2 h-full">{layer.art}</div>
+              <div className="w-1/2 h-full">{layer.art}</div>
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
 
       {!quiet && def.ambient && def.ambient !== 'none' && <Ambient kind={def.ambient} />}
     </div>
