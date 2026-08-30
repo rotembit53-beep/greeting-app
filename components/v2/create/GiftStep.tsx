@@ -5,6 +5,7 @@ import {
   Gift,
   GIFT_KIND_META,
   GiftSuggestion,
+  giftMapsUrl,
   INTERESTS,
   InterestId,
   interestLabel,
@@ -107,6 +108,9 @@ export default function GiftStep({
       code: '',
       url: '',
       imageUrl: '',
+      placeName: '',
+      placeAddress: '',
+      placeMapsUrl: '',
       provider: kind === 'buyme' ? 'BUYME' : '',
     });
     setPhase('details');
@@ -163,7 +167,32 @@ export default function GiftStep({
       code: '',
       url: s.checkoutUrl ?? '',
       imageUrl: '',
+      placeName: '',
+      placeAddress: '',
+      placeMapsUrl: '',
       provider: s.provider ?? '',
+    });
+    setPhase('details');
+  };
+
+  /** A real business the sender tapped in the places results — becomes the
+   * gift itself, carrying its verified name/address/Maps link along. */
+  const pickPlace = (p: PlaceResult) => {
+    onChange({
+      kind: 'voucher',
+      title: p.name,
+      description: p.address,
+      emoji: '📍',
+      amount: budget,
+      currency: 'ILS',
+      note: '',
+      code: '',
+      url: '',
+      imageUrl: '',
+      provider: '',
+      placeName: p.name,
+      placeAddress: p.address,
+      placeMapsUrl: p.mapsUrl,
     });
     setPhase('details');
   };
@@ -467,20 +496,22 @@ export default function GiftStep({
         {places.length > 0 && (
           <div className="mb-8">
             <span className="v2-label">עסקים אמיתיים לידכם</span>
+            <p className="v2-hint mb-1">לוחצים על מקום כדי לצרף אותו למתנה</p>
             <div className="flex flex-col gap-3">
               {places.map((p) => (
-                <a
+                <div
                   key={p.id}
-                  href={p.mapsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-start gap-4 rounded-2xl p-4 transition-transform hover:-translate-y-0.5"
+                  className="flex items-start gap-3 rounded-2xl p-4"
                   style={{
                     background: 'var(--v2-surface)',
                     border: '1.5px solid var(--v2-surface-border)',
                   }}
                 >
-                  <span className="flex-1">
+                  <button
+                    type="button"
+                    onClick={() => pickPlace(p)}
+                    className="flex-1 text-start transition-transform hover:-translate-y-0.5"
+                  >
                     <span
                       className="block font-extrabold mb-0.5"
                       style={{ color: 'var(--v2-ink)' }}
@@ -534,8 +565,26 @@ export default function GiftStep({
                         <span>מחיר לא מפורסם — כדאי לבדוק מול העסק</span>
                       )}
                     </span>
-                  </span>
-                </a>
+                  </button>
+
+                  <a
+                    href={p.mapsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    aria-label={`פתחו את ${p.name} במפות Google`}
+                    title="פתחו במפות Google"
+                    className="flex-shrink-0 flex items-center justify-center rounded-full"
+                    style={{
+                      width: '2.25rem',
+                      height: '2.25rem',
+                      fontSize: '1.1rem',
+                      background: 'var(--v2-accent-soft)',
+                    }}
+                  >
+                    🗺️
+                  </a>
+                </div>
               ))}
             </div>
             <p className="v2-hint mt-3">
@@ -735,6 +784,48 @@ export default function GiftStep({
             dir="ltr"
             maxLength={600}
           />
+        </div>
+
+        <div>
+          <span className="v2-label">
+            מיקום <span style={{ fontWeight: 400, color: 'var(--v2-ink-soft)' }}>(לא חובה)</span>
+          </span>
+          <p className="v2-hint">שם העסק וכתובתו — עם קישור ישיר למפות Google</p>
+          <div className="flex flex-col gap-2">
+            <input
+              id="gift-place-name"
+              className="v2-field"
+              dir="rtl"
+              value={gift.placeName ?? ''}
+              // Editing by hand invalidates the verified Google pin — clear
+              // it so the maps link falls back to a plain search on the
+              // text actually shown, rather than silently keeping a link to
+              // wherever the original search result pointed.
+              onChange={(e) => patch({ placeName: e.target.value, placeMapsUrl: '' })}
+              placeholder="שם העסק או המקום"
+              maxLength={160}
+            />
+            <input
+              id="gift-place-address"
+              className="v2-field"
+              dir="rtl"
+              value={gift.placeAddress ?? ''}
+              onChange={(e) => patch({ placeAddress: e.target.value, placeMapsUrl: '' })}
+              placeholder="כתובת"
+              maxLength={300}
+            />
+          </div>
+          {giftMapsUrl(gift) && (
+            <a
+              href={giftMapsUrl(gift)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="v2-btn v2-btn-ghost inline-flex mt-2"
+              style={{ padding: '0.5rem 1.2rem', fontSize: '0.85rem' }}
+            >
+              🗺️ פתחו במפות Google
+            </a>
+          )}
         </div>
 
         <div>

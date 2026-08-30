@@ -127,73 +127,8 @@ export function safeReveal(
   return () => window.clearTimeout(id);
 }
 
-/** Score + clock, in the template's own palette. */
-export function Hud({
-  template,
-  score,
-  target,
-  secondsLeft,
-  goalLabel,
-}: {
-  template: TemplateDef;
-  score: number;
-  target: number;
-  secondsLeft?: number;
-  goalLabel?: string;
-}) {
-  const { accent, ink, surface, surfaceBorder } = template.palette;
-
-  return (
-    <div className="flex items-center justify-between gap-3 w-full" dir="rtl">
-      <span
-        className="text-sm font-bold px-3.5 py-1.5 rounded-full tabular-nums"
-        style={{ background: surface, border: `1px solid ${surfaceBorder}`, color: ink }}
-      >
-        {goalLabel ? `${goalLabel} ` : ''}
-        {score}/{target}
-      </span>
-
-      {secondsLeft !== undefined && (
-        <span
-          className="text-sm font-bold px-3.5 py-1.5 rounded-full tabular-nums"
-          style={{
-            background: secondsLeft <= 5 ? accent : surface,
-            border: `1px solid ${secondsLeft <= 5 ? accent : surfaceBorder}`,
-            color: secondsLeft <= 5 ? '#fff' : ink,
-          }}
-        >
-          {secondsLeft}s
-        </span>
-      )}
-    </div>
-  );
-}
-
-/** The play area. Fixed aspect so a phone and a desktop play the same game. */
-export function Stage({
-  children,
-  template,
-  innerRef,
-  onPointerDown,
-}: {
-  children: React.ReactNode;
-  template: TemplateDef;
-  innerRef?: React.RefObject<HTMLDivElement | null>;
-  onPointerDown?: (e: React.PointerEvent<HTMLDivElement>) => void;
-}) {
-  return (
-    <div
-      ref={innerRef}
-      onPointerDown={onPointerDown}
-      className="relative w-full overflow-hidden rounded-3xl touch-none select-none"
-      style={{
-        height: 'min(58vh, 26rem)',
-        background: template.palette.surface,
-        border: `1px solid ${template.palette.surfaceBorder}`,
-        boxShadow: `0 24px 60px -34px ${template.palette.glow}`,
-      }}
-    >
-      {children}
-    </div>
-  );
-}
+/* `Hud` and `Stage` used to live here. They are gone, not moved: the kit's
+ * `GameHud` and `GameShell` replace them, and they replace them with something
+ * different rather than prettier — a HUD floated over the world instead of
+ * stacked above it, and a stage that owns a themed, parallaxed environment
+ * instead of painting one flat surface colour. See ../kit/GameShell.tsx. */

@@ -175,6 +175,15 @@ export const GiftSchema = z.object({
   url: safeHttpUrl,
   imageUrl: safeImageRef,
   provider: z.string().max(60).optional().default(''),
+  /**
+   * A real business picked from the Google Places results in the "help me
+   * find a gift" flow — name and address as Google returned them, plus the
+   * deep link into Google Maps. All three travel together; `placeName` is
+   * the signal that a place was actually attached (see `hasGift`).
+   */
+  placeName: z.string().max(160).optional().default(''),
+  placeAddress: z.string().max(300).optional().default(''),
+  placeMapsUrl: safeHttpUrl,
 });
 
 export type Gift = z.infer<typeof GiftSchema>;
@@ -446,5 +455,24 @@ export async function suggestGifts(params: GiftSearchParams): Promise<GiftSugges
 
 /** True when the greeting actually has something to reveal. */
 export function hasGift(gift: Gift | null | undefined): gift is Gift {
-  return Boolean(gift && (gift.code || gift.url || gift.imageUrl || gift.amount));
+  return Boolean(
+    gift && (gift.code || gift.url || gift.imageUrl || gift.amount || gift.placeName)
+  );
+}
+
+/**
+ * A Google Maps link for a gift's attached place.
+ *
+ * Prefers `placeMapsUrl` — the deep link Google Places returned when the
+ * sender picked a real business from search, pinned to that exact
+ * `place_id`. Falls back to a plain maps search built from whatever the
+ * sender typed by hand, so a manually-entered name/address still gets a
+ * working link even though it was never verified against a real place.
+ */
+export function giftMapsUrl(
+  gift: Pick<Gift, 'placeMapsUrl' | 'placeName' | 'placeAddress'>
+): string | undefined {
+  if (gift.placeMapsUrl) return gift.placeMapsUrl;
+  const q = [gift.placeName, gift.placeAddress].filter(Boolean).join(' ').trim();
+  return q ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}` : undefined;
 }

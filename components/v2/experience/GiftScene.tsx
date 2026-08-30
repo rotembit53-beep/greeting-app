@@ -5,7 +5,7 @@ import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { TemplateDef } from '@/lib/v2/templates';
-import { Gift, GIFT_KIND_META } from '@/lib/v2/gifts';
+import { Gift, GIFT_KIND_META, giftMapsUrl } from '@/lib/v2/gifts';
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -341,6 +341,39 @@ export default function GiftScene({ template, gift, recipientName }: Props) {
               >
                 למימוש המתנה
               </a>
+            ) : null}
+
+            {gift.placeName ? (
+              <div
+                className="px-4 py-3 my-4 text-start"
+                style={{
+                  background: 'var(--v2-accent-soft)',
+                  borderInlineStart: `2px solid ${accent}`,
+                }}
+              >
+                <p className="text-xs mb-1" style={{ color: 'var(--v2-ink-soft)' }}>
+                  📍 מיקום
+                </p>
+                <p className="font-extrabold" style={{ color: 'var(--v2-ink)' }}>
+                  {gift.placeName}
+                </p>
+                {gift.placeAddress ? (
+                  <p className="text-sm" style={{ color: 'var(--v2-ink-soft)' }}>
+                    {gift.placeAddress}
+                  </p>
+                ) : null}
+                {safeHref(giftMapsUrl(gift)) ? (
+                  <a
+                    href={safeHref(giftMapsUrl(gift))}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="v2-btn v2-btn-ghost inline-flex mt-3"
+                    style={{ padding: '0.5rem 1.2rem', fontSize: '0.85rem' }}
+                  >
+                    🗺️ פתחו במפות Google
+                  </a>
+                ) : null}
+              </div>
             ) : null}
 
             {gift.note ? (

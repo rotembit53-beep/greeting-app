@@ -1,4 +1,5 @@
 import { EVENT_BY_ID, EventType, GenderValue } from '../types';
+import { GAME_ICONS, GAME_THEMES } from './art';
 import { OPENING_MECHANICS, OpeningPreference } from './types';
 
 /**
@@ -40,6 +41,21 @@ THE MECHANICS (pick the one that fits the concept — never the other way round)
 - quiz-unlock: 1-3 questions only someone who knows them could answer.
   Good for: rich free text, inside jokes, long friendships.
 
+ART DIRECTION (this decides whether the game looks real)
+The game is DRAWN, not rendered from emoji. You choose from a fixed art library
+and the engine draws layered vector illustrations of what you pick.
+
+- theme: the WORLD the game is staged in. Pick the place the hook actually lives:
+  football -> stadium, cooking -> kitchen, a trip -> travel or beach, a band -> concert,
+  gaming -> arcade, hiking -> mountain, coffee -> cafe, a birthday party -> party.
+  Choosing well is the single biggest factor in how good the game looks.
+- icon (per item): the object to draw, from the icon library. ALWAYS set this.
+  Pick the closest real object — "ball-soccer", "coffee", "dog", "plane".
+- avatarIcon: for dodge-run, the thing the player controls. Optional elsewhere.
+- goalLabel: 1-2 Hebrew words for what the score counts ("גולים", "זיכרונות",
+  "כוסות קפה"). It appears in the HUD, so the score reads as part of the story.
+- emoji: still required per item as a fallback. Pick one that matches the icon.
+
 RULES
 - Write ALL player-facing text in Hebrew. Match the recipient's gender in every
   verb and pronoun; match the sender's gender when the text speaks as the sender.
@@ -48,7 +64,7 @@ RULES
 - Keep it winnable and short. This is a doorway, not a game session.
 - The victory line should land the joke or the warmth — it is the payoff.
 - The fail line is gentle and funny. Never harsh, never "game over".
-- Emoji only for item icons. One emoji per item. No markup, no URLs, no hashtags.
+- One emoji per item, as the fallback only. No markup, no URLs, no hashtags.
 - Do not put the product name anywhere.
 
 Return ONLY the JSON object. No markdown fences, no commentary.`;
@@ -120,12 +136,16 @@ Design the opening challenge now.
 
 Output exactly ONE JSON object and nothing else, with these keys:
 - mechanic (one of: ${OPENING_MECHANICS.join(', ')})
+- theme (one of: ${GAME_THEMES.join(', ')})
 - title (string, Hebrew, max 60 — the game's name)
 - instruction (string, Hebrew, max 140 — what the player does, in one line)
+- goalLabel (string, Hebrew, max 14 — what the score counts)
+- avatarIcon (icon name, or "" — the player's character; dodge-run especially)
 - durationSec (integer 8-60)
 - targetCount (integer 1-12 — how many successes are needed to win)
 - difficulty ("easy" or "medium")
-- items (array, max 12, each: { emoji, label (Hebrew, short), good (boolean) })
+- items (array, max 12, each: { icon, emoji, label (Hebrew, short), good (boolean) })
+    icon MUST be one of: ${GAME_ICONS.join(', ')}
     tap-targets: good items are the ones to tap, good:false are the ones to avoid
     sequence-order: array order IS the correct order, all good:true
     memory-match: each entry is ONE card that will be paired automatically, all good:true

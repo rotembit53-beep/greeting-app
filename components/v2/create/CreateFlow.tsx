@@ -18,7 +18,6 @@ import Generating from './Generating';
 import Editor, { EditorState } from './Editor';
 import SharePanel from './SharePanel';
 import GiftStep from './GiftStep';
-import OpeningStep from './OpeningStep';
 import Stepper, { FlowStage } from './Stepper';
 import HomeLink from '@/components/v2/HomeLink';
 import BackButton from '@/components/v2/BackButton';
@@ -197,12 +196,12 @@ export default function CreateFlow() {
         // (The stepper won't jump forward either — it only makes completed
         // steps clickable — so from there the flow runs again and the next
         // generation replaces what's held here.)
-        if (
-          parsed.stage === 'editor' ||
-          parsed.stage === 'opening' ||
-          parsed.stage === 'gift'
-        ) {
+        if (parsed.stage === 'editor' || parsed.stage === 'gift') {
           setStage(parsed.stage);
+        } else if (parsed.stage === 'opening') {
+          // A draft saved before "משחק פתיחה" became a tab inside "עיצוב
+          // ועריכה" rather than its own step — land on the merged step instead.
+          setStage('editor');
         }
       }
       /* eslint-enable react-hooks/set-state-in-effect */
@@ -246,22 +245,6 @@ export default function CreateFlow() {
   const goToStage = (target: FlowStage) => {
     setGenError(null);
     setStage(target);
-    if (target === 'opening') enterOpeningStep();
-  };
-
-  /**
-   * Arriving at the opening step starts building the experience straight away.
-   *
-   * "Surprise Me" is the default *and* the recommendation, so making the
-   * creator click it to make anything happen would leave the recommended path
-   * looking broken. Only ever fires when there's nothing to show yet, so
-   * revisiting the step doesn't burn another model call or replace a game the
-   * creator already accepted.
-   */
-  const enterOpeningStep = () => {
-    if (!editor || opening || openingLoading) return;
-    if (openingPref === 'classic') return;
-    void runOpeningGeneration(openingPref);
   };
 
   /* ---------------- Generation ---------------- */
@@ -413,6 +396,36 @@ export default function CreateFlow() {
     }
   };
 
+  /**
+   * Arriving at the editor step — the merged "עיצוב ועריכה" step — starts
+   * building the unlock experience (its "משחק פתיחה" tab) straight away,
+   * rather than waiting for the creator to actually click into that tab.
+   *
+   * "Surprise Me" is the default *and* the recommendation, so making the
+   * creator click it to make anything happen would leave the recommended
+   * path looking broken. Driven by an effect rather than called at each
+   * navigation site: reading `editor` right after `setEditor(...)` (as in a
+   * freshly-generated greeting) would still see the pre-update value, since
+   * state updates aren't visible until the next render — the effect instead
+   * reacts to the committed state, so it never fires on a stale editor. Only
+   * runs when there's nothing to show yet, so revisiting the step doesn't
+   * burn another model call or replace a game the creator already accepted.
+   *
+   * `runOpeningGeneration` sets its own loading flag before its first
+   * `await`, which reads as a synchronous setState from inside this effect —
+   * but the effect's job here genuinely is "start talking to an external
+   * system (the AI call) when this state changes," the case the lint rule
+   * itself carves out.
+   */
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    if (stage !== 'editor' || !editor || opening || openingLoading) return;
+    if (openingPref === 'classic') return;
+    void runOpeningGeneration(openingPref);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stage, editor, opening, openingLoading, openingPref]);
+  /* eslint-enable react-hooks/set-state-in-effect */
+
   /* ---------------- Publish ---------------- */
 
   const publish = async () => {
@@ -479,11 +492,17 @@ export default function CreateFlow() {
    * started", either. Picking a gift *type* writes a stub gift straight
    * away, so the gift step only counts once that stub carries something the
    * recipient can actually redeem (or the sender chose to send none). */
+  // "עיצוב ועריכה" is now one merged step covering both the greeting text
+  // and the unlock experience, so its own checkmark (keyed on `editor`,
+  // since that's the id the stepper renders) only lights up once both
+  // halves are actually settled — not the moment text exists but the
+  // opening choice is still unmade.
+  const openingSettled = Boolean(opening) || openingPref === 'classic';
   const completedSteps: Partial<Record<FlowStage, boolean>> = {
     event: Boolean(eventType),
     details: canContinueFromDetails,
-    editor: Boolean(editor),
-    opening: Boolean(opening) || openingPref === 'classic',
+    editor: Boolean(editor) && openingSettled,
+    opening: openingSettled,
     gift: hasGift(gift) || giftSkipped,
     share: Boolean(published),
   };
@@ -617,12 +636,21 @@ export default function CreateFlow() {
               state={editor}
               onChange={(patch) => setEditor((s) => (s ? { ...s, ...patch } : s))}
               onBack={() => setStage('details')}
-              onContinue={() => {
-                setStage('opening');
-                enterOpeningStep();
-              }}
+              onContinue={() => setStage('gift')}
               onRegenerate={() => void runGeneration()}
               publishing={publishing}
+              openingPref={openingPref}
+              opening={opening}
+              openingLoading={openingLoading}
+              openingError={openingError}
+              onOpeningPreferenceChange={(preference) => {
+                setOpeningPref(preference);
+                // Picking a different kind is a request for a different game,
+                // so it regenerates rather than leaving the previous one on
+                // screen looking like the answer.
+                void runOpeningGeneration(preference);
+              }}
+              onOpeningRegenerate={() => void runOpeningGeneration(openingPref)}
             />
           </>
         )}
@@ -634,35 +662,6 @@ export default function CreateFlow() {
           <EmptyStepPrompt
             title="עדיין אין טקסט לערוך"
             body="קודם בוחרים אירוע וממלאים כמה פרטים, ואז ה-AI כותב את הטקסט."
-            actionLabel={eventType ? 'למלא פרטים' : 'לבחור אירוע'}
-            onAction={() => setStage(eventType ? 'details' : 'event')}
-          />
-        )}
-
-        {stage === 'opening' && editor && (
-          <OpeningStep
-            preference={openingPref}
-            config={opening}
-            loading={openingLoading}
-            error={openingError}
-            onPreferenceChange={(preference) => {
-              setOpeningPref(preference);
-              // Picking a different kind is a request for a different game,
-              // so it regenerates rather than leaving the previous one on
-              // screen looking like the answer.
-              void runOpeningGeneration(preference);
-            }}
-            onRegenerate={() => void runOpeningGeneration(openingPref)}
-            onBack={() => setStage('editor')}
-            onContinue={() => setStage('gift')}
-          />
-        )}
-
-        {/* Jumped here before there is any greeting to attach an opening to. */}
-        {stage === 'opening' && !editor && (
-          <EmptyStepPrompt
-            title="עדיין אין ברכה"
-            body="קודם יוצרים את הטקסט, ואז בונים את חוויית הפתיחה סביב מי שחוגגים."
             actionLabel={eventType ? 'למלא פרטים' : 'לבחור אירוע'}
             onAction={() => setStage(eventType ? 'details' : 'event')}
           />

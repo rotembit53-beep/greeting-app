@@ -207,7 +207,15 @@ export default function MediaHero({ template, media, intro }: Props) {
       </div>
 
       {media.length > 1 && (
-        <div className="v2-container mt-4 flex items-center justify-center gap-1.5" dir="rtl">
+        // Deliberately `ltr`, independent of the page's own RTL direction:
+        // the "next" tap zone sits on the right (`start` in RTL), so the
+        // active dot must also progress rightward as `index` grows to stay
+        // parallel with the direction the viewer is actually moving through
+        // the sequence. Mirroring this row under `rtl` — as the container
+        // did before — put photo 1 on the far right and made the indicator
+        // crawl backwards (right-to-left) while tapping the right/forward
+        // zone, which read as broken.
+        <div className="v2-container mt-4 flex items-center justify-center gap-1.5" dir="ltr">
           {media.map((m, i) => (
             <button
               key={m.id}
