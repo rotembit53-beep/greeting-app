@@ -1777,3 +1777,42 @@
   outline: 2px solid var(--v2-accent);
   outline-offset: 2px;
 }
+
+/* ---------- Opening-game atmosphere ----------
+ * The drifting motes behind a game's world.
+ *
+ * Deliberately CSS rather than GSAP: there are up to ~34 of them on screen and
+ * each was previously its own infinite tween, which meant ~34 style writes on
+ * the main thread every frame purely for decoration. As declarative animations
+ * the compositor owns them, they cost the main thread nothing, and they still
+ * stop dead under prefers-reduced-motion. */
+.v2-mote {
+  will-change: transform, opacity;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+}
+
+@keyframes v2-mote-twinkle {
+  0%, 100% { opacity: 0.85; }
+  50%      { opacity: 0.15; }
+}
+
+@keyframes v2-mote-rise {
+  0%   { transform: translateY(0);      opacity: 0; }
+  15%  {                                opacity: 0.55; }
+  100% { transform: translateY(-280px); opacity: 0; }
+}
+
+@keyframes v2-mote-fall {
+  0%   { transform: translateY(-30px) rotate(0deg);    opacity: 0.9; }
+  100% { transform: translateY(340px) rotate(420deg);  opacity: 0.2; }
+}
+
+@keyframes v2-mote-drift {
+  0%, 100% { transform: translate(0, 0);      opacity: 0.3; }
+  50%      { transform: translate(14px, -18px); opacity: 0.5; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v2-mote { animation: none !important; }
+}
